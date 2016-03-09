@@ -8,7 +8,7 @@ Get started using this step by step [tutorial](wiki/).
 
 ### To use ExcelTrader
 
-Just download and open [ExcelTrader](#Versions) in Excel (2007 above). 
+Just download and open [ExcelTrader](release/) in Excel (2007 above). 
 
 *For 64bit Excel, you need open the file which name contains '64'*
 
@@ -23,7 +23,7 @@ Just download and open [ExcelTrader](#Versions) in Excel (2007 above).
 
 [Change Log](changelog.md)
 
-0.x release: [0.9.8](release/ExcelTrader_0.9.8.zip)
+0.x release: [0.9.8](https://github.com/DT-Workshop/ExcelTrader/issues)
 
 @Copyright 2016 [dt-workshop](http://www.dt-workshop.com)
 
