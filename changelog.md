@@ -7,6 +7,8 @@
 * new: add new button to withdraw all queueing orders
 * new: add real time system status and feature on/off update
 * new: detect the new version before connect server. So if the message protocol is changed, still be able to upgrade
+* new: use github as the file depository
+* new: open VC++ library download page if not installed 
 
 * fix: clear the cached provider status after login 
 
