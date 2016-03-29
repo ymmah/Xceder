@@ -1,6 +1,6 @@
-# ExcelTrader
-###Welcome to ExcelTrader 
-ExcelTrader is a Microsoft Excel (2007 above) addin to allow you display the real time price & trade just in Excel.
+# Xceder
+###Welcome to Xceder 
+Xceder is a Microsoft Excel (2007 above) addin to allow you display the real time price & trade just in Excel.
 
 ### Tutorial
 
