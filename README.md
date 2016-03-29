@@ -23,7 +23,7 @@ Just download and open [ExcelTrader](release/) in Excel (2007 above).
 
 [Change Log](changelog.md)
 
-0.x release: [0.9.8](https://github.com/DT-Workshop/ExcelTrader/issues)
+0.x release: [0.9.9](https://github.com/DT-Workshop/Xceder/releases)
 
 @Copyright 2016 [dt-workshop](http://www.dt-workshop.com)
 
