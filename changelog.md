@@ -1,4 +1,11 @@
-﻿### 0.9.8 (2016-02-24)
+﻿### 0.9.9 (2016-03-29)
+* new: change to name Xceder
+* new: account registration and password reset
+* new: CQG/Orient support
+* new: voice function to be used in the Excel
+
+
+### 0.9.8 (2016-02-24)
 
 * new: support CTP price & order
 * new: disable the order submission & retainer when logout
