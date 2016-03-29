@@ -3,6 +3,7 @@
 * new: account registration and password reset
 * new: CQG/Orient support
 * new: voice function to be used in the Excel
+* new: counter price stale alert
 
 
 ### 0.9.8 (2016-02-24)
