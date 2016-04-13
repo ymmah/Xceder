@@ -1,4 +1,16 @@
-﻿### 0.9.9 (2016-03-29)
+﻿### 0.9.9.3 (2016-04-13)
+* new: support CQG order submission
+* new: display the version check button in the ribbon
+* new: use the 'tag' for the 'submittedby' in the order grouping
+* fix: counter symbol should be case insensitive for non-CTP channels
+* fix: registration & password reset server list highlight issue
+* fix: order group statistic double count replace order qty 
+
+### 0.9.9.2 (2016-04-05)
+### 0.9.9.1 (2016-04-04)
+* fix: CTP price subscription issue 
+
+### 0.9.9 (2016-03-29)
 * new: change to name Xceder
 * new: account registration and password reset
 * new: CQG/Orient support
