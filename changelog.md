@@ -1,4 +1,7 @@
-﻿### 0.9.9.3 (2016-04-13)
+### 0.9.9.4 (2016-04-27)
+* new: support synthetic order (order trigger order) 
+
+### 0.9.9.3 (2016-04-13)
 * new: support CQG order submission
 * new: display the version check button in the ribbon
 * new: use the 'tag' for the 'submittedby' in the order grouping
