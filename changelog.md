@@ -1,3 +1,6 @@
+### 0.9.9.5 (2016-04-29)
+* fix: enhance _trade() to check the parameter with the existing order. if no change, won't trigger new order even the order is already done or rejected 
+
 ### 0.9.9.4 (2016-04-27)
 * new: support synthetic order (order trigger order) 
 
