@@ -1,5 +1,6 @@
 ### 0.9.9.6 (2016-05-10)
-* fix: enhance _trade() to check the underlying order status and only submit the replacement when the status is valid. Also change the _trade() only submit 1 normal order
+* new: enhance _trade() to check the underlying order status and only submit the replacement when the status is valid. Also change the _trade() only submit 1 normal order
+* new: auto reevaluate the worksheet when enable the order submission
 
 ### 0.9.9.5 (2016-04-29)
 * fix: enhance _trade() to check the parameter with the existing order. if no change, won't trigger new order even the order is already done or rejected 
