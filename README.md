@@ -8,7 +8,7 @@ Get started using this step by step [tutorial](wiki/).
 
 ### To use Xceder
 
-Just download and open [Xceder](release/) in Excel (2007 above). 
+Just download and open [Xceder](releases/) in Excel (2007 above). 
 
 *For 64bit Excel, you need open the file which name contains '64'*
 
