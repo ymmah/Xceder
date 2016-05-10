@@ -6,9 +6,9 @@ Xceder is a Microsoft Excel (2007 above) addin to allow you display the real tim
 
 Get started using this step by step [tutorial](wiki/).
 
-### To use ExcelTrader
+### To use Xceder
 
-Just download and open [ExcelTrader](release/) in Excel (2007 above). 
+Just download and open [Xceder](release/) in Excel (2007 above). 
 
 *For 64bit Excel, you need open the file which name contains '64'*
 
@@ -16,14 +16,12 @@ Just download and open [ExcelTrader](release/) in Excel (2007 above).
 
 * Excel 2007 above 
 
-* [Microsoft Visual C++ Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=49984) to support CTP (only need it for China market)
-
 
 #### Versions
 
 [Change Log](changelog.md)
 
-0.x release: [0.9.9](https://github.com/DT-Workshop/Xceder/releases)
+0.x release: [0.9.9.6](https://github.com/DT-Workshop/Xceder/releases)
 
 @Copyright 2016 [dt-workshop](http://www.dt-workshop.com)
 
