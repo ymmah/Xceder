@@ -1,3 +1,7 @@
+### 0.9.9.7 (2016-05-11)
+* new: enhance _orderstatistic() to provide new info "netposition" it will list down all the done counter's qty (buy - sell)
+* new: enhance _order()/_orderstatistic to return 0 for unfound order or records
+ 
 ### 0.9.9.6 (2016-05-10)
 * new: enhance _trade() to check the underlying order status and only submit the replacement when the status is valid. Also change the _trade() only submit 1 normal order
 * new: auto reevaluate the worksheet when enable the order submission
