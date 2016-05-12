@@ -21,7 +21,7 @@ Just download and open [Xceder](https://github.com/DT-Workshop/Xceder/releases/)
 
 [Change Log](changelog.md)
 
-0.x release: [0.9.9.6](https://github.com/DT-Workshop/Xceder/releases)
+0.x release: [0.9.9.8](https://github.com/DT-Workshop/Xceder/releases)
 
 @Copyright 2016 [dt-workshop](http://www.dt-workshop.com)
 
