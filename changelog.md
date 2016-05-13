@@ -1,3 +1,9 @@
+### 0.9.9.8 (2016-05-13)
+* new: provide the _withdraw() function to support cancelling group of orders by tag
+* new: _trade() now only use the qty 0 as the flag to withdraw orders. If qty isn't 0, price is 0, _trade() will report error
+* fix: change the _orderstatistic() report to not group by trading account. 
+
+
 ### 0.9.9.7 (2016-05-11)
 * new: enhance _orderstatistic() to provide new info "netposition" it will list down all the done counter's qty (buy - sell)
 * new: enhance _order()/_orderstatistic to return 0 for unfound order or records
