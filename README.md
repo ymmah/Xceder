@@ -4,7 +4,7 @@ Xceder is a Microsoft Excel (2007 above) addin to allow you display the real tim
 
 ### Tutorial
 
-Get started using this step by step [tutorial](wiki/).
+Get started using this step by step [tutorial](https://github.com/DT-Workshop/Xceder/wiki/).
 
 ### To use Xceder
 
