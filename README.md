@@ -1,6 +1,8 @@
 # Xceder
 ###Welcome to Xceder 
-Xceder is a Microsoft Excel (2007 above) addin to allow you display the real time price & trade just in Excel.
+Xceder is designed for the high frequency and algo trading. It can route the order in millisecond level. In our live trading, we see almost all order process latency less than 10 milliseconds, many of them even just 1 millisecond. leverage on this speed edge, the spreader trading and algo trading is not just privilege from those big players.
+
+To use Xceder is pretty simple, just download the Excel addin, open it in Microsoft Excel (2007 above). Here you go!
 
 ### Tutorial
 
