@@ -100,11 +100,17 @@ enum ERRORCODE
 
     CANCELLED = 135;
     
-    NOT_SUPPORT_BROKER = 136;
+    NOT_SUPPORT = 136;
     
     NOT_SUPPORT_SERVICE = 137;
 
     CONNECTOR_DOWN = 138;
+    
+    SPREADER_DUPLICATE_NAME = 139;
+    
+    SPREADER_INVALID_ID = 140;
+    
+    SPREADER_NO_QUOTING = 141;
 }
 
 enum  EXCHANGE
@@ -247,7 +253,7 @@ enum  EXCHANGE
     IEPA = 46;
 
     //Icap Electronic Broking (Us)
-    BTEC = 47;
+    //BTEC = 47;
 
     //TT
     BTec = 48;
@@ -387,7 +393,8 @@ message RequestMsg
         //upload the application layout to server
         AppLayouts layouts = 13;
     
-        //request to create spreader
+        //request to create/update spreader, the new spreader ID should be 0.
+        //only allow to change the spreader which status isn't RUN
         Spreader spreader = 14;
     }
 }
@@ -423,8 +430,11 @@ message ResponseMsg
     
         uint64 layoutSyncTime = 11;
     
-        //spreader ID for the requested spreader, this can be used in the order as instrument ID
+        //this is the result for the spreader creation successfully
         uint64 spreaderID = 12;
+    
+        //this will be sent when the spreader leg order is submitted by server
+        OrderReports orderReports = 13;
     }
 }
 
@@ -649,6 +659,10 @@ message ServiceStatus
         
         PRICE = 1;
         ORDER = 2;
+        
+        SPREADER = 3;
+        
+        ALGO = 4;
     }
     
     BROKER broker = 1;
@@ -782,6 +796,8 @@ message Query
         QueryLayout appLayout = 7;
     
         QueryConditions calendar = 8;
+    
+        QueryConditions spreader = 9;
 	}
 }
 
@@ -812,6 +828,8 @@ message QueryResult
         ExchangeCalendar calendar = 8;
         
         Instruments instruments = 9;
+    
+        Spreaders spreaders = 10;
     }
 }
 
@@ -836,12 +854,13 @@ message BrokerExchanges
     repeated EXCHANGE exchange = 2;
 }
 
+//based on different data, the parameter may be used differently
 message QueryConditions
 {
-    //include this time
+    //include this time, this can be 0
     uint64 fromUTC = 1;
 
-    //exclude this time
+    //exclude this time, this can be 0
     uint64 toUTC = 2;
 
     //if this query related to particular broker
@@ -851,15 +870,18 @@ message QueryConditions
     EXCHANGE exchange = 4;
     
     //if this query related to particular symbol
+    //for spreader query, it is the spreader name
     string symbol = 5;
     
     //if this query related to particular product type
     Instrument.PRODUCT product = 6;
     
-    //if this query related to particular instrument, when this is set, the above condition will be ignored
+    //if this query related to particular instrument, when this is set for instrument query, the above condition will be ignored
+    //in spreader query, it is the spreader ID
     uint64 instrumentID = 7;
     
     //if  this query related to the particular user, only allow to query itself or its client account's info
+    //0 means query itself info
     uint32 account = 8;
 }
 
@@ -983,20 +1005,23 @@ message Order
     // who placed the order.
     uint32 enterBy = 2;
     
-    // Client side time when an order was submitted (UTC).
+    //order source time when an order was submitted (UTC).
 	uint64 submitUTC = 3;
 
 	// tag for this order
     string tag = 4;
+    
+    //this is for the multipe leg orders. normally it should be 0 for non-leg orders
+    uint32 leg = 5;
 
-    MANUALORDER indicator = 5;
+    MANUALORDER indicator = 6;
     
     //order detail
     oneof detail
     {
-        OrderParams params = 6;
+        OrderParams params = 7;
     
-        CompoundOrder compound = 7;
+        CompoundOrder compound = 8;
     }
 }
 
@@ -1005,7 +1030,7 @@ message OrderParams
     //if this order is replaced/withdraw, this is its original clOrdID. otherwise, it should be 0
     uint64 origClOrdID = 1;
     
-    //instrument ID
+    //instrument/spreader ID
     uint64 instrument = 2;
 
     // Order side.
@@ -1063,8 +1088,6 @@ message OrderParams
     
     // True if the order is aggressive (Fixed Income specific order modifier).
     bool aggressive = 21;
-
-
 }
 
 // Compound order.
@@ -1093,6 +1116,11 @@ message CompoundOrder
     bool completeFill = 4;
 
 	repeated OrderParams order = 5;
+}
+
+message Spreaders
+{
+    repeated Spreader speader = 1;
 }
 
 message Spreader
@@ -1367,19 +1395,22 @@ message Spreader
         uint64 settlementDate = 34;
     
         //settlement price of the contracts in an exchange-traded strip, pack, or bundle
-        double StripBase = 35;
+        double stripBase = 35;
         
         YIELD_TYPE yieldType = 36;
     }
     
-    uint32 ownerAcct = 1;
+    //this will be created by server after it is registered successfully, client side spreader create request should be 0
+    uint64 id = 1;
     
-    //this must be unique
-    string name = 2;
+    uint32 ownerAcct = 2;
     
-    string remark = 3;
+    //this must be unique for the owner account
+    string name = 3;
     
-    Formula formular = 4;
+    string remark = 4;
+    
+    Formula formular = 5;
     
     //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
     //disclosed quantities.
@@ -1390,18 +1421,20 @@ message Spreader
     //0 will submit the new spread order at the same price as the previous spread order.
     //1 will submit the spread order at a price 1 tick from the previous spread order away from the market.
     //-1 will submit the spread order 1 tick from the previous spread order toward the market.
-    uint32 reloadOffset = 5;
+    uint32 reloadOffset = 6;
     
     //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
     //disclosed quantities.
     //When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire
     //spread order quantity fills.
     //This property specifies the quantity for each child disclosed order.
-    uint32 reloadQty = 6;
+    uint32 reloadQty = 7;
     
-    double tickSize = 7;
+    double tickSize = 8;
     
-    repeated Leg leg = 8;
+    repeated Leg leg = 9;
+    
+    uint64 updateTimeUTC = 10;
 }
 
 message OrderID
@@ -1543,9 +1576,9 @@ message ExecutionReport
 
     // If present, identifies the counterpart of the order fill, as reported by the execution system.
     string fillCounterParty = 14;
-
-    //gateway instance which process this message
-    uint32 gatewayID = 15;
+    
+    //which server create this execution report. 0 means it is from counter party
+    uint32 sourceServer = 15;
 }
 
 message InstrumentSubscription
@@ -1992,14 +2025,11 @@ message Instrument
         /*OTHER*/
         MF = 55;
 
-        //MULTI LEG
+        //MULTI LEG, for example, spreader
         MLEG = 56;
     
         //NDF
         FXNDF = 57;
-        
-        /*Xceder provided*/
-        ALGO = 58;
     }
 
     //FIX IDSource name
@@ -2125,9 +2155,6 @@ message Instrument
     
     //means this instrument is archived, should not avaible for trading
     bool isNonTradable = 18;
-    
-    //who create the instrument, mainly used for the algo trading
-    uint32 createdbyAccount = 19;
 }
 
 message WatchList
