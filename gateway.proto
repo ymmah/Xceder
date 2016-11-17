@@ -1,5 +1,5 @@
 ///////////////////////////////////////
-//version 1.0
+//version 20161117
 //the string size (not speicified) should be within 255 bytes
 
 syntax = "proto3";
@@ -111,191 +111,10 @@ enum ERRORCODE
     SPREADER_INVALID_ID = 140;
     
     SPREADER_NO_QUOTING = 141;
-}
-
-enum  EXCHANGE
-{
-    //means not specified
-    NON_EXCH = 0;
     
-    OTC = 1;
-
-    ///中国金融期货交易所
-    CCFX = 2;
-
-    //SHANGHAI GOLD EXCHANGE
-    SGEX = 3;
-
-    //CHINA FOREIGN EXCHANGE TRADE SYSTEM
-    XCFE = 4;
-
-    ///大连商品交易所
-    XDCE = 5;
-
-    ///上海期货交易所
-    XSGE = 6;
-
-    //SHANGHAI INTERNATIONAL ENERGY EXCHANGE
-    XINE = 7;
-
-    //SHENZHEN STOCK EXCHANGE
-    XSHE = 8;
-
-    //SHENZHEN STOCK EXCHANGE - SHENZHEN - HONG KONG STOCK CONNECT
-    XSEC = 9;
-
-    //SHANGHAI STOCK EXCHANGE
-    XSHG = 10;
-
-    //SHANGHAI STOCK EXCHANGE - SHANGHAI - HONG KONG STOCK CONNECT
-    XSSC = 11;
-
-    ///郑州商品交易所
-    XZCE = 12;
-
-    //SINGAPORE MERCANTILE EXCHANGE PTE LTD
-    SMEX = 13;
-
-    //SINGAPORE EXCHANGE
-    XSES = 14;
-
-    //SINGAPORE COMMODITY EXCHANGE
-    XSCE = 15;
-
-    //SINGAPORE EXCHANGE DERIVATIVES CLEARING LIMITED
-    XSIM = 16;
-
-    //CHICAGO MERCANTILE EXCHANGE
-    XCME = 17;
-
-    //CME SWAPS MARKETS (CBOT)
-    CBTS = 18;
-
-    //CME SWAPS MARKETS (COMEX)
-    CECS = 19;
-
-    //CME SWAPS MARKETS (CME)
-    CMES = 20;
-
-    //CHICAGO MERCANTILE EXCHANGE (FLOOR)
-    FCME = 21;
-
-    //CME GLOBEX
-    GLBX = 22;
-
-    //INTERNATIONAL MONETARY MARKET
-    XIMM = 23;
-
-    //INDEX AND OPTIONS MARKET
-    XIOM = 24;
-
-    //CURRENEX
-    XCUR = 25;
-
-    //ICAP EUROPE
-    ICAP = 26;
-
-    //BROKERTEC
-    BTEE = 27;
-
-    //BM&FBOVESPA S.A. - BOLSA DE VALORES, MERCADORIAS E FUTUROS
-    BVMF = 28;
-
-    //CHICAGO BOARD OPTIONS EXCHANGE
-    XCBO = 29;
-
-    //CBOE FUTURES EXCHANGE
-    XCBF = 30;
-
-    //CHICAGO BOARD OF TRADE
-    XCBT = 31;
-
-    //LONDON METAL EXCHANGE
-    XLME = 32;
-
-    //LONDON STOCK EXCHANGE
-    XLON = 34;
-
-    //LONDON STOCK EXCHANGE - DERIVATIVES MARKET
-    XLOD = 35;
-
-    //JAPAN EXCHANGE GROUP
-    XJPX = 36;
-
-    //OSAKA EXCHANGE
-    XOSE = 37;
-
-    //OSAKA EXCHANGE J-NET
-    XOSJ = 38;
-
-    //TOKYO STOCK EXCHANGE
-    XTKS = 39;
-
-    //TOKYO FINANCIAL  EXCHANGE
-    XTFF = 40;
-
-    //TOKYO COMMODITY EXCHANGE
-    XTKT = 41;
-
-    //ASX - ALL MARKETS
-    XASX = 42;
-
-    //ASX - TRADE24
-    XSFE = 43;
-
-    //Eurex Exchange
-    XEUR = 44;
-
-    //EUROPEAN CLIMATE EXCHANGE
-    ECXE = 45;
-
-    //INTERCONTINENTAL EXCHANGE
-    IEPA = 46;
-
-    //Icap Electronic Broking (Us)
-    //BTEC = 47;
-
-    //TT
-    BTec = 48;
-    ICE_IPE = 49;
-    NYSE_Liffe = 50;
-    Eris_GovEx = 51;
-    eSpeed = 52;
-    Eurex = 53;
-    CME = 54;
-    MEFF = 55;
-    Montreal = 56;
-    MX = 57;
-    NASDAQ_OMX_EU = 58;
-    eCBOT = 59;
-    EBS = 60;
-    OSE = 61;
-    CBOT = 62;
-    SGX = 63;
-    LME = 64;
-    SFE = 65;
-    LSE = 66;
-    TOCOM = 67;
-    TFX = 68;
-    CFE = 69;
-    NYSE_Liffe_US = 70;
-    TTSIM = 71;
-    NFX = 72;
-    HKEx = 73;
-    GMEX = 74;
-    FIX = 75;
-    TSE = 76;
-}
-
-enum SIDE
-{
-    NO_SIDE = 0;
+    INVALID_SYMBOL = 142;
     
-    // Describes purchasing side of a trade.
-    BUY = 1;
-
-    // Describes selling side of a trade.
-    SELL = 2;
+    INVALID_SIDE = 143;
 }
 
 enum BROKER
@@ -312,18 +131,22 @@ enum BROKER
     TT = 7;
 }
 
+enum SIDE
+{
+    NO_SIDE = 0;
+    
+    // Describes purchasing side of a trade.
+    BUY = 1;
+    
+    // Describes selling side of a trade.
+    SELL = 2;
+}
+
 enum OTP_PURPOSE
 {
     RESET_PWD = 0;
     EMAIL_CONFIRM = 1;
     PHONE_CONFIRM = 2;
-}
-
-enum SUBSCRIBE_ACTION
-{
-    SUBSCRIBE = 0;
-
-    UNSUBSCRIBE = 1;
 }
 
 // Days of week enumeration.
@@ -338,22 +161,187 @@ enum DAYOFWEEK
     SATURDAY = 6;
 }
 
-//Supported Xceder's client application version
-message Version
+message Exchange
 {
-    //current version
-    uint32 version = 1;
-
-    uint32 minVersion = 2;
-
-    uint32 desprectedVersion = 3;
-
-    uint32 cutoffEpochDays = 4;
+    enum  EXCHANGE
+    {
+        //means not specified
+        NON_EXCH = 0;
+        
+        OTC = 1;
+        
+        ///中国金融期货交易所
+        CCFX = 2;
+        
+        //SHANGHAI GOLD EXCHANGE
+        SGEX = 3;
+        
+        //CHINA FOREIGN EXCHANGE TRADE SYSTEM
+        XCFE = 4;
+        
+        ///大连商品交易所
+        XDCE = 5;
+        
+        ///上海期货交易所
+        XSGE = 6;
+        
+        //SHANGHAI INTERNATIONAL ENERGY EXCHANGE
+        XINE = 7;
+        
+        //SHENZHEN STOCK EXCHANGE
+        XSHE = 8;
+        
+        //SHENZHEN STOCK EXCHANGE - SHENZHEN - HONG KONG STOCK CONNECT
+        XSEC = 9;
+        
+        //SHANGHAI STOCK EXCHANGE
+        XSHG = 10;
+        
+        //SHANGHAI STOCK EXCHANGE - SHANGHAI - HONG KONG STOCK CONNECT
+        XSSC = 11;
+        
+        ///郑州商品交易所
+        XZCE = 12;
+        
+        //SINGAPORE MERCANTILE EXCHANGE PTE LTD
+        SMEX = 13;
+        
+        //SINGAPORE EXCHANGE
+        XSES = 14;
+        
+        //SINGAPORE COMMODITY EXCHANGE
+        XSCE = 15;
+        
+        //SINGAPORE EXCHANGE DERIVATIVES CLEARING LIMITED
+        XSIM = 16;
+        
+        //CHICAGO MERCANTILE EXCHANGE
+        XCME = 17;
+        
+        //CME SWAPS MARKETS (CBOT)
+        CBTS = 18;
+        
+        //CME SWAPS MARKETS (COMEX)
+        CECS = 19;
+        
+        //CME SWAPS MARKETS (CME)
+        CMES = 20;
+        
+        //CHICAGO MERCANTILE EXCHANGE (FLOOR)
+        FCME = 21;
+        
+        //CME GLOBEX
+        GLBX = 22;
+        
+        //INTERNATIONAL MONETARY MARKET
+        XIMM = 23;
+        
+        //INDEX AND OPTIONS MARKET
+        XIOM = 24;
+        
+        //CURRENEX
+        XCUR = 25;
+        
+        //ICAP EUROPE
+        ICAP = 26;
+        
+        //BROKERTEC
+        BTEE = 27;
+        
+        //BM&FBOVESPA S.A. - BOLSA DE VALORES, MERCADORIAS E FUTUROS
+        BVMF = 28;
+        
+        //CHICAGO BOARD OPTIONS EXCHANGE
+        XCBO = 29;
+        
+        //CBOE FUTURES EXCHANGE
+        XCBF = 30;
+        
+        //CHICAGO BOARD OF TRADE
+        XCBT = 31;
+        
+        //LONDON METAL EXCHANGE
+        XLME = 32;
+        
+        //LONDON STOCK EXCHANGE
+        XLON = 34;
+        
+        //LONDON STOCK EXCHANGE - DERIVATIVES MARKET
+        XLOD = 35;
+        
+        //JAPAN EXCHANGE GROUP
+        XJPX = 36;
+        
+        //OSAKA EXCHANGE
+        XOSE = 37;
+        
+        //OSAKA EXCHANGE J-NET
+        XOSJ = 38;
+        
+        //TOKYO STOCK EXCHANGE
+        XTKS = 39;
+        
+        //TOKYO FINANCIAL  EXCHANGE
+        XTFF = 40;
+        
+        //TOKYO COMMODITY EXCHANGE
+        XTKT = 41;
+        
+        //ASX - ALL MARKETS
+        XASX = 42;
+        
+        //ASX - TRADE24
+        XSFE = 43;
+        
+        //Eurex Exchange
+        XEUR = 44;
+        
+        //EUROPEAN CLIMATE EXCHANGE
+        ECXE = 45;
+        
+        //INTERCONTINENTAL EXCHANGE
+        IEPA = 46;
+        
+        //Icap Electronic Broking (Us)
+        //BTEC = 47;
+        
+        //TT
+        BTec = 48;
+        ICE_IPE = 49;
+        NYSE_Liffe = 50;
+        Eris_GovEx = 51;
+        eSpeed = 52;
+        Eurex = 53;
+        CME = 54;
+        MEFF = 55;
+        Montreal = 56;
+        MX = 57;
+        NASDAQ_OMX_EU = 58;
+        eCBOT = 59;
+        EBS = 60;
+        OSE = 61;
+        CBOT = 62;
+        SGX = 63;
+        LME = 64;
+        SFE = 65;
+        LSE = 66;
+        TOCOM = 67;
+        TFX = 68;
+        CFE = 69;
+        NYSE_Liffe_US = 70;
+        TTSIM = 71;
+        NFX = 72;
+        HKEx = 73;
+        GMEX = 74;
+        FIX = 75;
+        TSE = 76;
+    }
+    
+    EXCHANGE code = 1;
+    string name = 2;
+    sint32 timezone = 3;
 }
 
-/**
-If the request case is empty, server will return the version information
-*/
 message RequestMsg
 {
     //request ID, should be unique enough to receive the request Result
@@ -614,8 +602,8 @@ message Result
     //request's ID, submitted in the RequestMsg
     uint64 request = 1;
 
-    //id of the gateway
-    uint32 gateway = 2;
+    //id of the result source server
+    uint32 serverID = 2;
 
     ERRORCODE result = 3;
 
@@ -627,9 +615,28 @@ message Result
 
     uint64 finishProcessUTC = 7;
 
-    string fromIP = 8;
+    string requestFromIP = 8;
 
-    uint32 fromPort = 9;
+    uint32 requestFromPort = 9;
+}
+
+message Service
+{
+    enum SERVICE
+    {
+        SVCALL = 0;
+        
+        PRICE = 1;
+        ORDER = 2;
+        
+        SPREADER = 3;
+        
+        ALGO = 4;
+    }
+    
+    BROKER broker = 1;
+    SERVICE svc = 2;
+    Exchange.EXCHANGE exchange = 3;
 }
 
 message ServiceStatus
@@ -653,23 +660,9 @@ message ServiceStatus
         CLOSE = 5;
     }
     
-    enum SERVICE
-    {
-        SVCALL = 0;
-        
-        PRICE = 1;
-        ORDER = 2;
-        
-        SPREADER = 3;
-        
-        ALGO = 4;
-    }
-    
-    BROKER broker = 1;
-    SERVICE svc = 2;
-    EXCHANGE exchange = 3;
-    
-    STATUS status = 4;
+    uint32 serverID = 1;
+    Service service = 2;
+    STATUS status = 3;
 }
 
 message ServiceStatuses
@@ -812,7 +805,7 @@ message QueryResult
         // Report with a list of historical orders according to specified parameters.
         OrderReports ordersReports = 1;
         
-        ClientRequestLogs logs = 2;
+        RequestLogs logs = 2;
         
         WatchLists watchList = 3;
         
@@ -820,16 +813,13 @@ message QueryResult
         
         BrokerExchanges supportedExchanges = 5;
         
-        //when query without any parameter
-        Version version = 6;
+        AppLayouts layouts = 6;
         
-        AppLayouts layouts = 7;
+        ExchangeCalendar calendar = 7;
         
-        ExchangeCalendar calendar = 8;
-        
-        Instruments instruments = 9;
+        Instruments instruments = 8;
     
-        Spreaders spreaders = 10;
+        Spreaders spreaders = 9;
     }
 }
 
@@ -842,7 +832,7 @@ message ExchangeCalendar
         uint32 hours = 3;
     }
     
-    EXCHANGE exchange = 1;
+    Exchange.EXCHANGE exchange = 1;
     
     repeated Holiday holiday = 2;
 }
@@ -851,7 +841,7 @@ message BrokerExchanges
 {
     repeated BROKER broker = 1;
     
-    repeated EXCHANGE exchange = 2;
+    repeated Exchange.EXCHANGE exchange = 2;
 }
 
 //based on different data, the parameter may be used differently
@@ -867,7 +857,7 @@ message QueryConditions
     BROKER broker = 3;
     
     //if this query related to particular broker
-    EXCHANGE exchange = 4;
+    Exchange.EXCHANGE exchange = 4;
     
     //if this query related to particular symbol
     //for spreader query, it is the spreader name
@@ -893,16 +883,16 @@ message OrderReports
 message OrderReport
 {
     Order order = 1;
-
-    ExecutionReports reports = 2;
+    
+    repeated ExecutionReport report = 2;
 }
 
-message ClientRequestLogs
+message RequestLogs
 {
-    repeated ClientRequestLog logs = 1;
+    repeated RequestLog logs = 1;
 }
 
-message ClientRequestLog
+message RequestLog
 {
     RequestMsg request = 1;
 
@@ -912,7 +902,7 @@ message ClientRequestLog
 // Trade routing order. It is used as new order request and as a part of order status updates.
 message Order
 {
-	//FIX OrdType char code
+    //FIX OrdType char code
 	enum TYPE
 	{
         // Limit order, buy or sell by price that is the same or better then specified limit price.
@@ -1125,30 +1115,6 @@ message Spreaders
 
 message Spreader
 {
-    //how to represent the price for this spread
-    enum FORMULA
-    {
-        // Prices display as the implied price of the spread.
-        // Leg A Price (*) User-Defined Multiplier – Leg B Price (*) User-Defined Multiplier= Implied Price
-        IMPLIED = 0;
-        
-        //Prices display based on the individual legs' net change from the previous day settlement.
-        //If you base spread prices on Net Change , you disable calculations in the Tick Information section.
-        //The Calculated Tick Size defaults to 25/100. You can still use the Override Tick Size to change it.
-        NETCHANGE = 1;
-        
-        //Prices display as a percentage ratio (divides Leg A price by Leg B price).
-        //The Ratio setting is for two-legged spreads.
-        RATIO = 2;
-        
-        //Prices display in yield. When enabled, an additional set of “Yield” parameters is displayed that can be configured
-        //for each leg
-        YIELD = 3;
-    
-        //Prices display based on a custom formula for the implied spread price.
-        CUSTOM = 5;
-    }
-    
     enum QUOTING_MODE
     {
         //If the hedge market quantity drops below the minimum hedge quantity, the associated quoting order will be pulled
@@ -1233,7 +1199,31 @@ message Spreader
     
     message Formula
     {
-        FORMULA type = 1;
+        //how to represent the price for this spread
+        enum TYPE
+        {
+            // Prices display as the implied price of the spread.
+            // Leg A Price (*) User-Defined Multiplier – Leg B Price (*) User-Defined Multiplier= Implied Price
+            IMPLIED = 0;
+        
+            //Prices display based on the individual legs' net change from the previous day settlement.
+            //If you base spread prices on Net Change , you disable calculations in the Tick Information section.
+            //The Calculated Tick Size defaults to 25/100. You can still use the Override Tick Size to change it.
+            NETCHANGE = 1;
+        
+            //Prices display as a percentage ratio (divides Leg A price by Leg B price).
+            //The Ratio setting is for two-legged spreads.
+            RATIO = 2;
+        
+            //Prices display in yield. When enabled, an additional set of “Yield” parameters is displayed that can be configured
+            //for each leg
+            YIELD = 3;
+        
+            //Prices display based on a custom formula for the implied spread price.
+            CUSTOM = 5;
+        }
+    
+        TYPE type = 1;
         string formula = 2;
     }
     
@@ -1583,10 +1573,17 @@ message ExecutionReport
 
 message InstrumentSubscription
 {
+    enum ACTION
+    {
+        SUBSCRIBE = 0;
+        
+        UNSUBSCRIBE = 1;
+    }
+    
     //array of instrument ID
     repeated uint64 instrument = 1 [packed=true];
     
-    SUBSCRIBE_ACTION action = 2;
+    ACTION action = 2;
 }
 
 message MarketDatas
@@ -2091,8 +2088,8 @@ message Instrument
         //this is xceder system counter ID. it is global unique and never change after create. it is a value which combines
         //exchange, broker, product and xceder system internal instrument number
         uint64 id = 1;
-
-        EXCHANGE exchange = 2;
+    
+        Exchange.EXCHANGE exchange = 2;
 
         BROKER broker = 3;
         
@@ -2207,4 +2204,5 @@ message AppLayout
     
     uint64 syncTime = 3;
 }
+
 
