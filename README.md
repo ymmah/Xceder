@@ -41,6 +41,8 @@ Xceder is designed for the high frequency and algo trading. It can route the ord
 
 Get started using this step by step [tutorial](https://github.com/xcedertechnology/Xceder/wiki/).
 
+More books are avaible here http://books.xceder.com
+
 ### To use Xceder
 * UI
   www.xceder.com
