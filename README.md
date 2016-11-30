@@ -2,8 +2,6 @@
 ###Welcome to Xceder 
 Xceder is designed for the high frequency and algo trading. It can route the order in millisecond level. In our live trading, we see almost all order process latency less than 10 milliseconds, many of them even just 1 millisecond. leverage on this speed edge, the spreader trading and algo trading is not just privilege from those big players.
 
-To use Xceder is pretty simple, just download the Excel addin, open it in Microsoft Excel (2007 above). Here you go!
-
 ### Order Processing Speed
 | Order Recieved Time(UTC) | Order Routed Time (UTC) | Latency (ms) |
 | --- | --- | --- |
@@ -38,48 +36,26 @@ To use Xceder is pretty simple, just download the Excel addin, open it in Micros
 |	2016-10-03 09:50:30.570	|	2016-10-03 09:50:30.572	|	2	|
 |	2016-10-03 09:50:03.258	|	2016-10-03 09:50:03.274	|	16	|
 |	2016-10-03 09:49:49.527	|	2016-10-03 09:49:49.529	|	2	|
-|	2016-10-03 09:48:09.061	|	2016-10-03 09:48:09.070	|	9	|
-|	2016-10-03 09:46:01.930	|	2016-10-03 09:46:01.987	|	57	|
-|	2016-10-03 09:40:00.661	|	2016-10-03 09:40:00.667	|	6	|
-|	2016-10-03 09:39:19.407	|	2016-10-03 09:39:19.412	|	5	|
-|	2016-10-03 09:37:46.656	|	2016-10-03 09:37:46.657	|	1	|
-|	2016-10-03 09:36:43.010	|	2016-10-03 09:36:43.013	|	3	|
-|	2016-10-03 09:35:56.303	|	2016-10-03 09:35:56.313	|	10	|
-|	2016-10-03 09:31:12.031	|	2016-10-03 09:31:12.031	|	0	|
-|	2016-10-03 09:30:19.998	|	2016-10-03 09:30:19.999	|	1	|
-|	2016-10-03 09:30:02.781	|	2016-10-03 09:30:02.806	|	25	|
-|	2016-10-03 09:17:58.016	|	2016-10-03 09:17:58.214	|	198	|
-|	2016-10-03 08:02:18.041	|	2016-10-03 08:02:18.045	|	4	|
-|	2016-10-03 08:02:08.701	|	2016-10-03 08:02:08.728	|	27	|
-|	2016-10-03 08:02:00.642	|	2016-10-03 08:02:00.651	|	9	|
-|	2016-10-03 08:01:03.101	|	2016-10-03 08:01:03.115	|	14	|
-|	2016-10-03 07:57:32.465	|	2016-10-03 07:57:32.573	|	108	|
-|	2016-10-03 07:56:01.418	|	2016-10-03 07:56:01.423	|	5	|
-|	2016-10-03 07:53:00.164	|	2016-10-03 07:53:00.196	|	32	|
-|	2016-10-03 07:51:24.573	|	2016-10-03 07:51:24.596	|	23	|
-
 
 ### Tutorial
 
-Get started using this step by step [tutorial](https://github.com/DT-Workshop/Xceder/wiki/).
+Get started using this step by step [tutorial](https://github.com/xcedertechnology/Xceder/wiki/).
 
 ### To use Xceder
-
-Just download and open [Xceder](https://github.com/DT-Workshop/Xceder/releases/) in Excel (2007 above). 
+* UI
+  www.xceder.com
+  
+* Excel plugin  https://github.com/xcedertechnology/Xceder/releases/ in Excel (2007 above). 
 
 *For 64bit Excel, you need open the file which name contains '64'*
-
-### Running Environment
-
-* Excel 2007 above 
 
 ### Versions
 
 [Change Log](changelog.md)
 
-0.x release: [0.9.9.8](https://github.com/DT-Workshop/Xceder/releases)
+0.x release: [0.9.9.8](https://github.com/xcedertechnology/Xceder/releases)
 
-@Copyright 2016 [dt-workshop](http://www.dt-workshop.com)
+@Copyright 2016 [xceder technology](http://www.xceder.com)
 
 
 
