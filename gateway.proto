@@ -1,5 +1,5 @@
 ///////////////////////////////////////
-//version 20161117
+//version 20161204
 //the string size (not speicified) should be within 255 bytes
 
 syntax = "proto3";
@@ -44,7 +44,6 @@ enum ERRORCODE
     // Requested data is outside of allowed range.
     OUTSIDE_ALLOWED_RANGE = 108;
 
-    // Parameters of a time bar request are invalid.
     INVALID_PARAMS = 109;
 
     UNKNOWN_REQUEST = 110;
@@ -383,6 +382,7 @@ message RequestMsg
     
         //request to create/update spreader, the new spreader ID should be 0.
         //only allow to change the spreader which status isn't RUN
+        //to delete spreader, just specify the ID with the empty name
         Spreader spreader = 14;
     }
 }
@@ -1197,34 +1197,28 @@ message Spreader
         TYPE7 = 6;
     }
     
-    message Formula
+    //how to represent the price for this spread
+    enum TYPE
     {
-        //how to represent the price for this spread
-        enum TYPE
-        {
-            // Prices display as the implied price of the spread.
-            // Leg A Price (*) User-Defined Multiplier – Leg B Price (*) User-Defined Multiplier= Implied Price
-            IMPLIED = 0;
+        // Prices display as the implied price of the spread.
+        // Leg A Price (*) User-Defined Multiplier – Leg B Price (*) User-Defined Multiplier= Implied Price
+        IMPLIED = 0;
         
-            //Prices display based on the individual legs' net change from the previous day settlement.
-            //If you base spread prices on Net Change , you disable calculations in the Tick Information section.
-            //The Calculated Tick Size defaults to 25/100. You can still use the Override Tick Size to change it.
-            NETCHANGE = 1;
+        //Prices display based on the individual legs' net change from the previous day settlement.
+        //If you base spread prices on Net Change , you disable calculations in the Tick Information section.
+        //The Calculated Tick Size defaults to 25/100. You can still use the Override Tick Size to change it.
+        NETCHANGE = 1;
         
-            //Prices display as a percentage ratio (divides Leg A price by Leg B price).
-            //The Ratio setting is for two-legged spreads.
-            RATIO = 2;
+        //Prices display as a percentage ratio (divides Leg A price by Leg B price).
+        //The Ratio setting is for two-legged spreads.
+        RATIO = 2;
         
-            //Prices display in yield. When enabled, an additional set of “Yield” parameters is displayed that can be configured
-            //for each leg
-            YIELD = 3;
+        //Prices display in yield. When enabled, an additional set of “Yield” parameters is displayed that can be configured
+        //for each leg
+        YIELD = 3;
         
-            //Prices display based on a custom formula for the implied spread price.
-            CUSTOM = 5;
-        }
-    
-        TYPE type = 1;
-        string formula = 2;
+        //Prices display based on a custom formula for the implied spread price.
+        CUSTOM = 4;
     }
     
     message SpreadSlop
@@ -1271,18 +1265,20 @@ message Spreader
     
         TYPE type = 2;
     
+        //indicate whether this leg is a short leg
+        bool isShortLeg = 3;
+        
         //quantity of this leg in relation to the other spread legs
-        //negative sign (-) before the number indicates a short leg.
         //The Spread Ratio field allows a value of zero for spreads that require a leg for spread calculation purposes only,
         //and not for entering orders as a part of the spread. When a leg has a value of zero in the Spread Ratio field,
         //no quoting orders or hedge orders will be submitted in that leg as a part of a spread, but a spread fill is
         //generated. The current inside market price at the time of the quoting leg fill will be used for the leg fill price
         //when creating the spread fill.
         //Values entered in the Spread Ratio field do not affect the spread price.
-        double qtyRatio = 3;
+        double qtyRatio = 4;
     
         //the multipler in the spread price formula
-        double priceMultiplier = 4;
+        double priceWeight = 5;
         
         //number of ticks spreader can adjust the price of the limit order to fill the spread order.
         //Indicates the number of ticks Spreader can adjust the price of the limit order to fill the spread order.
@@ -1296,48 +1292,48 @@ message Spreader
         //for 2128.00 to achieve the spread price, Autospreader adjusts the price 2 ticks away from the market and enters an
         //order at 2128.50. Using this same example but with Payup Ticks set to positive "2", Autospreader adjusts the spread
         //price 2 ticks into the market and enters a hedge order at 2127.50.
-        sint32 payupTicks = 5;
+        sint32 hedgeTick = 6;
     
         //minimum quantity required for quoting orders to lean against
         //If you want to lean only against the inside market and not lean on multiple levels of depth you can set the
         //qtyLeanDepth to 0 and the minQtyLean to 1.
-        uint32 minQtyLean = 6;
+        uint32 minQtyLean = 7;
         
         //Example: If the quantity on the second leg of the spread is 10 and the trader assigns an qtyLeanDepth of 2,
         //Spreader determines the price level at which 20 contracts of cumulative market quantity exists on the second leg
         //and uses this to determine the price at which it quotes the first leg of the spread.
-        uint32 qtyLeanDepth = 7;
+        uint32 qtyLeanDepth = 8;
         
-        QUOTING_MODE quotingMode = 8;
+        QUOTING_MODE quotingMode = 9;
     
         //number of outright leg orders placed at consecutive price levels away from the inside market in addition to the
         //single quoted order for each leg.
         //Note: Queue Holder is only available with two-legged spreads.
-        uint32 queueHolderOrders = 9;
+        uint32 queueHolderDepth = 10;
     
     
         //maximum number of ticks a leg price can move in a single price update before pulling the order
         //this defines an order move threshold in the quoting leg.
         //Setting these properties can help prevent legging risks in volatile markets.
         //minimum setting is 1
-        uint32 maxQuotePriceMove = 10;
+        uint32 maxQuotePriceMove = 11;
     
         //maximum number of ticks a leg price can move in a single price update before pulling the order from the market
         //this defines a price move threshold in the leaning (hedging) leg.
         //Setting these properties can help prevent legging risks in volatile markets.
         //minimum setting is 1
-        uint32 maxHedgePriceMove = 11;
+        uint32 maxHedgePriceMove = 12;
         
         //key is the EVENT number
-        map<uint32, string> rule = 12;
+        map<uint32, string> rule = 13;
     
         //Lets you configure multiple levels of slop to determine when to reprice the quoted outright legs based upon
         //movement in the market
-        repeated SpreadSlop slopLevel = 13;
+        repeated SpreadSlop slopLevel = 14;
         
         //reduces excessive quoting away from the inside market.
         //legs only requote when they are a set number of ticks away from the inside market
-        InsideQuote insideQuote = 14;
+        InsideQuote insideQuote = 15;
         
         //whether should send a hedge order when the quoted order is more than specified qty filled
         //This setting is intended to be used for spreads with quoting orders more than double the quantity of the hedge order
@@ -1345,7 +1341,7 @@ message Spreader
         //unhedged leg of the spread and will not reprice.
         //Example: You are quoting 11 contracts and hedging 1. With Hedge trigger is set at 6, a hedge order is sent when 6
         //of the 11 contracts fill. When not set (0), all 11 contracts need to fill before 1 lot hedge is sent.
-        uint32 hedgeTriggerFillQty = 15;
+        uint32 hedgeTriggerFillQty = 16;
     
         
         //When creating spread legs for instruments that trade in yield, you can include the following optional values to use
@@ -1354,40 +1350,40 @@ message Spreader
         //Dated Date (issueDate)
     
         //first real coupon date, 0 to disable the bond instrument yield to maturity calculation
-        uint64 firstCouponDate = 16;
+        uint64 firstCouponDate = 17;
     
         //date on which interest accrual begins,must occur before the first coupon date
         //0 to disable the bond instrument yield to maturity calculation
-        uint64 issueDate = 17;
+        uint64 issueDate = 18;
         
         //the factor by which the futures price is multiplied if the specified bond is delivered against it
-        double conversionFactor = 18;
+        double conversionFactor = 19;
         
         //whether to convert 360 days to 365 days
-        bool use365Days = 19;
+        bool use365Days = 20;
         
         //coupon's annual interest rate
-        double couponRate = 29;
+        double couponRate = 21;
     
-        COUPONFREQ couponFreq = 30;
+        COUPONFREQ couponFreq = 22;
 
         //coupon payments always occur on the last day of the month if the settlement date falls on the last day of the month
         //true, if payments always occur on the last day of the month; false, otherwise
-        bool endOfMonthCoupon = 31;
+        bool endOfMonthCoupon = 23;
         
         //redemption date of the bond. Must be greater than the settlement date and greater than today
-        uint64 maturityDate = 32;
+        uint64 maturityDate = 24;
         
         //used for converting NPV to a Par Rate for Eris Invoice Futures Spreads
-        double PV01 = 33;
+        double PV01 = 25;
         
         //date the trade settles. The value must be less than the maturity date and greater than today.
-        uint64 settlementDate = 34;
+        uint64 settlementDate = 26;
     
         //settlement price of the contracts in an exchange-traded strip, pack, or bundle
-        double stripBase = 35;
+        double stripBase = 27;
         
-        YIELD_TYPE yieldType = 36;
+        YIELD_TYPE yieldType = 28;
     }
     
     //this will be created by server after it is registered successfully, client side spreader create request should be 0
@@ -1396,11 +1392,14 @@ message Spreader
     uint32 ownerAcct = 2;
     
     //this must be unique for the owner account
+    //if it is blank, will delete the spreader specified by the id
     string name = 3;
     
     string remark = 4;
     
-    Formula formular = 5;
+    TYPE type = 5;
+    
+    string formula = 6;
     
     //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
     //disclosed quantities.
@@ -1411,20 +1410,20 @@ message Spreader
     //0 will submit the new spread order at the same price as the previous spread order.
     //1 will submit the spread order at a price 1 tick from the previous spread order away from the market.
     //-1 will submit the spread order 1 tick from the previous spread order toward the market.
-    uint32 reloadOffset = 6;
+    uint32 reloadOffset = 7;
     
     //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
     //disclosed quantities.
     //When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire
     //spread order quantity fills.
     //This property specifies the quantity for each child disclosed order.
-    uint32 reloadQty = 7;
+    uint32 reloadQty = 8;
     
-    double tickSize = 8;
+    double tickSize = 9;
     
-    repeated Leg leg = 9;
+    repeated Leg leg = 10;
     
-    uint64 updateTimeUTC = 10;
+    uint64 updateTimeUTC = 11;
 }
 
 message OrderID
@@ -1657,15 +1656,6 @@ message Quote
     uint32 numberOfOrders = 6;
 }
 
-message TickSize
-{
-    //Size of one base tick for this security
-    double size = 1;
-
-    //Size of one point for this security in product native currency
-    double value = 2;
-}
-
 message TickRange
 {
     double priceRange = 1;
@@ -1724,11 +1714,15 @@ message InstrumentTradingRule
     MORTGAGE_USAGE	mortgageUseRange = 9;
 
     uint32 lotSize = 10;
-
-    TickSize tickSize = 11;
+    
+    //Size of one base tick for this security
+    double tickSize = 11;
+    
+    //Size of one point for this security in product native currency
+    double tickValue = 12;
 
     //tick table for price tiers
-    repeated TickRange tickRange = 12;
+    repeated TickRange tickRange = 13;
 }
 
 message EnergyAttributes
