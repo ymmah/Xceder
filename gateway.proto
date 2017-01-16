@@ -1,5 +1,5 @@
 ///////////////////////////////////////
-//version 20161204
+//version 20161219
 //the string size (not speicified) should be within 255 bytes
 
 syntax = "proto3";
@@ -7,6 +7,13 @@ syntax = "proto3";
 package com.xceder.messages;
 
 option optimize_for = SPEED;
+
+enum ID_TYPE
+{
+    INSTRUMENT = 0;
+    SPREADER = 1;
+    ORDER = 2;
+}
 
 // Result code.
 enum ERRORCODE
@@ -25,38 +32,37 @@ enum ERRORCODE
     // One-time password is required for this user but it was not sent, repeat logon
     // with one-time password.
     NO_ONETIME_PASSWORD = 102;
-
+    
+    NO_TRADINGACCOUNT = 103;
+    
+    OTP_EXPIRED = 104;
+    
+    OTP_NOT_FOUND = 105;
+    
+    NETWORK_ERROR = 106;
+    
+    CANCELLED = 107;
+    
+    CONNECTION_DOWN = 108;
+    
+    CONNECTION_NOT_CONFIGURE = 109;
+    
+    // Requested data is outside of allowed range.
+    OUTSIDE_ALLOWED_RANGE = 110;
+    
+    UNKNOWN_REQUEST = 111;
+    
     // User password is expired, only change password operation is allowed.
-    PASSWORD_EXPIRED = 103;
+    PASSWORD_EXPIRED = 112;
 
     // Client is redirected to a different server, new server is specified in redirectUrl.
-    REDIRECTED = 104;
+    REDIRECTED = 113;
 
     // The user is not allowed to access this instrument data.
-    ACCESS_DENIED = 105;
+    ACCESS_DENIED = 114;
 
     //connection to broker isn't up
-    DISCONNECTED = 106;
-
-    // Requested information is not found.
-    NOT_FOUND = 107;
-
-    // Requested data is outside of allowed range.
-    OUTSIDE_ALLOWED_RANGE = 108;
-
-    INVALID_PARAMS = 109;
-
-    UNKNOWN_REQUEST = 110;
-
-    NOT_LOGIN = 111;
-
-    INVALID_INSTRUMENTID = 112;
-
-    INVALID_CLORDID = 113;
-
-    NO_TRADINGACCOUNT = 114;
-
-    INVALID_USERID = 115;
+    DISCONNECTED = 115;
 
     WRONG_PASSWORD = 116;
 
@@ -67,53 +73,100 @@ enum ERRORCODE
     TIMEOUTOFSYNC = 119;
 
     DUPLICATE_USER = 120;
-
-    INVALID_BROKER = 121;
     
-    INVALID_EMAIL = 122;
-
-    INVALID_ORDER_SUBMITUSER = 123;
-
-    INVALID_ORDER_QTY = 124;
-
-    INVALID_LIMIT_PRICE = 125;
     
-    INVALID_STOP_PRICE = 126;
+    
+    NOT_LOGIN = 130;
+    
+    NOT_SUPPORT = 131;
+    
+    NOT_SUPPORT_SERVICE = 132;
+    
+    // Requested information is not found.
+    NOT_FOUND = 133;
+    
+    NOT_FOUND_ORDER = 134;
+    
+    
+    
+    INVALID_PARAMS = 140;
+    
+    INVALID_INSTRUMENTID = 141;
+    
+    INVALID_CLORDID = 142;
+    
+    INVALID_USERID = 143;
+    
+    INVALID_BROKER = 144;
+    
+    INVALID_EMAIL = 145;
 
-    INVALID_ORDER_TYPE = 127;
+    INVALID_ORDER_SUBMITUSER = 146;
 
-    INVALID_ORDER_SUBMIT_TIME = 128;
+    INVALID_ORDER_QTY = 147;
 
+    INVALID_LIMIT_PRICE = 148;
+    
+    INVALID_STOP_PRICE = 149;
+
+    INVALID_ORDER_TYPE = 150;
+
+    INVALID_ORDER_SUBMIT_TIME = 151;
+
+    INVALID_ORDER_TIMEINFORCE = 152;
+    
+    INVALID_CHAINCLORDID = 153;
+    
+    INVALID_SYMBOL = 154;
+    
+    INVALID_SIDE = 155;
+    
+    INSTRUMENT_EXPIRED = 156;
+    
+    INSTRUMENT_NOT_TRADABLE = 157;
+    
+    INSTRUMENT_NO_PRICE_ACCESS = 158;
+    
+    
+    
+    /* Order related errors */
     //tag should be less than 255
-    ORDER_TAG_TOOLONG = 129;
-
-    INVALID_ORDER_TIMEINFORCE = 130;
-
-    OTP_EXPIRED = 131;
+    ORDER_TAG_TOOLONG = 160;
     
-    OTP_NOT_FOUND = 132;
-
-    INVALID_CHAINCLORDID = 133;
-                              
-    NETWORK_ERROR = 134;
-
-    CANCELLED = 135;
+    ORDER_NOT_REPLACEABLE = 161;
     
-    NOT_SUPPORT = 136;
     
-    NOT_SUPPORT_SERVICE = 137;
-
-    CONNECTOR_DOWN = 138;
     
-    SPREADER_DUPLICATE_NAME = 139;
     
-    SPREADER_INVALID_ID = 140;
+    /* Spreader related errors */
+    SPREADER_DUPLICATE_NAME = 171;
     
-    SPREADER_NO_QUOTING = 141;
+    SPREADER_NO_QUOTING = 172;
     
-    INVALID_SYMBOL = 142;
+    SPREADER_NO_LEGS = 173;
     
-    INVALID_SIDE = 143;
+    SPREADER_NO_INSTRUMENT_ACCESS = 174;
+    
+    SPREADER_DUPLICATE_ORDER = 175;
+    
+    SPREADER_INVALID_ID = 176;
+    
+    SPREADER_INVALID_LEG_INSTRUMENT = 177;
+    
+    SPREADER_INVALID_LEG_RATIO = 178;
+    
+    SPREADER_INVALID_LEG_PRICEWEIGHT = 179;
+    
+    //for example syntax error
+    SPREADER_INVALID_LEG_RULES = 180;
+    
+    //leg order has failure, for example, fail to withdraw some leg orders
+    SPREADER_LEG_FAILURE = 181;
+    
+    
+    /* Algo related errors */
+    //can't modify the algo/spreader because of active orders
+    ALGO_ACTIVE_ORDER = 190;
 }
 
 enum BROKER
@@ -301,10 +354,10 @@ message Exchange
         //INTERCONTINENTAL EXCHANGE
         IEPA = 46;
         
-        //Icap Electronic Broking (Us)
         //BTEC = 47;
         
         //TT
+        //Icap Electronic Broking (Us)
         BTec = 48;
         ICE_IPE = 49;
         NYSE_Liffe = 50;
@@ -398,31 +451,28 @@ message ResponseMsg
         // Reports with requested information.
         QueryResult queryResult = 2;
 
-        //return the order transaction, Execution report
-        ExecutionReports executionReports = 3;
+        MarketDatas marketData = 3;
 
-        MarketDatas marketData = 4;
-
-        Ping ping = 5;
+        Ping ping = 4;
 
         // Session level messages from server.
-        LogonResult logonResult = 6;
+        LogonResult logonResult = 5;
 
-        NoticeMessages notice = 7;
+        NoticeMessages notice = 6;
     
-        ServiceStatuses  serviceStatus = 8;
+        ServiceStatuses  serviceStatus = 7;
     
-        InstrumentStatuses instrumentStatus = 9;
+        InstrumentStatuses instrumentStatus = 8;
 
-        uint64 watchListSyncTime = 10;
+        uint64 watchListSyncTime = 9;
     
-        uint64 layoutSyncTime = 11;
+        uint64 layoutSyncTime = 10;
     
         //this is the result for the spreader creation successfully
-        uint64 spreaderID = 12;
+        uint64 spreaderID = 11;
     
-        //this will be sent when the spreader leg order is submitted by server
-        OrderReports orderReports = 13;
+        //this will be sent when the spreader leg order is submitted by server, or execution report for the order status
+        OrderReports orderReports = 12;
     }
 }
 
@@ -882,8 +932,10 @@ message OrderReports
 
 message OrderReport
 {
+    //if it is not empty, must have the reports
     Order order = 1;
     
+    //can be used without order
     repeated ExecutionReport report = 2;
 }
 
@@ -1163,14 +1215,6 @@ message Spreader
         D365_30E = 5;
     }
     
-    enum EVENT
-    {
-        PRE_QUOTE = 0;
-        
-        PRE_HEDGE = 1;
-        POST_HEDGE = 2;
-    }
-    
     enum YIELD_TYPE
     {
         //Instrument price is in yield, so no conversion is necessary
@@ -1250,6 +1294,13 @@ message Spreader
         uint32 distanceLimit = 2;
     }
     
+    message EventRules
+    {
+        string preQuoting = 1;
+        string preHedging = 2;
+        string postHedging = 3;
+    }
+    
     message Leg
     {
         enum TYPE
@@ -1259,6 +1310,50 @@ message Spreader
             
             //send the hedge order only after receiving a full fill of the quoting order
             HEDGE = 1;
+        }
+    
+        message ExtraAttributes
+        {
+            //When creating spread legs for instruments that trade in yield, you can include the following optional values to use
+            //when calculating the yield price:
+            //First Coupon Date (firstCouponDate)
+            //Dated Date (issueDate)
+        
+            //first real coupon date, 0 to disable the bond instrument yield to maturity calculation
+            uint64 firstCouponDate = 1;
+        
+            //date on which interest accrual begins,must occur before the first coupon date
+            //0 to disable the bond instrument yield to maturity calculation
+            uint64 issueDate = 2;
+        
+            //the factor by which the futures price is multiplied if the specified bond is delivered against it
+            double conversionFactor = 3;
+        
+            //whether to convert 360 days to 365 days
+            bool use365Days = 4;
+        
+            //coupon's annual interest rate
+            double couponRate = 5;
+        
+            COUPONFREQ couponFreq = 6;
+        
+            //coupon payments always occur on the last day of the month if the settlement date falls on the last day of the month
+            //true, if payments always occur on the last day of the month; false, otherwise
+            bool endOfMonthCoupon = 7;
+        
+            //redemption date of the bond. Must be greater than the settlement date and greater than today
+            uint64 maturityDate = 8;
+        
+            //used for converting NPV to a Par Rate for Eris Invoice Futures Spreads
+            double PV01 = 9;
+        
+            //date the trade settles. The value must be less than the maturity date and greater than today.
+            uint64 settlementDate = 10;
+        
+            //settlement price of the contracts in an exchange-traded strip, pack, or bundle
+            double stripBase = 11;
+        
+            YIELD_TYPE yieldType = 12;
         }
     
         uint64 instrument = 1;
@@ -1324,9 +1419,8 @@ message Spreader
         //minimum setting is 1
         uint32 maxHedgePriceMove = 12;
         
-        //key is the EVENT number
-        map<uint32, string> rule = 13;
-    
+        EventRules rules = 13;
+        
         //Lets you configure multiple levels of slop to determine when to reprice the quoted outright legs based upon
         //movement in the market
         repeated SpreadSlop slopLevel = 14;
@@ -1343,47 +1437,8 @@ message Spreader
         //of the 11 contracts fill. When not set (0), all 11 contracts need to fill before 1 lot hedge is sent.
         uint32 hedgeTriggerFillQty = 16;
     
-        
-        //When creating spread legs for instruments that trade in yield, you can include the following optional values to use
-        //when calculating the yield price:
-        //First Coupon Date (firstCouponDate)
-        //Dated Date (issueDate)
     
-        //first real coupon date, 0 to disable the bond instrument yield to maturity calculation
-        uint64 firstCouponDate = 17;
-    
-        //date on which interest accrual begins,must occur before the first coupon date
-        //0 to disable the bond instrument yield to maturity calculation
-        uint64 issueDate = 18;
-        
-        //the factor by which the futures price is multiplied if the specified bond is delivered against it
-        double conversionFactor = 19;
-        
-        //whether to convert 360 days to 365 days
-        bool use365Days = 20;
-        
-        //coupon's annual interest rate
-        double couponRate = 21;
-    
-        COUPONFREQ couponFreq = 22;
-
-        //coupon payments always occur on the last day of the month if the settlement date falls on the last day of the month
-        //true, if payments always occur on the last day of the month; false, otherwise
-        bool endOfMonthCoupon = 23;
-        
-        //redemption date of the bond. Must be greater than the settlement date and greater than today
-        uint64 maturityDate = 24;
-        
-        //used for converting NPV to a Par Rate for Eris Invoice Futures Spreads
-        double PV01 = 25;
-        
-        //date the trade settles. The value must be less than the maturity date and greater than today.
-        uint64 settlementDate = 26;
-    
-        //settlement price of the contracts in an exchange-traded strip, pack, or bundle
-        double stripBase = 27;
-        
-        YIELD_TYPE yieldType = 28;
+        ExtraAttributes attribute = 17;
     }
     
     //this will be created by server after it is registered successfully, client side spreader create request should be 0
@@ -1444,11 +1499,6 @@ message OrderID
     string execOrderID = 5;
 }
 
-message ExecutionReports
-{
-    repeated ExecutionReport report = 1;
-}
-
 // Status of a specific transaction.
 // All attributes are at the transaction moment.
 message ExecutionReport
@@ -1464,21 +1514,22 @@ message ExecutionReport
 
         PENDING_REPLACE = 3; //(e.g. result of Order Cancel/Replace Request <G>)
 
-        SUSPENDED = 4;
-
-        NEW = 5;
-
+        NEW = 4;
+    
+        REPLACED = 5;
+    
         PARTIAL_FILL = 6;
 
         //this is mainly for the FIX ExecType RESTATED, order status should has no this value
         RESTATED = 7;
-
+    
+        //CQG suspended has other meaning, market is closed and temporarily queued in their server
+        SUSPENDED = 8;
+    
         //non-working order status
-        FILL = 8;
+        FILL = 9;
 
-        CANCELED = 9;
-
-        REPLACED = 10;
+        CANCELED = 10;
 
         REJECTED = 11;
 
@@ -2016,7 +2067,7 @@ message Instrument
         /*OTHER*/
         MF = 55;
 
-        //MULTI LEG, for example, spreader
+        //MULTI LEG, for example, spread
         MLEG = 56;
     
         //NDF
