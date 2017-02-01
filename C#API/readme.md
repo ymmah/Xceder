@@ -5,7 +5,7 @@ through the events.
 
 # Project Setup
 	
-	in the VS IDE can just simply restore the NuGet packages in the solution popup menu by right mouse click
+in the VS IDE can just simply restore the NuGet packages in the solution popup menu by right mouse click
 
 1. Install the google protobuf package (Google.Protobuf) through NuGet package manager
 2. Install the google protobuf tools package (Google.Protobuf.Tools) through NuGet package manager  
