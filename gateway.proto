@@ -543,7 +543,7 @@ message Account {
     }
     
     //it is server side created account ID, when register new user, it should be just 0
-    uint32 account = 1;
+    uint32 accountID = 1;
 
     //client side specified user ID. it will be used as login user name
     string userID = 2;
@@ -655,7 +655,7 @@ message Result
     //id of the result source server
     uint32 serverID = 2;
 
-    ERRORCODE result = 3;
+    ERRORCODE resultCode = 3;
 
     string remark = 4;
 
