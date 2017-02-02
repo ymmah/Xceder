@@ -8,7 +8,7 @@
     <ProjectGuid>{9D0A8CDB-7EC1-416E-B605-97712400C733}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>xcederAPI</RootNamespace>
+    <RootNamespace>Xceder</RootNamespace>
     <AssemblyName>xcederAPI</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
@@ -30,27 +30,28 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\xcederAPI.XML</DocumentationFile>
+    <DocumentationFile>bin\xcederAPI.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="project.json" />
     <None Include="readme.md" />
+    <EmbeddedResource Include="xcederRSA.pub" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PemKeyUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CircularBuffer.cs" />
-    <Compile Include="protobuf\Gateway.cs" />
+    <Compile Include="Gateway.cs" />
     <Compile Include="Client.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"$(USERPROFILE)\.nuget\packages\Google.Protobuf.Tools\3.2.0\tools\windows_x64\protoc.exe"  --proto_path="$(ProjectDir).."  --csharp_out=$(ProjectDir)protobuf  $(ProjectDir)..\gateway.proto
+    <PreBuildEvent>"$(USERPROFILE)\.nuget\packages\Google.Protobuf.Tools\3.2.0\tools\windows_x64\protoc.exe"  --proto_path="$(ProjectDir).."  --csharp_out=$(ProjectDir) $(ProjectDir)..\gateway.proto
 </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

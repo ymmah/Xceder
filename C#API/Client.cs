@@ -1,5 +1,4 @@
-﻿using CircularBuffer;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using System;
 using System.Net;
 using System.Collections.Generic;
@@ -11,6 +10,7 @@ using Com.Xceder.Messages;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
 using System.Security.Cryptography;
+using System.Reflection;
 
 namespace Xceder
 {
@@ -232,6 +232,7 @@ namespace Xceder
         {
             get { return _accountInfo; }
         }
+
 
         ///<exception cref="Exception"></exception>
         private TMessage extractMessages<TMessage>(Stream stream) where TMessage : IMessage<TMessage>, new()
@@ -560,14 +561,45 @@ namespace Xceder
             return requestID;
         }
 
+        private RSA loadPublicKey()
+        {
+            RSA rsa = null;
+
+            string key;
+
+            var assembly = GetType().GetTypeInfo().Assembly;
+
+            Stream resource = assembly.GetManifestResourceStream("xcederRSA.pub");
+
+            StreamReader streamReader = new StreamReader(resource);
+
+            key = streamReader.ReadToEnd();
+
+            var pemkey = PemKeyUtils.DecodeOpenSSLPublicKey(key);
+
+            RSAParameters? rsaParam = PemKeyUtils.DecodeX509PublicKey(pemkey);
+
+            if (rsaParam != null)
+            {
+                rsa = RSA.Create();
+
+                rsa.ImportParameters((RSAParameters)rsaParam);
+            }
+
+            return rsa;
+        }
+
+
         private string rsaEncrypt(string val)
         {
-            string result;
+            string result = "";
 
             byte[] dataBytes = System.Text.Encoding.UTF8.GetBytes(val);
 
-            // client encrypting data with public key issued by server                
-            result = Convert.ToBase64String(RSA.Create().Encrypt(dataBytes, RSAEncryptionPadding.Pkcs1));
+            RSA rsa = loadPublicKey();
+
+            if (rsa != null)
+                result = Convert.ToBase64String(loadPublicKey().Encrypt(dataBytes, RSAEncryptionPadding.Pkcs1));
 
             return result;
         }

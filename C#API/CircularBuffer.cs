@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 
-namespace CircularBuffer
+namespace Xceder
 {
     /// <summary>
     /// Circular buffer.
