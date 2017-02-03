@@ -1,0 +1,3378 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>xcederAPI</name>
+    </assembly>
+    <members>
+        <member name="T:Xceder.PemKeyUtils">
+            <summary>
+            extract the key parameters from the pem key file
+            </summary>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.GetRSAProviderFromPemFile(System.String)">
+            <summary>
+            extract the key parameters from the file
+            </summary>
+            <param name="pemfile"></param>
+            <returns>return null if fail</returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPublicKey(System.String)">
+            <summary>
+            Get the binary RSA PUBLIC key
+            </summary>
+            <param name="keyVal"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeX509PublicKey(System.Byte[])">
+            <summary>
+            Parses binary asn.1 X509 SubjectPublicKeyInfo; returns RSACryptoServiceProvider
+            </summary>
+            <param name="x509key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeRSAPrivateKey(System.Byte[])">
+            <summary>
+            Parses binary ans.1 RSA private key; returns RSACryptoServiceProvider
+            </summary>
+            <param name="privkey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPrivateKey(System.String)">
+            <summary>
+            Get the binary RSA PRIVATE key, decrypting if necessary
+            </summary>
+            <param name="instr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Xceder.CircularBuffer`1">
+            <summary>
+            Circular buffer.
+            
+            When writting to a full buffer:
+            PushBack -> removes this[0] / Front()
+            PushFront -> removes this[Size-1] / Back()
+            
+            this implementation is inspired by
+            http://www.boost.org/doc/libs/1_53_0/libs/circular_buffer/doc/circular_buffer.html
+            because I liked their interface.
+            </summary>
+        </member>
+        <member name="F:Xceder.CircularBuffer`1._start">
+            <summary>
+            The _start. Index of the first element in buffer.
+            </summary>
+        </member>
+        <member name="F:Xceder.CircularBuffer`1._end">
+            <summary>
+            The _end. Index after the last element in the buffer.
+            </summary>
+        </member>
+        <member name="F:Xceder.CircularBuffer`1._size">
+            <summary>
+            The _size. Buffer size.
+            </summary>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.#ctor(System.Int32,`0[])">
+            <summary>
+            Initializes a new instance of the <see cref="!:CircularBuffer.CircularBuffer`1"/> class.
+            
+            </summary>
+            <param name='capacity'>
+            Buffer capacity. Must be positive.
+            </param>
+            <param name='items'>
+            Items to fill buffer with. Items length must be less than capacity.
+            Sugestion: use Skip(x).Take(y).ToArray() to build this argument from
+            any enumerable.
+            </param>
+        </member>
+        <member name="P:Xceder.CircularBuffer`1.Capacity">
+            <summary>
+            Maximum capacity of the buffer. Elements pushed into the buffer after
+            maximum capacity is reached (IsFull = true), will remove an element.
+            </summary>
+        </member>
+        <member name="P:Xceder.CircularBuffer`1.Size">
+            <summary>
+            Current buffer size (the number of elements that the buffer has).
+            </summary>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.Front">
+            <summary>
+            Element at the front of the buffer - this[0].
+            </summary>
+            <returns>The value of the element of type T at the front of the buffer.</returns>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.Back">
+            <summary>
+            Element at the back of the buffer - this[Size - 1].
+            </summary>
+            <returns>The value of the element of type T at the back of the buffer.</returns>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.PushBack(`0)">
+            <summary>
+            Pushes a new element to the back of the buffer. Back()/this[Size-1]
+            will now return this element.
+            
+            When the buffer is full, the element at Front()/this[0] will be 
+            popped to allow for this new element to fit.
+            </summary>
+            <param name="item">Item to push to the back of the buffer</param>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.PushFront(`0)">
+            <summary>
+            Pushes a new element to the front of the buffer. Front()/this[0]
+            will now return this element.
+            
+            When the buffer is full, the element at Back()/this[Size-1] will be 
+            popped to allow for this new element to fit.
+            </summary>
+            <param name="item">Item to push to the front of the buffer</param>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.PopBack(System.Int32)">
+            <summary>
+            Removes the element at the back of the buffer. Decreassing the 
+            Buffer size by 1.
+            </summary>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.PopFront(System.Int32)">
+            <summary>
+            Removes the element at the front of the buffer. Decreassing the 
+            Buffer size by 1.
+            </summary>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.ToArray">
+            <summary>
+            Copies the buffer contents to an array, acording to the logical
+            contents of the buffer (i.e. independent of the internal 
+            order/contents)
+            </summary>
+            <returns>A new array with a copy of the buffer contents.</returns>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.Increment(System.Int32@)">
+            <summary>
+            Increments the provided index variable by one, wrapping
+            around if necessary.
+            </summary>
+            <param name="index"></param>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.Decrement(System.Int32@)">
+            <summary>
+            Decrements the provided index variable by one, wrapping
+            around if necessary.
+            </summary>
+            <param name="index"></param>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.InternalIndex(System.Int32)">
+            <summary>
+            Converts the index in the argument to an index in <code>_buffer</code>
+            </summary>
+            <returns>
+            The transformed index.
+            </returns>
+            <param name='index'>
+            External index.
+            </param>
+        </member>
+        <member name="T:Xceder.Client">
+            <summary>handle the xceder server connection</summary>
+        </member>
+        <member name="E:Xceder.Client.RcvMessageEvent">
+            <summary>
+            provide the message receive event. if the message isn't reply for the sent request, the RequestMsg will be null 
+            </summary>
+        </member>
+        <member name="E:Xceder.Client.PostSendMessageEvent">
+            <summary>
+            after the message is sent successfully, this event will be triggered with the sent message
+            </summary>
+        </member>
+        <member name="E:Xceder.Client.ErrorEvent">
+            <summary>
+            error event for the error encountered 
+            </summary>
+        </member>
+        <member name="P:Xceder.Client.Started">
+            <summary>
+            indicate whether the connection is started 
+            </summary>
+        </member>
+        <member name="M:Xceder.Client.convertUTC(System.UInt64)">
+            <summary>
+            convert the long UTC milliseconds into DateTime object
+            </summary>
+            <param name="UTCMillis">target UTC milliseconds</param>
+            <returns>return a DateTime object</returns>
+        </member>
+        <member name="M:Xceder.Client.toEpochMilliseconds(System.DateTime)">
+            <summary>
+            convert the local DateTime object into the UTC milliseconds
+            </summary>
+            <param name="localTime">target local datetime object</param>
+            <returns>UTC milliseconds</returns>
+        </member>
+        <member name="P:Xceder.Client.LastSentRequestID">
+            <summary>
+            last sent request ID
+            </summary>
+        </member>
+        <member name="P:Xceder.Client.AccountInfo">
+            <summary>
+            current account info. if it is not login yet, it is the default Account instance
+            </summary>
+        </member>
+        <member name="M:Xceder.Client.extractMessages``1(System.IO.Stream)">
+            <exception cref="T:System.Exception"></exception>
+        </member>
+        <member name="M:Xceder.Client.isRequestSent(System.UInt64)">
+            <summary>
+            check whether the specified request by the ID is sent successfully
+            </summary>
+            <param name="reqID">requet ID</param>
+            <returns>true: sent out successfully, false: not sent</returns>
+        </member>
+        <member name="M:Xceder.Client.getRequestResult(System.UInt64)">
+            <summary>
+            return the sent request Result by the specified ID
+            </summary>
+            <param name="reqID">request ID</param>
+            <returns>instance of Result</returns>
+        </member>
+        <member name="M:Xceder.Client.start(System.Net.IPEndPoint,System.Boolean)">
+            <summary>
+            start to connect to the server
+            </summary>
+            <param name="server">server IP info</param>
+            <param name="forceReconnect">indicate whether reconnect to the server if it is already connected</param>
+        </member>
+        <member name="M:Xceder.Client.stop(System.String)">
+            <summary>
+            stop the current connection
+            </summary>
+            <param name="reason">sepcify the stop reason</param>
+        </member>
+        <member name="M:Xceder.Client.sendLogin(System.String,System.String)">
+            <summary>
+            send login request to the server. 
+            </summary>
+            <param name="userID"></param>
+            <param name="password"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.Client.registerAccount(System.String,System.String,System.String)">
+            <summary>
+            request to register a new account
+            </summary>
+            <param name="userID"></param>
+            <param name="email"></param>
+            <param name="password"></param>
+            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.requestOTP(System.String)">
+            <summary>
+            request an one time password for the password change
+            </summary>
+            <param name="email"></param>
+            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.requestPWDReset(System.String,System.String,System.String)">
+            <summary>
+            request password reset
+            </summary>
+            <param name="email"></param>
+            <param name="OTP">one time password gotten by the requestOTP()</param>
+            <param name="newPassword"></param>
+            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.subscribePrice(System.UInt64[],System.Boolean)">
+            <summary>
+            subscribe or unsubscribe the specified instrument IDs market data
+            </summary>
+            <param name="instrumentIDAry"></param>
+            <param name="isUnSubscribe"></param>
+            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.sendPingRequest">
+            <summary>
+            send the ping request to the server to ensure the connection status
+            </summary>
+            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.submitOrder(Com.Xceder.Messages.OrderParams)">
+            <summary>
+            submit the order
+            </summary>
+            <param name="orderParams"></param>
+            <returns>0 means fail, otherwise the sent request ID for this order</returns>
+        </member>
+        <member name="M:Xceder.Client.replaceOrWithdrawOrder(System.UInt64,System.UInt32,System.UInt64,System.UInt64)">
+            <summary>
+            replace/withdraw the target order
+            </summary>
+            <param name="targetClOrdID">target order clOrdID</param>
+            <param name="newQty">new order qty, 0 means withdraw the target order</param>
+            <param name="newLimitPrice"></param>
+            <param name="newStopPrice"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Com.Xceder.Messages.GatewayReflection">
+            <summary>Holder for reflection information generated from gateway.proto</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.GatewayReflection.Descriptor">
+            <summary>File descriptor for gateway.proto</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.ERRORCODE">
+            <summary>
+            Result code.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.Success">
+            <summary>
+            success codes
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.Failure">
+            <summary>
+            failure codes (>=100)
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.RequestLimitViolation">
+            <summary>
+            The limit of the request number has been violated.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.NoOnetimePassword">
+            <summary>
+            One-time password is required for this user but it was not sent, repeat logon
+            with one-time password.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.OutsideAllowedRange">
+            <summary>
+            Requested data is outside of allowed range.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.PasswordExpired">
+            <summary>
+            User password is expired, only change password operation is allowed.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.Redirected">
+            <summary>
+            Client is redirected to a different server, new server is specified in redirectUrl.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.AccessDenied">
+            <summary>
+            The user is not allowed to access this instrument data.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.Disconnected">
+             <summary>
+            connection to broker isn't up
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.NotFound">
+            <summary>
+            Requested information is not found.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.OrderTagToolong">
+             <summary>
+            tag should be less than 255
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.SpreaderDuplicateName">
+            <summary>
+            Spreader related errors 
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.SpreaderInvalidLegRules">
+             <summary>
+            for example syntax error
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.SpreaderLegFailure">
+             <summary>
+            leg order has failure, for example, fail to withdraw some leg orders
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ERRORCODE.AlgoActiveOrder">
+             <summary>
+            can't modify the algo/spreader because of active orders
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.BROKER.Xceder">
+             <summary>
+            also means any/unspecified broker
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.SIDE.Buy">
+            <summary>
+            Describes purchasing side of a trade.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.SIDE.Sell">
+            <summary>
+            Describes selling side of a trade.
+            </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.DAYOFWEEK">
+            <summary>
+            Days of week enumeration.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.CodeFieldNumber">
+            <summary>Field number for the "code" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.NameFieldNumber">
+            <summary>Field number for the "name" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.TimezoneFieldNumber">
+            <summary>Field number for the "timezone" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Exchange.Types">
+            <summary>Container for nested types declared in the Exchange message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.NonExch">
+             <summary>
+            means not specified
+             </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Ccfx" -->
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Sgex">
+             <summary>
+            SHANGHAI GOLD EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xcfe">
+             <summary>
+            CHINA FOREIGN EXCHANGE TRADE SYSTEM
+             </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xdce" -->
+        <!-- Badly formed XML comment ignored for member "F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xsge" -->
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xine">
+             <summary>
+            SHANGHAI INTERNATIONAL ENERGY EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xshe">
+             <summary>
+            SHENZHEN STOCK EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xsec">
+             <summary>
+            SHENZHEN STOCK EXCHANGE - SHENZHEN - HONG KONG STOCK CONNECT
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xshg">
+             <summary>
+            SHANGHAI STOCK EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xssc">
+             <summary>
+            SHANGHAI STOCK EXCHANGE - SHANGHAI - HONG KONG STOCK CONNECT
+             </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xzce" -->
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Smex">
+             <summary>
+            SINGAPORE MERCANTILE EXCHANGE PTE LTD
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xses">
+             <summary>
+            SINGAPORE EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xsce">
+             <summary>
+            SINGAPORE COMMODITY EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xsim">
+             <summary>
+            SINGAPORE EXCHANGE DERIVATIVES CLEARING LIMITED
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xcme">
+             <summary>
+            CHICAGO MERCANTILE EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Cbts">
+             <summary>
+            CME SWAPS MARKETS (CBOT)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Cecs">
+             <summary>
+            CME SWAPS MARKETS (COMEX)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Cmes">
+             <summary>
+            CME SWAPS MARKETS (CME)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Fcme">
+             <summary>
+            CHICAGO MERCANTILE EXCHANGE (FLOOR)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Glbx">
+             <summary>
+            CME GLOBEX
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Ximm">
+             <summary>
+            INTERNATIONAL MONETARY MARKET
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xiom">
+             <summary>
+            INDEX AND OPTIONS MARKET
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xcur">
+             <summary>
+            CURRENEX
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Icap">
+             <summary>
+            ICAP EUROPE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Btee">
+             <summary>
+            BROKERTEC
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Bvmf">
+             <summary>
+            BM&amp;FBOVESPA S.A. - BOLSA DE VALORES, MERCADORIAS E FUTUROS
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xcbo">
+             <summary>
+            CHICAGO BOARD OPTIONS EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xcbf">
+             <summary>
+            CBOE FUTURES EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xcbt">
+             <summary>
+            CHICAGO BOARD OF TRADE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xlme">
+             <summary>
+            LONDON METAL EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xlon">
+             <summary>
+            LONDON STOCK EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xlod">
+             <summary>
+            LONDON STOCK EXCHANGE - DERIVATIVES MARKET
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xjpx">
+             <summary>
+            JAPAN EXCHANGE GROUP
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xose">
+             <summary>
+            OSAKA EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xosj">
+             <summary>
+            OSAKA EXCHANGE J-NET
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xtks">
+             <summary>
+            TOKYO STOCK EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xtff">
+             <summary>
+            TOKYO FINANCIAL  EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xtkt">
+             <summary>
+            TOKYO COMMODITY EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xasx">
+             <summary>
+            ASX - ALL MARKETS
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xsfe">
+             <summary>
+            ASX - TRADE24
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Xeur">
+             <summary>
+            Eurex Exchange
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Ecxe">
+             <summary>
+            EUROPEAN CLIMATE EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Iepa">
+             <summary>
+            INTERCONTINENTAL EXCHANGE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Btec">
+             <summary>
+            TT
+            Icap Electronic Broking (Us)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.RequestIDFieldNumber">
+            <summary>Field number for the "requestID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.RequestID">
+             <summary>
+            request ID, should be unique enough to receive the request Result
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.RequestUTCFieldNumber">
+            <summary>Field number for the "requestUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.RequestUTC">
+             <summary>
+            this is the timestamp from client side when request is submitted
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.QueryRequestFieldNumber">
+            <summary>Field number for the "queryRequest" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.OrderFieldNumber">
+            <summary>Field number for the "order" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.MarketDataFieldNumber">
+            <summary>Field number for the "marketData" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.MarketData">
+            <summary>
+            subscribe/unsubscribe market data
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.PingFieldNumber">
+            <summary>Field number for the "ping" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.LogonFieldNumber">
+            <summary>Field number for the "logon" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.Logon">
+             <summary>
+            login system for registered user
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.LogoffFieldNumber">
+            <summary>Field number for the "logoff" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.Logoff">
+             <summary>
+            logoff message to logoff current session
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.PasswordChangeFieldNumber">
+            <summary>Field number for the "passwordChange" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.AccountFieldNumber">
+            <summary>Field number for the "account" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.Account">
+             <summary>
+            register new account or update the account detail
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.WatchListFieldNumber">
+            <summary>Field number for the "watchList" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.WatchList">
+             <summary>
+            update client's watch list, only can update own watch list
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.InstrumentStatusFieldNumber">
+            <summary>Field number for the "instrumentStatus" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.InstrumentStatus">
+             <summary>
+            subscribe/unsubscribe the instrument status change
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.LayoutsFieldNumber">
+            <summary>Field number for the "layouts" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.Layouts">
+             <summary>
+            upload the application layout to server
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestMsg.SpreaderFieldNumber">
+            <summary>Field number for the "spreader" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.RequestMsg.Spreader">
+             <summary>
+            request to create/update spreader, the new spreader ID should be 0.
+            only allow to change the spreader which status isn't RUN
+            to delete spreader, just specify the ID with the empty name
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.RequestMsg.RequestOneofCase">
+            <summary>Enum of possible cases for the "request" oneof.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.ResponseMsg">
+            <summary>
+            Server to Client message, server can include different fields in a single message
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.ResultFieldNumber">
+            <summary>Field number for the "result" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ResponseMsg.Result">
+             <summary>
+            this is mainly for the request reply. it can be ignored for the server side initiated broadcasting messages, such as ping, price updates
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.QueryResultFieldNumber">
+            <summary>Field number for the "queryResult" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ResponseMsg.QueryResult">
+            <summary>
+            Reports with requested information.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.MarketDataFieldNumber">
+            <summary>Field number for the "marketData" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.PingFieldNumber">
+            <summary>Field number for the "ping" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.LogonResultFieldNumber">
+            <summary>Field number for the "logonResult" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ResponseMsg.LogonResult">
+            <summary>
+            Session level messages from server.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.NoticeFieldNumber">
+            <summary>Field number for the "notice" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.ServiceStatusFieldNumber">
+            <summary>Field number for the "serviceStatus" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.InstrumentStatusFieldNumber">
+            <summary>Field number for the "instrumentStatus" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.WatchListSyncTimeFieldNumber">
+            <summary>Field number for the "watchListSyncTime" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.LayoutSyncTimeFieldNumber">
+            <summary>Field number for the "layoutSyncTime" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.SpreaderIDFieldNumber">
+            <summary>Field number for the "spreaderID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ResponseMsg.SpreaderID">
+             <summary>
+            this is the result for the spreader creation successfully
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ResponseMsg.OrderReportsFieldNumber">
+            <summary>Field number for the "orderReports" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ResponseMsg.OrderReports">
+             <summary>
+            this will be sent when the spreader leg order is submitted by server, or execution report for the order status
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.ResponseMsg.ResponseOneofCase">
+            <summary>Enum of possible cases for the "response" oneof.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.DeviceToken.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.DeviceToken.TokenFieldNumber">
+            <summary>Field number for the "token" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.DeviceToken.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.DeviceToken.Types">
+            <summary>Container for nested types declared in the DeviceToken message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.AccountIDFieldNumber">
+            <summary>Field number for the "accountID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Account.AccountID">
+             <summary>
+            it is server side created account ID, when register new user, it should be just 0
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.UserIDFieldNumber">
+            <summary>Field number for the "userID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Account.UserID">
+             <summary>
+            client side specified user ID. it will be used as login user name
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.PasswordFieldNumber">
+            <summary>Field number for the "password" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.ParticularFieldNumber">
+            <summary>Field number for the "particular" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.RoleFieldNumber">
+            <summary>Field number for the "role" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.ServicesFieldNumber">
+            <summary>Field number for the "services" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Account.Services">
+            <summary>
+            the enum Service.SERVICE bits mask.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.UpdateUTCFieldNumber">
+            <summary>Field number for the "updateUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.StatusFieldNumber">
+            <summary>Field number for the "status" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Account.Status">
+             <summary>
+            for new client, it should be UNVERIFIED
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.LoginRecordFieldNumber">
+            <summary>Field number for the "loginRecord" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Account.LoginRecord">
+             <summary>
+            it is the server side recorded current login record
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.PrevLoginRecordFieldNumber">
+            <summary>Field number for the "prevLoginRecord" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.WatchListSyncTimeFieldNumber">
+            <summary>Field number for the "watchListSyncTime" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Account.WatchListSyncTime">
+             <summary>
+            the latest watch list sync timestamp
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.TradingRuleUpdateTimeFieldNumber">
+            <summary>Field number for the "tradingRuleUpdateTime" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Account.TradingRuleUpdateTime">
+             <summary>
+            the latest account trading rule update timestamp
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.AllowedConnectionFieldNumber">
+            <summary>Field number for the "allowedConnection" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.LoginModeFieldNumber">
+            <summary>Field number for the "loginMode" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.LayoutSyncTimeFieldNumber">
+            <summary>Field number for the "layoutSyncTime" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Account.Types">
+            <summary>Container for nested types declared in the Account message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.Types.ROLE.Anonymouse">
+            <summary>
+            Anonymouse users
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.Types.ROLE.Client">
+            <summary>
+            normal client
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.Types.ROLE.Tr">
+            <summary>
+            trading representative, such as dealers
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.Types.ROLE.Admin">
+            <summary>
+            administrator
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.Types.ROLE.Demo">
+            <summary>
+            For demostration purpose
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.Types.ROLE.Apps">
+            <summary>
+            applications, such as computer trading system
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.FirstNameFieldNumber">
+            <summary>Field number for the "firstName" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.SurNameFieldNumber">
+            <summary>Field number for the "surName" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.EmailFieldNumber">
+            <summary>Field number for the "email" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.PhoneFieldNumber">
+            <summary>Field number for the "phone" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.CountryFieldNumber">
+            <summary>Field number for the "country" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Particular.Country">
+             <summary>
+            ISO 3166 2-letter code
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.LanguageFieldNumber">
+            <summary>Field number for the "language" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Particular.Language">
+             <summary>
+            ISO 639 alpha-2 language code
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.TimezoneOffsetFieldNumber">
+            <summary>Field number for the "timezoneOffset" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Particular.TimezoneOffset">
+             <summary>
+            in minutes, default, SG time zone
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.GenderFieldNumber">
+            <summary>Field number for the "gender" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.SignUpUTCFieldNumber">
+            <summary>Field number for the "signUpUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.EmailVerifiedUTCFieldNumber">
+            <summary>Field number for the "emailVerifiedUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.PhoneVerifiedUTCFieldNumber">
+            <summary>Field number for the "phoneVerifiedUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Particular.MobileDeviceTokensFieldNumber">
+            <summary>Field number for the "mobileDeviceTokens" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Particular.Types">
+            <summary>Container for nested types declared in the Particular message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.AuthByFieldNumber">
+            <summary>Field number for the "authBy" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.LoginUTCFieldNumber">
+            <summary>Field number for the "loginUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.LoginFromFieldNumber">
+            <summary>Field number for the "loginFrom" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.LoginDeviceFieldNumber">
+            <summary>Field number for the "loginDevice" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.LoginResultFieldNumber">
+            <summary>Field number for the "loginResult" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.LogoutUTCFieldNumber">
+            <summary>Field number for the "logoutUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.LogoutRemarkFieldNumber">
+            <summary>Field number for the "logoutRemark" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.PrevFailCountFieldNumber">
+            <summary>Field number for the "prevFailCount" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.OTPFieldNumber">
+            <summary>Field number for the "OTP" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.ClientAppFieldNumber">
+            <summary>Field number for the "clientApp" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LoginRecord.PushingDelayFieldNumber">
+            <summary>Field number for the "pushingDelay" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Result">
+             <summary>
+            each request will get a process error result from the server before the actual result disseminated
+            because of the async process, later when remote side reject the request, the error will be disseminated accordingly
+            client side need use the reqID to determine which request this error is for
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.RequestFieldNumber">
+            <summary>Field number for the "request" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Result.Request">
+             <summary>
+            request's ID, submitted in the RequestMsg
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.ServerIDFieldNumber">
+            <summary>Field number for the "serverID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Result.ServerID">
+             <summary>
+            id of the result source server
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.ResultCodeFieldNumber">
+            <summary>Field number for the "resultCode" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.RemarkFieldNumber">
+            <summary>Field number for the "remark" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.RequestRcvUTCFieldNumber">
+            <summary>Field number for the "requestRcvUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.StartProcessUTCFieldNumber">
+            <summary>Field number for the "startProcessUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.FinishProcessUTCFieldNumber">
+            <summary>Field number for the "finishProcessUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.RequestFromIPFieldNumber">
+            <summary>Field number for the "requestFromIP" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Result.RequestFromPortFieldNumber">
+            <summary>Field number for the "requestFromPort" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Service.BrokerFieldNumber">
+            <summary>Field number for the "broker" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Service.SvcFieldNumber">
+            <summary>Field number for the "svc" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Service.ExchangeFieldNumber">
+            <summary>Field number for the "exchange" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Service.Types">
+            <summary>Container for nested types declared in the Service message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ServiceStatus.ServerIDFieldNumber">
+            <summary>Field number for the "serverID" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ServiceStatus.ServiceFieldNumber">
+            <summary>Field number for the "service" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ServiceStatus.StatusFieldNumber">
+            <summary>Field number for the "status" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.ServiceStatus.Types">
+            <summary>Container for nested types declared in the ServiceStatus message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ServiceStatus.Types.STATUS.Ready">
+             <summary>
+            line is up and can take requests
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ServiceStatus.Types.STATUS.Broken">
+             <summary>
+            network connection is broken
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ServiceStatus.Types.STATUS.Disconnect">
+             <summary>
+            disconnect from broker in trading hour either caused by network issue or counter party system
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ServiceStatus.Types.STATUS.Close">
+             <summary>
+            session is over
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ServiceStatuses.StatusFieldNumber">
+            <summary>Field number for the "status" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Logon">
+            <summary>
+            Logon into the system and opening a new session.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Logon.UserIDFieldNumber">
+            <summary>Field number for the "userID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Logon.UserID">
+            <summary>
+            User login ID.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Logon.PasswordFieldNumber">
+            <summary>Field number for the "password" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Logon.Password">
+            <summary>
+            User's password.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Logon.OTPFieldNumber">
+            <summary>Field number for the "OTP" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Logon.OTP">
+            <summary>
+            User's one time password, might be required according to the user's settings.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Logon.ClientAppFieldNumber">
+            <summary>Field number for the "clientApp" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Logon.ClientApp">
+            <summary>
+            Identifier of the client application.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Logon.PushingDelayFieldNumber">
+            <summary>Field number for the "pushingDelay" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Logon.PushingDelay">
+             <summary>
+            specify the minimum pushing message gap (in seconds) from the server, such as price, order status updates. this excludes those reponse of
+            requests. if it is 0, means no delay on the pushing message.
+            this is to avoid sending too many messages. server will merge the messages properly
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.LogonResult">
+            <summary>
+            Result of the successful logon
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LogonResult.AccountFieldNumber">
+            <summary>Field number for the "account" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.LogonResult.RedirectURLFieldNumber">
+            <summary>Field number for the "redirectURL" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.LogonResult.RedirectURL">
+            <summary>
+            URL for a client to reconnect in case of redirection.
+            </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.PasswordChange">
+            <summary>
+            Message to change user's password.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PasswordChange.CurrentPasswordFieldNumber">
+            <summary>Field number for the "currentPassword" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.PasswordChange.CurrentPassword">
+            <summary>
+            Currently used password.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PasswordChange.NewPasswordFieldNumber">
+            <summary>Field number for the "newPassword" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.PasswordChange.NewPassword">
+            <summary>
+            New password that user wants to use. put blank means request the reset token
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PasswordChange.EmailFieldNumber">
+            <summary>Field number for the "email" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessages.NoticeFieldNumber">
+            <summary>Field number for the "notice" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.NoticeMessage">
+            <summary>
+            Text message from server.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessage.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.NoticeMessage.Type">
+            <summary>
+            This field is associated with MessageType enum type.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessage.SourceFieldNumber">
+            <summary>Field number for the "source" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.NoticeMessage.Source">
+            <summary>
+            Information about source of the message.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessage.SubjectFieldNumber">
+            <summary>Field number for the "subject" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.NoticeMessage.Subject">
+            <summary>
+            Message subject.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessage.TextFieldNumber">
+            <summary>Field number for the "text" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.NoticeMessage.Text">
+            <summary>
+            Message text.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessage.ExpirationUTCFieldNumber">
+            <summary>Field number for the "expirationUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.NoticeMessage.ExpirationUTC">
+            <summary>
+            Optional time when this message is expired, it should be hidden from user after this time (UTC).
+            </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.NoticeMessage.Types">
+            <summary>Container for nested types declared in the NoticeMessage message type.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.NoticeMessage.Types.TYPE">
+            <summary>
+            Type of the message.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessage.Types.TYPE.Info">
+            <summary>
+            General information.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessage.Types.TYPE.Warning">
+            <summary>
+            Warning.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.NoticeMessage.Types.TYPE.Error">
+            <summary>
+            Critical error message.
+            </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Ping">
+            <summary>
+            Ping request which can be initiated by any side to ensure connection is alive. Both client and
+            server sides must respond such request with Ping.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Ping.PingUTCFieldNumber">
+            <summary>Field number for the "pingUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Ping.PingUTC">
+            <summary>
+            initiator time
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Ping.PongUTCFieldNumber">
+            <summary>Field number for the "pongUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Ping.PongUTC">
+            <summary>
+            responser time
+            </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Query">
+            <summary>
+            Request for information.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.OrderFieldNumber">
+            <summary>Field number for the "order" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Query.Order">
+            <summary>
+            Request for a list of historical orders according to a search criteria.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.LogFieldNumber">
+            <summary>Field number for the "log" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.InstrumentsFieldNumber">
+            <summary>Field number for the "instruments" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.WatchListFieldNumber">
+            <summary>Field number for the "watchList" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.AccountTradingRuleFieldNumber">
+            <summary>Field number for the "accountTradingRule" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Query.AccountTradingRule">
+             <summary>
+            always query the whole rules to ensure the data intact.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.SupportBrokerExchangesFieldNumber">
+            <summary>Field number for the "supportBrokerExchanges" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.AppLayoutFieldNumber">
+            <summary>Field number for the "appLayout" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.CalendarFieldNumber">
+            <summary>Field number for the "calendar" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.SpreaderFieldNumber">
+            <summary>Field number for the "spreader" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Query.QueryOneofCase">
+            <summary>Enum of possible cases for the "query" oneof.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Query.Types">
+            <summary>Container for nested types declared in the Query message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.Types.QueryLayout.AccountFieldNumber">
+            <summary>Field number for the "account" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.Types.QueryLayout.LayoutIDFieldNumber">
+            <summary>Field number for the "layoutID" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Query.Types.QueryLayout.FromSyncTimeFieldNumber">
+            <summary>Field number for the "fromSyncTime" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.QueryResult">
+             <summary>
+            *
+            Pagination is done in the server side automatically. Client should always query the server until return empty records
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.OrdersReportsFieldNumber">
+            <summary>Field number for the "ordersReports" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryResult.OrdersReports">
+            <summary>
+            Report with a list of historical orders according to specified parameters.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.LogsFieldNumber">
+            <summary>Field number for the "logs" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.WatchListFieldNumber">
+            <summary>Field number for the "watchList" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.AccountTradingRuleFieldNumber">
+            <summary>Field number for the "accountTradingRule" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.SupportedExchangesFieldNumber">
+            <summary>Field number for the "supportedExchanges" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.LayoutsFieldNumber">
+            <summary>Field number for the "layouts" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.CalendarFieldNumber">
+            <summary>Field number for the "calendar" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.InstrumentsFieldNumber">
+            <summary>Field number for the "instruments" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.SpreadersFieldNumber">
+            <summary>Field number for the "spreaders" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.QueryResult.ResponseOneofCase">
+            <summary>Enum of possible cases for the "response" oneof.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExchangeCalendar.ExchangeFieldNumber">
+            <summary>Field number for the "exchange" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExchangeCalendar.HolidayFieldNumber">
+            <summary>Field number for the "holiday" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.ExchangeCalendar.Types">
+            <summary>Container for nested types declared in the ExchangeCalendar message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExchangeCalendar.Types.Holiday.EpochDayFieldNumber">
+            <summary>Field number for the "epochDay" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExchangeCalendar.Types.Holiday.Holiday_FieldNumber">
+            <summary>Field number for the "holiday" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExchangeCalendar.Types.Holiday.HoursFieldNumber">
+            <summary>Field number for the "hours" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.BrokerExchanges.BrokerFieldNumber">
+            <summary>Field number for the "broker" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.BrokerExchanges.ExchangeFieldNumber">
+            <summary>Field number for the "exchange" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.QueryConditions">
+             <summary>
+            based on different data, the parameter may be used differently
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryConditions.FromUTCFieldNumber">
+            <summary>Field number for the "fromUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryConditions.FromUTC">
+             <summary>
+            include this time, this can be 0
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryConditions.ToUTCFieldNumber">
+            <summary>Field number for the "toUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryConditions.ToUTC">
+             <summary>
+            exclude this time, this can be 0
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryConditions.BrokerFieldNumber">
+            <summary>Field number for the "broker" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryConditions.Broker">
+             <summary>
+            if this query related to particular broker
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryConditions.ExchangeFieldNumber">
+            <summary>Field number for the "exchange" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryConditions.Exchange">
+             <summary>
+            if this query related to particular broker
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryConditions.SymbolFieldNumber">
+            <summary>Field number for the "symbol" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryConditions.Symbol">
+             <summary>
+            if this query related to particular symbol
+            for spreader query, it is the spreader name
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryConditions.ProductFieldNumber">
+            <summary>Field number for the "product" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryConditions.Product">
+             <summary>
+            if this query related to particular product type
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryConditions.InstrumentIDFieldNumber">
+            <summary>Field number for the "instrumentID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryConditions.InstrumentID">
+             <summary>
+            if this query related to particular instrument, when this is set for instrument query, the above condition will be ignored
+            in spreader query, it is the spreader ID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryConditions.AccountFieldNumber">
+            <summary>Field number for the "account" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.QueryConditions.Account">
+             <summary>
+            if  this query related to the particular user, only allow to query itself or its client account's info
+            0 means query itself info
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderReports.OrderReportFieldNumber">
+            <summary>Field number for the "orderReport" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderReport.OrderFieldNumber">
+            <summary>Field number for the "order" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderReport.Order">
+             <summary>
+            if it is not empty, must have the reports
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderReport.ReportFieldNumber">
+            <summary>Field number for the "report" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderReport.Report">
+             <summary>
+            can be used without order
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestLogs.LogsFieldNumber">
+            <summary>Field number for the "logs" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestLog.RequestFieldNumber">
+            <summary>Field number for the "request" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.RequestLog.ResultFieldNumber">
+            <summary>Field number for the "result" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Order">
+            <summary>
+            Trade routing order. It is used as new order request and as a part of order status updates.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.AccountFieldNumber">
+            <summary>Field number for the "account" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Order.Account">
+            <summary>
+            this order owner user ID.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.EnterByFieldNumber">
+            <summary>Field number for the "enterBy" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Order.EnterBy">
+            <summary>
+            who placed the order.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.SubmitUTCFieldNumber">
+            <summary>Field number for the "submitUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Order.SubmitUTC">
+             <summary>
+            order source time when an order was submitted (UTC).
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.TagFieldNumber">
+            <summary>Field number for the "tag" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Order.Tag">
+            <summary>
+            tag for this order
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.LegFieldNumber">
+            <summary>Field number for the "leg" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Order.Leg">
+             <summary>
+            this is for the multipe leg orders. normally it should be 0 for non-leg orders
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.IndicatorFieldNumber">
+            <summary>Field number for the "indicator" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.ParamsFieldNumber">
+            <summary>Field number for the "params" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.CompoundFieldNumber">
+            <summary>Field number for the "compound" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Order.DetailOneofCase">
+            <summary>Enum of possible cases for the "detail" oneof.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Order.Types">
+            <summary>Container for nested types declared in the Order message type.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Order.Types.TYPE">
+             <summary>
+            FIX OrdType char code
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TYPE.Lmt">
+            <summary>
+            Limit order, buy or sell by price that is the same or better then specified limit price.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TYPE.Stp">
+            <summary>
+            Stop order, Order becomes a Market when market reaches order's stop price
+            (which is on opposite side of market).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TYPE.Stl">
+            <summary>
+            Stop-limit order, Order becomes a Limit when market reaches order's stop price.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TYPE.Mkt">
+            <summary>
+            Market order, buy or sell by the best available opposite price.
+            </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Order.Types.TIMEINFORCE">
+             <summary>
+            FIX TimeInForce
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TIMEINFORCE.Gtc">
+             <summary>
+            Good Till Cancel
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TIMEINFORCE.Opg">
+             <summary>
+            At the Opening
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TIMEINFORCE.Ioc">
+             <summary>
+            Immediate or Cancel
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TIMEINFORCE.Fok">
+             <summary>
+            Fill or Kill
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TIMEINFORCE.Gis">
+             <summary>
+            Good in Session
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.EXECINSTRUCTION.Aon">
+            <summary>
+            All or None (fill order only completely).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.EXECINSTRUCTION.Iceberg">
+            <summary>
+            Iceberg (show only part of order size).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.EXECINSTRUCTION.Qt">
+            <summary>
+            Quantity triggered (aka DOM Triggered, honor additional quantity threshold for triggering).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.EXECINSTRUCTION.Trail">
+            <summary>
+            Trailing order (price of the order is following market one direction by specific offset).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.EXECINSTRUCTION.Funari">
+            <summary>
+            Funari (Limit order becomes a Market on Close).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.EXECINSTRUCTION.Mit">
+            <summary>
+            Market if Touched (Limit order becomes a Market when market reaches order's limit price).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.EXECINSTRUCTION.Mlm">
+            <summary>
+            Market Limit Market is a limit order that is used to place a buy order above the best offer
+            to fill by the best offer or a sell order below the best bid to fill by the best bid.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TRAILINGPEG.Bestbid">
+            <summary>
+            Trail the best bid.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TRAILINGPEG.Bestask">
+            <summary>
+            Trail the best ask.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.Types.TRAILINGPEG.Lasttrade">
+            <summary>
+            Trail the last trade.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.OrigClOrdIDFieldNumber">
+            <summary>Field number for the "origClOrdID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.OrigClOrdID">
+             <summary>
+            if this order is replaced/withdraw, this is its original clOrdID. otherwise, it should be 0
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.InstrumentFieldNumber">
+            <summary>Field number for the "instrument" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.Instrument">
+             <summary>
+            instrument/spreader ID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.SideFieldNumber">
+            <summary>Field number for the "side" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.Side">
+            <summary>
+            Order side.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.OrderTypeFieldNumber">
+            <summary>Field number for the "orderType" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.ExecInstructionFieldNumber">
+            <summary>Field number for the "execInstruction" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.TimeInForceFieldNumber">
+            <summary>Field number for the "timeInForce" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.OrderQtyFieldNumber">
+            <summary>Field number for the "orderQty" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.OrderQty">
+            <summary>
+            Total positive size of the order. if the qty is 0, means the order is requested to be cancelled
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.LimitPriceFieldNumber">
+            <summary>Field number for the "limitPrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.LimitPrice">
+             <summary>
+            Limit price of the order (required for Limit and Stop-limit orders).
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.StopPriceFieldNumber">
+            <summary>Field number for the "stopPrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.StopPrice">
+            <summary>
+            Stop price of the order (required for Stop and Stop-limit orders).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.VisibleQtyFieldNumber">
+            <summary>Field number for the "visibleQty" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.VisibleQty">
+            <summary>
+            Visible size of the order for Icebergs, if it is 0 means all visible.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.MinVisibleQtyFieldNumber">
+            <summary>Field number for the "minVisibleQty" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.MinVisibleQty">
+            <summary>
+            Minimum visible positive size of the order
+            used for iceberg orders with 'random visible size',
+            must be &lt; visible_qty.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.GoodThruUTCFieldNumber">
+            <summary>Field number for the "goodThruUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.RegulatoryAlgorithmFieldNumber">
+            <summary>Field number for the "regulatoryAlgorithm" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.TrailOffsetFieldNumber">
+            <summary>Field number for the "trailOffset" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.TrailOffset">
+            <summary>
+            Maximum offset between market and limit prices for trail orders.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.TrailingPegFieldNumber">
+            <summary>Field number for the "trailingPeg" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.TrailingPeg">
+            <summary>
+            Trailing limit peg to follow specific side of the market.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.TriggerQtyFieldNumber">
+            <summary>Field number for the "triggerQty" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.TriggerQty">
+            <summary>
+            Trigger quantity (threshold) as additional stop order activation condition.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.ActivationUTCFieldNumber">
+            <summary>Field number for the "activationUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.ActivationUTC">
+             <summary>
+             Time when order should be submitted to execution system as assigned by client (UTC).
+            if it is 0 means, this order is in suspending status, need activation request to activate it
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.SuspensionUTCFieldNumber">
+            <summary>Field number for the "suspensionUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.SuspensionUTC">
+            <summary>
+            Time when order should be suspended (UTC).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.CurrencyFieldNumber">
+            <summary>Field number for the "currency" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.Currency">
+             <summary>
+            ISO 3 charactor currency
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.CloseFieldNumber">
+            <summary>Field number for the "close" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.Close">
+            <summary>
+            True if order is used for closing/ reducing a position, opening/ increasing otherwise
+            default is false, means open position
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderParams.AggressiveFieldNumber">
+            <summary>Field number for the "aggressive" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderParams.Aggressive">
+            <summary>
+            True if the order is aggressive (Fixed Income specific order modifier).
+            </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.CompoundOrder">
+            <summary>
+            Compound order.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.CompoundOrder.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.CompoundOrder.CompoundIDFieldNumber">
+            <summary>Field number for the "compoundID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.CompoundOrder.CompoundID">
+            <summary>
+            ID of the compound order assigned by client.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.CompoundOrder.RemarkFieldNumber">
+            <summary>Field number for the "remark" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.CompoundOrder.CompleteFillFieldNumber">
+            <summary>Field number for the "completeFill" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.CompoundOrder.CompleteFill">
+            <summary>
+            Indicates whether compound order execution shall happen on a complete fill (true) or partial fill (false)
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.CompoundOrder.OrderFieldNumber">
+            <summary>Field number for the "order" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.CompoundOrder.Types">
+            <summary>Container for nested types declared in the CompoundOrder message type.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.CompoundOrder.Types.TYPE">
+            <summary>
+            Type of the compound order.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.CompoundOrder.Types.TYPE.Opo">
+            <summary>
+            Order Places Order.
+            [Partial] fill of the first entry triggers [partial] placement of all other orders.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.CompoundOrder.Types.TYPE.Oco">
+            <summary>
+            Order Cancels Order. This type allows several compound order entires.
+            [Partial] fill of any order triggers [partial] canceling of all other orders.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreaders.SpeaderFieldNumber">
+            <summary>Field number for the "speader" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Id">
+             <summary>
+            this will be created by server after it is registered successfully, client side spreader create request should be 0
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.OwnerAcctFieldNumber">
+            <summary>Field number for the "ownerAcct" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.NameFieldNumber">
+            <summary>Field number for the "name" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Name">
+             <summary>
+            this must be unique for the owner account
+            if it is blank, will delete the spreader specified by the id
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.RemarkFieldNumber">
+            <summary>Field number for the "remark" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.FormulaFieldNumber">
+            <summary>Field number for the "formula" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.ReloadOffsetFieldNumber">
+            <summary>Field number for the "reloadOffset" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.ReloadOffset">
+             <summary>
+            Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
+            disclosed quantities.
+            When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire spread
+            order quantity fills.
+            You can use the this property tick enter the market at the same price or a set number of ticks from the previously
+            disclosed spread order.
+            0 will submit the new spread order at the same price as the previous spread order.
+            1 will submit the spread order at a price 1 tick from the previous spread order away from the market.
+            -1 will submit the spread order 1 tick from the previous spread order toward the market.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.ReloadQtyFieldNumber">
+            <summary>Field number for the "reloadQty" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.ReloadQty">
+             <summary>
+            Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
+            disclosed quantities.
+            When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire
+            spread order quantity fills.
+            This property specifies the quantity for each child disclosed order.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.TickSizeFieldNumber">
+            <summary>Field number for the "tickSize" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.LegFieldNumber">
+            <summary>Field number for the "leg" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Spreader.Types">
+            <summary>Container for nested types declared in the Spreader message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.QUOTING_MODE.AllNone">
+             <summary>
+            If the hedge market quantity drops below the minimum hedge quantity, the associated quoting order will be pulled
+            from the market and will not be resubmitted even if sufficient hedge market volume reappears at some later time.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.QUOTING_MODE.AllNoneResubmit">
+             <summary>
+            Resubmits a quoting order when there is sufficient hedge volume.
+            Note: that with this option, the spread order will persist and remain working even though no quoting orders are
+            working in the market; quoting orders will automatically be resubmitted if sufficient hedge quantity returns.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.QUOTING_MODE.DynamicInsidelean">
+             <summary>
+            Leans on only the inside market of the hedge legs and, therefore, only considers the size of the hedge leg’s inside
+            market. If that volume is less than the minimum hedge quantity, the quoting order will be reduced to the largest
+            size that could be fully hedged at the inside market of the hedge leg(s).
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.DAYCOUNTTYPE.Actual">
+             <summary>
+            actual number of days based on an actual calendar year (leap year counts for 366 days)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.DAYCOUNTTYPE.D365">
+             <summary>
+            actual number of days based on a 365-day calendar year
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.DAYCOUNTTYPE.D360">
+             <summary>
+            actual number of days based on a 360-day calendar year
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.DAYCOUNTTYPE.D36530">
+             <summary>
+            Count is the number of days based on a 365 day calendar year, where the second date is changed from the 31st to
+            the 30th only if the first date falls on the 30th or 31st
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.DAYCOUNTTYPE.D36030">
+             <summary>
+            Count is the number of days based on a 360 day calendar year, where the second date is changed from the 31st to
+            the 30th only if the first date falls on the 30th or 31st
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.DAYCOUNTTYPE.D36530E">
+             <summary>
+            number of days based on a 360 day calendar year, where the second date is changed from the 31st to the 30th
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.YIELD_TYPE.Type1">
+             <summary>
+            Instrument price is in yield, so no conversion is necessary
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.YIELD_TYPE.Type2">
+             <summary>
+            (100-price): Yield is calculated by subtracting the instrument price from 100. Calculation for the Euribor.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.YIELD_TYPE.Type3">
+             <summary>
+            ((10000-Price)/100): yield is calculated by subtracting the instrument price from 10000 and dividing the result by
+            100. Calculation for the Eurodollar.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.YIELD_TYPE.Type4">
+             <summary>
+            ((10000-(Price+Strip Base))/100): Eurodollar Strip type yield, a base (settlement) is added to the instrument price
+            before the Eurodollar conversion. Calculation for the exchange traded Strip, Pack or Bundle.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.YIELD_TYPE.Type5">
+             <summary>
+            ((100000-Price)/1000): CBOT 30-day Fed Fund (ZQ) contract.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.YIELD_TYPE.Type6">
+             <summary>
+            Yield To Maturity: Price based on the rate of return if held until the maturity date.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.YIELD_TYPE.Type7">
+             <summary>
+            Par Rate. You must set the Leg.PV01 property as input to this yield calculation.
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Spreader.Types.TYPE">
+             <summary>
+            how to represent the price for this spread
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.TYPE.Implied">
+            <summary>
+            Prices display as the implied price of the spread.
+            Leg A Price (*) User-Defined Multiplier – Leg B Price (*) User-Defined Multiplier= Implied Price
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.TYPE.Netchange">
+             <summary>
+            Prices display based on the individual legs' net change from the previous day settlement.
+            If you base spread prices on Net Change , you disable calculations in the Tick Information section.
+            The Calculated Tick Size defaults to 25/100. You can still use the Override Tick Size to change it.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.TYPE.Ratio">
+             <summary>
+            Prices display as a percentage ratio (divides Leg A price by Leg B price).
+            The Ratio setting is for two-legged spreads.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.TYPE.Yield">
+             <summary>
+            Prices display in yield. When enabled, an additional set of “Yield” parameters is displayed that can be configured
+            for each leg
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.TYPE.Custom">
+             <summary>
+            Prices display based on a custom formula for the implied spread price.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.SpreadSlop.RangeFieldNumber">
+            <summary>Field number for the "range" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.SpreadSlop.Range">
+             <summary>
+            spread price range for this slop
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.SpreadSlop.InsideSlopFieldNumber">
+            <summary>Field number for the "insideSlop" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.SpreadSlop.InsideSlop">
+             <summary>
+            The worst spread price you will accept
+            When buying, this property applies to prices above the current bid.
+            When selling, this property applies to prices below the current offer.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.SpreadSlop.OutsideSlopFieldNumber">
+            <summary>Field number for the "outsideSlop" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.SpreadSlop.OutsideSlop">
+             <summary>
+            The best spread price you will accept
+            When buying, this property applies to prices below the current bid.
+            When selling, this property applies to prices above the current offer.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.InsideQuote.InsideTickFieldNumber">
+            <summary>Field number for the "insideTick" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.InsideQuote.InsideTick">
+             <summary>
+            0: means disable
+            1: Quotes do not adjust toward the inside market unless the new quote price is the inside market
+            n: quoting (n-1) ticks away from the inside market
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.InsideQuote.DistanceLimitFieldNumber">
+            <summary>Field number for the "distanceLimit" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.InsideQuote.DistanceLimit">
+             <summary>
+            limit in ticks a quoting order is allowed to work away from the price level that matches the spread differential
+            0: the spread differential price level and the quoting order will always requote to the price that matches the
+            spread differential.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.EventRules.PreQuotingFieldNumber">
+            <summary>Field number for the "preQuoting" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.EventRules.PreHedgingFieldNumber">
+            <summary>Field number for the "preHedging" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.EventRules.PostHedgingFieldNumber">
+            <summary>Field number for the "postHedging" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.InstrumentFieldNumber">
+            <summary>Field number for the "instrument" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.IsShortLegFieldNumber">
+            <summary>Field number for the "isShortLeg" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.IsShortLeg">
+             <summary>
+            indicate whether this leg is a short leg
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.QtyRatioFieldNumber">
+            <summary>Field number for the "qtyRatio" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.QtyRatio">
+             <summary>
+            quantity of this leg in relation to the other spread legs
+            The Spread Ratio field allows a value of zero for spreads that require a leg for spread calculation purposes only,
+            and not for entering orders as a part of the spread. When a leg has a value of zero in the Spread Ratio field,
+            no quoting orders or hedge orders will be submitted in that leg as a part of a spread, but a spread fill is
+            generated. The current inside market price at the time of the quoting leg fill will be used for the leg fill price
+            when creating the spread fill.
+            Values entered in the Spread Ratio field do not affect the spread price.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.PriceWeightFieldNumber">
+            <summary>Field number for the "priceWeight" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.PriceWeight">
+             <summary>
+            the multipler in the spread price formula
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.HedgeTickFieldNumber">
+            <summary>Field number for the "hedgeTick" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.HedgeTick">
+             <summary>
+            Example: You buy one ES Dec-Mar calendar spread at 6.00 and the quote leg fills at 2134.00. Payup Ticks are set to
+            "-2" for the hedge leg and the contract ticks in ".25" increments. Instead of entering a sell order in the hedge leg
+            for 2128.00 to achieve the spread price, Autospreader adjusts the price 2 ticks away from the market and enters an
+            order at 2128.50. Using this same example but with Payup Ticks set to positive "2", Autospreader adjusts the spread
+            price 2 ticks into the market and enters a hedge order at 2127.50.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.MinQtyLeanFieldNumber">
+            <summary>Field number for the "minQtyLean" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.MinQtyLean">
+             <summary>
+            minimum quantity required for quoting orders to lean against
+            If you want to lean only against the inside market and not lean on multiple levels of depth you can set the
+            qtyLeanDepth to 0 and the minQtyLean to 1.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.QtyLeanDepthFieldNumber">
+            <summary>Field number for the "qtyLeanDepth" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.QtyLeanDepth">
+             <summary>
+            Example: If the quantity on the second leg of the spread is 10 and the trader assigns an qtyLeanDepth of 2,
+            Spreader determines the price level at which 20 contracts of cumulative market quantity exists on the second leg
+            and uses this to determine the price at which it quotes the first leg of the spread.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.QuotingModeFieldNumber">
+            <summary>Field number for the "quotingMode" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.QueueHolderDepthFieldNumber">
+            <summary>Field number for the "queueHolderDepth" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.QueueHolderDepth">
+             <summary>
+            number of outright leg orders placed at consecutive price levels away from the inside market in addition to the
+            single quoted order for each leg.
+            Note: Queue Holder is only available with two-legged spreads.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.MaxQuotePriceMoveFieldNumber">
+            <summary>Field number for the "maxQuotePriceMove" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.MaxQuotePriceMove">
+             <summary>
+            maximum number of ticks a leg price can move in a single price update before pulling the order
+            this defines an order move threshold in the quoting leg.
+            Setting these properties can help prevent legging risks in volatile markets.
+            minimum setting is 1
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.MaxHedgePriceMoveFieldNumber">
+            <summary>Field number for the "maxHedgePriceMove" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.MaxHedgePriceMove">
+             <summary>
+            maximum number of ticks a leg price can move in a single price update before pulling the order from the market
+            this defines a price move threshold in the leaning (hedging) leg.
+            Setting these properties can help prevent legging risks in volatile markets.
+            minimum setting is 1
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.RulesFieldNumber">
+            <summary>Field number for the "rules" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.SlopLevelFieldNumber">
+            <summary>Field number for the "slopLevel" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.SlopLevel">
+             <summary>
+            Lets you configure multiple levels of slop to determine when to reprice the quoted outright legs based upon
+            movement in the market
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.InsideQuoteFieldNumber">
+            <summary>Field number for the "insideQuote" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.InsideQuote">
+             <summary>
+            reduces excessive quoting away from the inside market.
+            legs only requote when they are a set number of ticks away from the inside market
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.HedgeTriggerFillQtyFieldNumber">
+            <summary>Field number for the "hedgeTriggerFillQty" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.HedgeTriggerFillQty">
+             <summary>
+            whether should send a hedge order when the quoted order is more than specified qty filled
+            This setting is intended to be used for spreads with quoting orders more than double the quantity of the hedge order
+            Once the entire hedge order fills and there is a quoting order working in the market, the quoting order is now the
+            unhedged leg of the spread and will not reprice.
+            Example: You are quoting 11 contracts and hedging 1. With Hedge trigger is set at 6, a hedge order is sent when 6
+            of the 11 contracts fill. When not set (0), all 11 contracts need to fill before 1 lot hedge is sent.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.AttributeFieldNumber">
+            <summary>Field number for the "attribute" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Spreader.Types.Leg.Types">
+            <summary>Container for nested types declared in the Leg message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.TYPE.Quote">
+             <summary>
+            send hedge and quoting orders at the same time
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.TYPE.Hedge">
+             <summary>
+            send the hedge order only after receiving a full fill of the quoting order
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes">
+             <summary>
+            When creating spread legs for instruments that trade in yield, you can include the following optional values to use
+            when calculating the yield price:
+            First Coupon Date (firstCouponDate)
+            Dated Date (issueDate)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.FirstCouponDateFieldNumber">
+            <summary>Field number for the "firstCouponDate" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.FirstCouponDate">
+             <summary>
+            first real coupon date, 0 to disable the bond instrument yield to maturity calculation
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.IssueDateFieldNumber">
+            <summary>Field number for the "issueDate" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.IssueDate">
+             <summary>
+            date on which interest accrual begins,must occur before the first coupon date
+            0 to disable the bond instrument yield to maturity calculation
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.ConversionFactorFieldNumber">
+            <summary>Field number for the "conversionFactor" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.ConversionFactor">
+             <summary>
+            the factor by which the futures price is multiplied if the specified bond is delivered against it
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.Use365DaysFieldNumber">
+            <summary>Field number for the "use365Days" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.Use365Days">
+             <summary>
+            whether to convert 360 days to 365 days
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.CouponRateFieldNumber">
+            <summary>Field number for the "couponRate" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.CouponRate">
+             <summary>
+            coupon's annual interest rate
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.CouponFreqFieldNumber">
+            <summary>Field number for the "couponFreq" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.EndOfMonthCouponFieldNumber">
+            <summary>Field number for the "endOfMonthCoupon" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.EndOfMonthCoupon">
+             <summary>
+            coupon payments always occur on the last day of the month if the settlement date falls on the last day of the month
+            true, if payments always occur on the last day of the month; false, otherwise
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.MaturityDateFieldNumber">
+            <summary>Field number for the "maturityDate" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.MaturityDate">
+             <summary>
+            redemption date of the bond. Must be greater than the settlement date and greater than today
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.PV01FieldNumber">
+            <summary>Field number for the "PV01" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.PV01">
+             <summary>
+            used for converting NPV to a Par Rate for Eris Invoice Futures Spreads
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.SettlementDateFieldNumber">
+            <summary>Field number for the "settlementDate" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.SettlementDate">
+             <summary>
+            date the trade settles. The value must be less than the maturity date and greater than today.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.StripBaseFieldNumber">
+            <summary>Field number for the "stripBase" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.StripBase">
+             <summary>
+            settlement price of the contracts in an exchange-traded strip, pack, or bundle
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.Types.Leg.Types.ExtraAttributes.YieldTypeFieldNumber">
+            <summary>Field number for the "yieldType" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderID.ClOrdIDFieldNumber">
+            <summary>Field number for the "clOrdID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderID.ClOrdID">
+            <summary>
+            Client order ID of the order at the transaction moment.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderID.ChainClOrdIDFieldNumber">
+            <summary>Field number for the "chainClOrdID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderID.ChainClOrdID">
+             <summary>
+            the root order for the seriers replace/withdraw, which is 0 for the first order
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderID.OrigClOrdIDFieldNumber">
+            <summary>Field number for the "origClOrdID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderID.OrigClOrdID">
+            <summary>
+            If order is modified, this is target order ClOrdID for modification.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderID.TradingAccountFieldNumber">
+            <summary>Field number for the "tradingAccount" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderID.TradingAccount">
+            <summary>
+            trading account used for this order
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OrderID.ExecOrderIDFieldNumber">
+            <summary>Field number for the "execOrderID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OrderID.ExecOrderID">
+            <summary>
+            Order ID assigned by broker or exchange
+            </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.ExecutionReport">
+            <summary>
+            Status of a specific transaction.
+            All attributes are at the transaction moment.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.ExecIDFieldNumber">
+            <summary>Field number for the "execID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.ExecID">
+             <summary>
+            FIX ExecID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.OrderIDFieldNumber">
+            <summary>Field number for the "orderID" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.ExecTypeFieldNumber">
+            <summary>Field number for the "execType" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.ExecType">
+             <summary>
+            this transaction type
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.OrdStatusFieldNumber">
+            <summary>Field number for the "ordStatus" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.OrdStatus">
+             <summary>
+            order status
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.RejectCodeFieldNumber">
+            <summary>Field number for the "rejectCode" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.RejectCode">
+             <summary>
+            only valid when the status is rejected
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.TransactTimeUTCFieldNumber">
+            <summary>Field number for the "transactTimeUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.TransactTimeUTC">
+            <summary>
+            Time of execution/order creation, if not provided, 0.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.ReportTimeUTCFieldNumber">
+            <summary>Field number for the "reportTimeUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.ReportTimeUTC">
+            <summary>
+            Time of report received time
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.FillQtyFieldNumber">
+            <summary>Field number for the "fillQty" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.FillPriceFieldNumber">
+            <summary>Field number for the "fillPrice" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.TotalFillQtyFieldNumber">
+            <summary>Field number for the "totalFillQty" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.AvgFillPriceFieldNumber">
+            <summary>Field number for the "avgFillPrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.AvgFillPrice">
+            <summary>
+            Average fill price.
+            NOTE: this price is aligned by a tick size so don't use it for OTE/UPL calculation but
+            use prices from individual TRADE elements.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.RemainingQtyFieldNumber">
+            <summary>Field number for the "remainingQty" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.RemainingQty">
+            <summary>
+            Remaining (unfilled) order quantity. It is not always equal
+            to order size minus filled size (for example, busted orders violate that).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.RemarkFieldNumber">
+            <summary>Field number for the "remark" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.Remark">
+            <summary>
+            Additional transaction details.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.FillCounterPartyFieldNumber">
+            <summary>Field number for the "fillCounterParty" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.FillCounterParty">
+            <summary>
+            If present, identifies the counterpart of the order fill, as reported by the execution system.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.SourceServerFieldNumber">
+            <summary>Field number for the "sourceServer" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.ExecutionReport.SourceServer">
+             <summary>
+            which server create this execution report. 0 means it is from counter party
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.ExecutionReport.Types">
+            <summary>Container for nested types declared in the ExecutionReport message type.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.ExecutionReport.Types.STATUS">
+             <summary>
+            keep the 0 for those unknown status
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.STATUS.PendingReplace">
+             <summary>
+            (e.g. result of Order Cancel/Replace Request &lt;G>)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.STATUS.Restated">
+             <summary>
+            this is mainly for the FIX ExecType RESTATED, order status should has no this value
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.STATUS.Suspended">
+             <summary>
+            CQG suspended has other meaning, market is closed and temporarily queued in their server
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.STATUS.Fill">
+             <summary>
+            non-working order status
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.REJECTCODE.BrokerOption">
+             <summary>
+            FIX OrdRejReason
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.REJECTCODE.UnknownOrder">
+             <summary>
+            Unknown order
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.REJECTCODE.Duplicate">
+             <summary>
+            (e.g. dupe ClOrdID &lt;11> ())
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.REJECTCODE.DuplicateCommunicated">
+             <summary>
+            Duplicate of a verbally communicated order
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.REJECTCODE.Unsupported">
+             <summary>
+            Unsupported order characteristic
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.REJECTCODE.Surveillence">
+             <summary>
+            Surveillence Option
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.REJECTCODE.Quantity">
+             <summary>
+            Incorrect quantity
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.REJECTCODE.AllocatedQuantity">
+             <summary>
+            Incorrect allocated quantity
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentSubscription.InstrumentFieldNumber">
+            <summary>Field number for the "instrument" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.InstrumentSubscription.Instrument">
+             <summary>
+            array of instrument ID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentSubscription.ActionFieldNumber">
+            <summary>Field number for the "action" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.InstrumentSubscription.Types">
+            <summary>Container for nested types declared in the InstrumentSubscription message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarketDatas.MarketDataFieldNumber">
+            <summary>Field number for the "marketData" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PriceBar.UpdateTimeFieldNumber">
+            <summary>Field number for the "updateTime" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PriceBar.OpenFieldNumber">
+            <summary>Field number for the "open" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PriceBar.HighFieldNumber">
+            <summary>Field number for the "high" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PriceBar.LowFieldNumber">
+            <summary>Field number for the "low" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PriceBar.CloseFieldNumber">
+            <summary>Field number for the "close" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PriceBar.VolumeFieldNumber">
+            <summary>Field number for the "volume" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.PriceBar.Volume">
+             <summary>
+            traded volume
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.PriceBar.SettlementFieldNumber">
+            <summary>Field number for the "settlement" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.MarketData">
+            <summary>
+            Real time data delivery.
+            Snapshot is sent as the first message after subscription and may appear periodically when subscribed.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarketData.InstrumentFieldNumber">
+            <summary>Field number for the "instrument" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.MarketData.Instrument">
+             <summary>
+            instrument ID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarketData.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.MarketData.UpdateTimeUTC">
+             <summary>
+            the latest update timestamp
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarketData.PriceBarFieldNumber">
+            <summary>Field number for the "priceBar" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarketData.PrevPriceBarFieldNumber">
+            <summary>Field number for the "prevPriceBar" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarketData.TradeQuoteFieldNumber">
+            <summary>Field number for the "tradeQuote" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.MarketData.TradeQuote">
+             <summary>
+            last trade message
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarketData.BidQuotesFieldNumber">
+            <summary>Field number for the "bidQuotes" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.MarketData.BidQuotes">
+             <summary>
+            always sorted by the price from best to worst, (bid: highest -> lowest, ask: lowest -> highest)
+            bid market depth
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarketData.AskQuotesFieldNumber">
+            <summary>Field number for the "askQuotes" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.MarketData.AskQuotes">
+             <summary>
+            always sorted by the price from best to worst, (bid: highest -> lowest, ask: lowest -> highest)
+            ask market depth
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Quote">
+            <summary>
+            Specific quote information. when both price &amp; volume is 0, means the specified entryID should be deleted
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Quote.EntryIDFieldNumber">
+            <summary>Field number for the "entryID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Quote.EntryID">
+             <summary>
+            this is for MDEntryID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Quote.QuoteUTCFieldNumber">
+            <summary>Field number for the "quoteUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Quote.QuoteUTC">
+            <summary>
+            Time of the quote (UTC).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Quote.PriceFieldNumber">
+            <summary>Field number for the "price" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Quote.Price">
+            <summary>
+            Quote price. when price &amp; volume are all 0, means remove the specified entry
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Quote.VolumeFieldNumber">
+            <summary>Field number for the "volume" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Quote.Volume">
+            <summary>
+            Quote volume (included for BBA only if volume is subscribed).
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Quote.TradeConditionFieldNumber">
+            <summary>Field number for the "tradeCondition" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Quote.TradeCondition">
+             <summary>
+            refer to FIX tag 277,Space-delimited list of conditions describing a trade
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Quote.NumberOfOrdersFieldNumber">
+            <summary>Field number for the "numberOfOrders" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Quote.NumberOfOrders">
+             <summary>
+            In an Aggregated Book, used to show how many individual orders make up this entry
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.TickRange.PriceRangeFieldNumber">
+            <summary>Field number for the "priceRange" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.TickRange.NumTicksFieldNumber">
+            <summary>Field number for the "numTicks" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.VolumeMultipleFieldNumber">
+            <summary>Field number for the "volumeMultiple" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.MaxMarketOrderVolumeFieldNumber">
+            <summary>Field number for the "maxMarketOrderVolume" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.MinMarketOrderVolumeFieldNumber">
+            <summary>Field number for the "minMarketOrderVolume" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.MaxLimitOrderVolumeFieldNumber">
+            <summary>Field number for the "maxLimitOrderVolume" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.MinLimitOrderVolumeFieldNumber">
+            <summary>Field number for the "minLimitOrderVolume" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.PositionTypeFieldNumber">
+            <summary>Field number for the "positionType" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.IncludePastPositionFieldNumber">
+            <summary>Field number for the "includePastPosition" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.CloseDealTypeFieldNumber">
+            <summary>Field number for the "closeDealType" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.MortgageUseRangeFieldNumber">
+            <summary>Field number for the "mortgageUseRange" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.LotSizeFieldNumber">
+            <summary>Field number for the "lotSize" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.TickSizeFieldNumber">
+            <summary>Field number for the "tickSize" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.InstrumentTradingRule.TickSize">
+             <summary>
+            Size of one base tick for this security
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.TickValueFieldNumber">
+            <summary>Field number for the "tickValue" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.InstrumentTradingRule.TickValue">
+             <summary>
+            Size of one point for this security in product native currency
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.TickRangeFieldNumber">
+            <summary>Field number for the "tickRange" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.InstrumentTradingRule.TickRange">
+             <summary>
+            tick table for price tiers
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.InstrumentTradingRule.Types">
+            <summary>Container for nested types declared in the InstrumentTradingRule message type.</summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:Com.Xceder.Messages.InstrumentTradingRule.Types.MORTGAGE_USAGE.None" -->
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.Types.MORTGAGE_USAGE.Margin">
+             <summary>
+            userd for margin only
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.Types.MORTGAGE_USAGE.All">
+             <summary>
+            used for margin, charge...
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.DeliveryUnitFieldNumber">
+            <summary>Field number for the "deliveryUnit" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.EnergyAttributes.DeliveryUnit">
+             <summary>
+            Delivery unit for this contract (2500 MMBtus, 50 megawatts,and so on). when it is 0, means delivers all-at-once
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.BlocksFieldNumber">
+            <summary>Field number for the "blocks" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.EnergyAttributes.Blocks">
+             <summary>
+            Total number of deliverable units per contract
+            You can calculate the number of deliverable units per delivery day by dividing this value by the value in deliveryDays.
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.DeliveryDaysFieldNumber">
+            <summary>Field number for the "deliveryDays" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.ContractTermFieldNumber">
+            <summary>Field number for the "contractTerm" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.EnergyAttributes.Types">
+            <summary>Container for nested types declared in the EnergyAttributes message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Monthly">
+             <summary>
+            default is monthly
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Daily">
+             <summary>
+            Daily term
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Day">
+             <summary>
+            same day
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.NextDay">
+             <summary>
+            next day
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Week">
+             <summary>
+            Balance of week
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Weekly">
+             <summary>
+            Weekly term
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Month">
+             <summary>
+            Balance of month
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Quarterly">
+             <summary>
+            Quarterly term
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Seasonal">
+             <summary>
+            Seasonal term
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Yearly">
+             <summary>
+            Yearly calendar term
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Variable">
+             <summary>
+            Variable term
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.EnergyAttributes.Types.CONTRACT_TERM.Custom">
+             <summary>
+            Custom
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OptionsAttributes.TypeFieldNumber">
+            <summary>Field number for the "type" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OptionsAttributes.StrikePriceFieldNumber">
+            <summary>Field number for the "strikePrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OptionsAttributes.StrikePrice">
+             <summary>
+            only valid for the options
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.OptionsAttributes.VersionFieldNumber">
+            <summary>Field number for the "version" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.OptionsAttributes.Version">
+             <summary>
+            FIX OptAttribute char code, It is usually '0' but can have higher integer values indicating a change to the contract.
+             For example, if an event such as a stock split occurs, the exchange will change the version of the options on the stock
+             to indicate a change in a property of the underlying contract. So it would be possible to have two option contracts
+             with the same strike price but different versions.
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.OptionsAttributes.Types">
+            <summary>Container for nested types declared in the OptionsAttributes message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarginFormula.LongMarginRatioFieldNumber">
+            <summary>Field number for the "longMarginRatio" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarginFormula.ShortMarginRatioFieldNumber">
+            <summary>Field number for the "shortMarginRatio" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.MarginFormula.IsMaxMarginSideAlgorithmFieldNumber">
+            <summary>Field number for the "isMaxMarginSideAlgorithm" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instruments.InstrumentFieldNumber">
+            <summary>Field number for the "instrument" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentStatuses.StatusFieldNumber">
+            <summary>Field number for the "status" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentStatus.InstrumentFieldNumber">
+            <summary>Field number for the "instrument" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentStatus.StatusFieldNumber">
+            <summary>Field number for the "status" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentStatus.RemarkFieldNumber">
+            <summary>Field number for the "remark" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.InstrumentStatus.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.IdentityFieldNumber">
+            <summary>Field number for the "identity" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.ProductFieldNumber">
+            <summary>Field number for the "product" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.CFICodeFieldNumber">
+            <summary>Field number for the "CFICode" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.DescriptionFieldNumber">
+            <summary>Field number for the "description" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.CurrencyFieldNumber">
+            <summary>Field number for the "currency" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.CreateEpochDayFieldNumber">
+            <summary>Field number for the "createEpochDay" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.MaturityEpochDaysFieldNumber">
+            <summary>Field number for the "maturityEpochDays" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Instrument.MaturityEpochDays">
+             <summary>
+            or expiration date
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.ListEpochDayFieldNumber">
+            <summary>Field number for the "listEpochDay" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.StartDeliveryEpochDaysFieldNumber">
+            <summary>Field number for the "startDeliveryEpochDays" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.EndDeliveryEpochDaysFieldNumber">
+            <summary>Field number for the "endDeliveryEpochDays" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.MarginCalculationFieldNumber">
+            <summary>Field number for the "marginCalculation" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.ContractSymbolFieldNumber">
+            <summary>Field number for the "contractSymbol" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.TradingRuleFieldNumber">
+            <summary>Field number for the "tradingRule" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.UnderlyingFieldNumber">
+            <summary>Field number for the "underlying" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Instrument.Underlying">
+             <summary>
+            key will be the SecurityID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.OptionAttributesFieldNumber">
+            <summary>Field number for the "optionAttributes" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Instrument.OptionAttributes">
+             <summary>
+            only need for option
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.EnergyAttributesFieldNumber">
+            <summary>Field number for the "energyAttributes" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Instrument.EnergyAttributes">
+             <summary>
+            it is only for NRG instruments
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.IsNonTradableFieldNumber">
+            <summary>Field number for the "isNonTradable" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Instrument.IsNonTradable">
+             <summary>
+            means this instrument is archived, should not avaible for trading
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Instrument.Types">
+            <summary>Container for nested types declared in the Instrument message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Eusupra">
+             <summary>
+            Euro Supranational Coupons
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Fac">
+             <summary>
+            Federal Agency Coupon
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Fadn">
+             <summary>
+            Federal Agency Discount Note
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Pef">
+             <summary>
+            Private Export Funding
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Supra">
+             <summary>
+            USD Supranational Coupons
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Fut">
+             <summary>
+            FUTURE
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Opt">
+             <summary>
+            OPTION
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Nrg">
+             <summary>
+            ENERGY
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Corp">
+             <summary>
+            Corporate Bond
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Cpp">
+             <summary>
+            Corporate Private Placement
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Cb">
+             <summary>
+            Convertible Bond
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Dual">
+             <summary>
+            Dual Currency
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Eucorp">
+             <summary>
+            Euro Corporate Bond
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Xlinkd">
+             <summary>
+            Indexed Linked
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Struct">
+             <summary>
+            Structured Notes
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Yank">
+             <summary>
+            Yankee Corporate Bond
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.For">
+             <summary>
+            FOREIGN EXCHANGE CONTRACT
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Cs">
+             <summary>
+            COMMON STOCK
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Ps">
+             <summary>
+            Preferred Stock
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.War">
+             <summary>
+            Warrant now is listed under Municipals for consistency with Bloomberg fixed income product types
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Brady">
+             <summary>
+            Brady Bond
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Eusov">
+             <summary>
+            Euro Sovereigns
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Tbond">
+             <summary>
+            US Treasury Bond
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Tint">
+             <summary>
+            Interest strip from any bond or note
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Tips">
+             <summary>
+            Treasury Inflation Protected Securities
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Tcal">
+             <summary>
+            Principal strip of a callable bond or note
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Tprn">
+             <summary>
+            Principal strip from a non-callable bond or note
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Ust">
+             <summary>
+            deprecated,US Treasury Note
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Ustb">
+             <summary>
+            deprecated,US Treasury Bill
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Tnote">
+             <summary>
+            US Treasury Note
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Tbill">
+             <summary>
+            US Treasury Bill
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Govt">
+             <summary>
+            TREASURIES PLUS AGENCY DEBENTURE, TT
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Idx">
+             <summary>
+            IDEX
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Repo">
+             <summary>
+            Repurchase
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Forward">
+             <summary>
+            Forward
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Buysell">
+             <summary>
+            Buy Sellback
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Secloan">
+             <summary>
+            Securities Loan
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Secpledge">
+             <summary>
+            Securities Pledge
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Mf">
+             <summary>
+            OTHER
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Mleg">
+             <summary>
+            MULTI LEG, for example, spread
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.PRODUCT.Fxndf">
+             <summary>
+            NDF
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Instrument.Types.IDSOURCE">
+             <summary>
+            FIX IDSource name
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Instrument.Types.Identity">
+             <summary>
+            there are 2 ways to locate a product. the symbol won't be abled to ensure the uniqueness. For example, futures product
+            will have different maturity date
+            1. id
+            2. exchange+broker+securityID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Identity.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Instrument.Types.Identity.Id">
+             <summary>
+            this is xceder system counter ID. it is global unique and never change after create. it is a value which combines
+            exchange, broker, product and xceder system internal instrument number
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Identity.ExchangeFieldNumber">
+            <summary>Field number for the "exchange" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Identity.BrokerFieldNumber">
+            <summary>Field number for the "broker" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Identity.SymbolFieldNumber">
+            <summary>Field number for the "symbol" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Identity.SecurityIDFieldNumber">
+            <summary>Field number for the "securityID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Instrument.Types.Identity.SecurityID">
+             <summary>
+            refer to FIX tag 48 SecurityID
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Identity.IdSourceFieldNumber">
+            <summary>Field number for the "idSource" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Leg.InstrumentFieldNumber">
+            <summary>Field number for the "instrument" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Leg.SideFieldNumber">
+            <summary>Field number for the "side" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Leg.PriceFieldNumber">
+            <summary>Field number for the "price" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Instrument.Types.Leg.QtyFieldNumber">
+            <summary>Field number for the "qty" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.WatchList.TitleFieldNumber">
+            <summary>Field number for the "title" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.WatchList.RemarkFieldNumber">
+            <summary>Field number for the "remark" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.WatchList.AccessTimeFieldNumber">
+            <summary>Field number for the "accessTime" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.WatchList.AccessTime">
+             <summary>
+            this is the local time UTC
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.WatchList.SyncTimeFieldNumber">
+            <summary>Field number for the "syncTime" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.WatchList.SyncTime">
+             <summary>
+            this is the server side UTC. when sync, we only take the server side time. when upload change to server, it should be 0
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.WatchList.InstrumentIDFieldNumber">
+            <summary>Field number for the "instrumentID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.WatchList.InstrumentID">
+             <summary>
+            empty list means delete this watch list
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.WatchLists.WatchListFieldNumber">
+            <summary>Field number for the "watchList" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountTradingRules.AccountFieldNumber">
+            <summary>Field number for the "account" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountTradingRules.AllowedProductsFieldNumber">
+            <summary>Field number for the "allowedProducts" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountTradingRules.AllowedInstrumentsFieldNumber">
+            <summary>Field number for the "allowedInstruments" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountTradingRules.BannedProductsFieldNumber">
+            <summary>Field number for the "bannedProducts" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountTradingRules.BannedInstrumentsFieldNumber">
+            <summary>Field number for the "bannedInstruments" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountTradingRules.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AppLayouts.LayoutsFieldNumber">
+            <summary>Field number for the "layouts" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AppLayout.LayoutIDFieldNumber">
+            <summary>Field number for the "layoutID" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AppLayout.DetailFieldNumber">
+            <summary>Field number for the "detail" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.AppLayout.Detail">
+             <summary>
+            max length is 10K bytes
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AppLayout.SyncTimeFieldNumber">
+            <summary>Field number for the "syncTime" field.</summary>
+        </member>
+    </members>
+</doc>
