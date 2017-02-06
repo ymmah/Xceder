@@ -4,9 +4,93 @@
 
 syntax = "proto3";
 
+import "google/protobuf/any.proto";
+
 package com.xceder.messages;
 
 option optimize_for = SPEED;
+
+message Request
+{
+    //request ID, should be unique enough to receive the request Result
+    uint64 requestID = 1;
+    
+    //this is the timestamp from client side when request is submitted
+    uint64 requestUTC = 2;
+    
+    oneof request
+    {
+        //it is used as request extension for some system, for example, xceder Web need this to update the watch list
+        google.protobuf.Any extension = 3;
+    
+        Ping ping = 4;
+    
+        //login system for registered user
+        Logon logon = 5;
+    
+        //logoff message to logoff current session
+        string logoff = 6;
+    
+        PasswordChange passwordChange = 7;
+    
+        //register new account or update the account detail
+        Account account = 8;
+    
+        Query queryRequest = 9;
+        
+        // subscribe/unsubscribe market data
+        InstrumentSubscription marketData = 10;
+        
+        // subscribe/unsubscribe the instrument change
+        InstrumentSubscription instruments = 11;
+    
+        //subscribe/unsubscribe the instrument status change
+        InstrumentSubscription instrumentStatus = 12;
+    
+        Order order = 13;
+    
+        //request to create/update spreader, the new spreader ID should be 0.
+        //only allow to change the spreader which status isn't RUN
+        //to delete spreader, just specify the ID with the empty name
+        Spreader spreader = 14;
+    }
+}
+
+// Server to Client message, server can include different fields in a single message
+message Response
+{
+    //this is mainly for the request reply. it can be ignored for the server side initiated broadcasting messages, such as ping, price updates
+    Result result = 1;
+    
+    oneof response
+    {
+        google.protobuf.Any extension = 2;
+    
+        // Reports with requested information.
+        QueryResult queryResult = 3;
+        
+        MarketDatas marketDatas = 4;
+        
+        Ping ping = 5;
+        
+        // Session level messages from server.
+        LogonResult logonResult = 6;
+        
+        NoticeMessages notice = 7;
+        
+        ServiceStatuses  serviceStatus = 8;
+    
+        Instruments instruments = 9;
+        
+        InstrumentStatuses instrumentStatus = 10;
+        
+        //this is the result for the spreader creation successfully
+        uint64 spreaderID = 11;
+        
+        //this will be sent when the spreader leg order is submitted by server, or execution report for the order status
+        OrderReports orderReports = 12;
+    }
+}
 
 enum ID_TYPE
 {
@@ -80,12 +164,10 @@ enum ERRORCODE
     
     NOT_SUPPORT = 131;
     
-    NOT_SUPPORT_SERVICE = 132;
-    
     // Requested information is not found.
-    NOT_FOUND = 133;
+    NOT_FOUND = 132;
     
-    NOT_FOUND_ORDER = 134;
+    NOT_FOUND_ORDER = 133;
     
     
     
@@ -394,88 +476,6 @@ message Exchange
     sint32 timezone = 3;
 }
 
-message RequestMsg
-{
-    //request ID, should be unique enough to receive the request Result
-    uint64 requestID = 1;
-
-    //this is the timestamp from client side when request is submitted
-    uint64 requestUTC = 2;
-
-    oneof request
-    {
-        Query queryRequest = 3;
-
-        Order order = 4;
-
-        // subscribe/unsubscribe market data
-        InstrumentSubscription marketData = 5;
-
-        Ping ping = 6;
-
-        //login system for registered user
-        Logon logon = 7;
-
-        //logoff message to logoff current session
-        string logoff = 8;
-
-        PasswordChange passwordChange = 9;
-
-        //register new account or update the account detail
-        Account account = 10;
-
-        //update client's watch list, only can update own watch list
-        WatchLists watchList = 11;
-
-        //subscribe/unsubscribe the instrument status change
-        InstrumentSubscription instrumentStatus = 12;
-    
-        //upload the application layout to server
-        AppLayouts layouts = 13;
-    
-        //request to create/update spreader, the new spreader ID should be 0.
-        //only allow to change the spreader which status isn't RUN
-        //to delete spreader, just specify the ID with the empty name
-        Spreader spreader = 14;
-    }
-}
-
-// Server to Client message, server can include different fields in a single message
-message ResponseMsg
-{
-    //this is mainly for the request reply. it can be ignored for the server side initiated broadcasting messages, such as ping, price updates
-    Result result = 1;
-
-    oneof response
-    {
-        // Reports with requested information.
-        QueryResult queryResult = 2;
-
-        MarketDatas marketData = 3;
-
-        Ping ping = 4;
-
-        // Session level messages from server.
-        LogonResult logonResult = 5;
-
-        NoticeMessages notice = 6;
-    
-        ServiceStatuses  serviceStatus = 7;
-    
-        InstrumentStatuses instrumentStatus = 8;
-
-        uint64 watchListSyncTime = 9;
-    
-        uint64 layoutSyncTime = 10;
-    
-        //this is the result for the spreader creation successfully
-        uint64 spreaderID = 11;
-    
-        //this will be sent when the spreader leg order is submitted by server, or execution report for the order status
-        OrderReports orderReports = 12;
-    }
-}
-
 message DeviceToken
 {
     enum DEVICE_TYPE
@@ -542,42 +542,39 @@ message Account {
         SUSPEND = 2;
     }
     
+    google.protobuf.Any extension = 1;
+    
     //it is server side created account ID, when register new user, it should be just 0
-    uint32 accountID = 1;
+    uint32 accountID = 2;
 
     //client side specified user ID. it will be used as login user name
-    string userID = 2;
+    string userID = 3;
 
-    string password = 3;
+    string password = 4;
 
-    Particular particular = 4;
+    Particular particular = 5;
 
-    ROLE role = 5;
+    ROLE role = 6;
 
     // the enum Service.SERVICE bits mask.
-    uint32 services = 6;
+    uint32 services = 7;
 
-    uint64 updateUTC = 7;
+    uint64 updateUTC = 8;
 
     //for new client, it should be UNVERIFIED
-    STATUS status = 8;
+    STATUS status = 9;
 
     //it is the server side recorded current login record
-    LoginRecord loginRecord = 9;
+    LoginRecord loginRecord = 10;
 
-    LoginRecord prevLoginRecord = 10;
+    LoginRecord prevLoginRecord = 11;
 
-    //the latest watch list sync timestamp
-    uint64 watchListSyncTime = 11;
-    
     //the latest account trading rule update timestamp
     uint64 tradingRuleUpdateTime = 12;
     
     CONNECTION allowedConnection = 13;
     
     LOGIN_MODE loginMode = 14;
-    
-    uint64 layoutSyncTime = 15;
 }
 
 message Particular
@@ -813,34 +810,25 @@ message Ping
 // Request for information.
 message Query
 {
-    message QueryLayout
-    {
-        uint32 account = 1;
-        string layoutID = 2;
-        uint64 fromSyncTime = 3;
-    }
-    
     oneof query
     {
-        // Request for a list of historical orders according to a search criteria.
-        QueryConditions order = 1;
-
-        QueryConditions log = 2;
-
-        QueryConditions instruments = 3;
+        google.protobuf.Any extension = 1;
     
-        QueryConditions watchList = 4;
-        
+        // Request for a list of historical orders according to a search criteria.
+        QueryConditions order = 2;
+
+        QueryConditions log = 3;
+
+        QueryConditions instruments = 4;
+    
         //always query the whole rules to ensure the data intact.
         uint32 accountTradingRule = 5;
 
         bool supportBrokerExchanges = 6;
     
-        QueryLayout appLayout = 7;
+        QueryConditions calendar = 7;
     
-        QueryConditions calendar = 8;
-    
-        QueryConditions spreader = 9;
+        QueryConditions spreader = 8;
 	}
 }
 
@@ -850,26 +838,24 @@ Pagination is done in the server side automatically. Client should always query 
 */
 message QueryResult
 {
-    oneof response
+    oneof result
     {
+        google.protobuf.Any extension = 1;
+    
         // Report with a list of historical orders according to specified parameters.
-        OrderReports ordersReports = 1;
+        OrderReports ordersReports = 2;
         
-        RequestLogs logs = 2;
-        
-        WatchLists watchList = 3;
+        RequestLogs logs = 3;
         
         AccountTradingRules accountTradingRule = 4;
         
         BrokerExchanges supportedExchanges = 5;
         
-        AppLayouts layouts = 6;
+        ExchangeCalendar calendar = 6;
         
-        ExchangeCalendar calendar = 7;
-        
-        Instruments instruments = 8;
+        Instruments instruments = 7;
     
-        Spreaders spreaders = 9;
+        Spreaders spreaders = 8;
     }
 }
 
@@ -946,7 +932,7 @@ message RequestLogs
 
 message RequestLog
 {
-    RequestMsg request = 1;
+    Request request = 1;
 
     Result result = 2;
 }
@@ -2199,27 +2185,6 @@ message Instrument
     bool isNonTradable = 18;
 }
 
-message WatchList
-{
-    string title = 1;
-    
-    string remark = 2;
-    
-    //this is the local time UTC
-    uint64 accessTime = 3;
-    
-    //this is the server side UTC. when sync, we only take the server side time. when upload change to server, it should be 0
-    uint64 syncTime = 4;
-    
-    //empty list means delete this watch list
-    repeated uint64 instrumentID = 5 [packed=true];
-}
-
-message WatchLists
-{
-    repeated WatchList watchList = 1;
-}
-
 message AccountTradingRules
 {
     uint32 account = 1;
@@ -2234,20 +2199,3 @@ message AccountTradingRules
 
     uint64 updateTimeUTC = 6;
 }
-
-message AppLayouts
-{
-    repeated AppLayout layouts = 1;
-}
-
-message AppLayout
-{
-    string layoutID = 1;
-    
-    //max length is 10K bytes
-    string detail = 2;
-    
-    uint64 syncTime = 3;
-}
-
-
