@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Xceder
 {
-    class CircularBufferStream : Stream
+    class CircularBufferStream : System.IO.Stream
     {
         private CircularBuffer<byte> proxied;
         private int position = 0;
@@ -156,14 +156,14 @@ namespace Xceder
         private static DateTime EPOCH = new DateTime(1970, 1, 1);
 
         /// <summary>
-        /// provide the message receive event. if the message isn't reply for the sent request, the RequestMsg will be null 
+        /// provide the message receive event. if the message isn't reply for the sent request, the Request will be null 
         /// </summary>
-        public event EventHandler<Tuple<RequestMsg, ResponseMsg>> RcvMessageEvent;
+        public event EventHandler<Tuple<Request, Response>> RcvMessageEvent;
 
         /// <summary>
         /// after the message is sent successfully, this event will be triggered with the sent message
         /// </summary>
-        public event EventHandler<RequestMsg> PostSendMessageEvent;
+        public event EventHandler<Request> PostSendMessageEvent;
 
         /// <summary>
         /// error event for the error encountered 
@@ -173,7 +173,7 @@ namespace Xceder
         private long sentRequestID = (long)DateTime.UtcNow.TimeOfDay.TotalSeconds;
 
         //store all sent request and result from the server
-        private ConcurrentDictionary<ulong, Tuple<RequestMsg, Result>> _sentRequests = new ConcurrentDictionary<ulong, Tuple<RequestMsg, Result>>();
+        private ConcurrentDictionary<ulong, Tuple<Request, Result>> _sentRequests = new ConcurrentDictionary<ulong, Tuple<Request, Result>>();
 
         private readonly object _lock = new object();
 
@@ -235,7 +235,7 @@ namespace Xceder
 
 
         ///<exception cref="Exception"></exception>
-        private TMessage extractMessages<TMessage>(Stream stream) where TMessage : IMessage<TMessage>, new()
+        private TMessage extractMessages<TMessage>(System.IO.Stream stream) where TMessage : IMessage<TMessage>, new()
         {
             TMessage result = default(TMessage);
 
@@ -284,7 +284,7 @@ namespace Xceder
         public Result getRequestResult(ulong reqID)
         {
             Result result = null;
-            Tuple<RequestMsg, Result> tuple = null;
+            Tuple<Request, Result> tuple = null;
 
             _sentRequests.TryGetValue(reqID, out tuple);
 
@@ -318,9 +318,10 @@ namespace Xceder
         /// <summary>
         /// start to connect to the server
         /// </summary>
-        /// <param name="server">server IP info</param>
+        /// <param name="server">server IP or domain</param>
+        /// <param name="port">port number</param>
         /// <param name="forceReconnect">indicate whether reconnect to the server if it is already connected</param>
-        public void start(IPEndPoint server, bool forceReconnect = false)
+        public void start(string server, int port, bool forceReconnect = false)
         {
             if (!forceReconnect && Started && server.Equals(currentSocketAsyncArgs.RemoteEndPoint))
                 return;
@@ -329,9 +330,11 @@ namespace Xceder
 
             try
             {
+                var serverAddr = Dns.GetHostAddressesAsync(server).Result[0];
+
                 lock (_lock)
                 {
-                    currentSocketAsyncArgs = connectAsync(server);
+                    currentSocketAsyncArgs = connectAsync(new IPEndPoint(serverAddr, port));
 
                     scheduleDeadConnectionCheck();
                 }
@@ -385,7 +388,7 @@ namespace Xceder
 
                 if (bytesRead > 0)
                 {
-                    List<Tuple<RequestMsg, ResponseMsg>> messageList;
+                    List<Tuple<Request, Response>> messageList;
 
                     LastRcvMsgTime = DateTime.Now;
 
@@ -457,27 +460,27 @@ namespace Xceder
                 _socketRcvBuffer.PopFront(_socketRcvBuffer.Size);
         }
 
-        private List<Tuple<RequestMsg, ResponseMsg>> processRcvBytes()
+        private List<Tuple<Request, Response>> processRcvBytes()
         {
-            List<Tuple<RequestMsg, ResponseMsg>> messageList = new List<Tuple<RequestMsg, ResponseMsg>>();
+            List<Tuple<Request, Response>> messageList = new List<Tuple<Request, Response>>();
 
-            ResponseMsg msg = null;
+            Response msg = null;
 
             while (_socketRcvBuffer.Size > 0)
             {
-                Stream stream = new CircularBufferStream(_socketRcvBuffer);
+                System.IO.Stream stream = new CircularBufferStream(_socketRcvBuffer);
 
-                msg = extractMessages<ResponseMsg>(stream);
+                msg = extractMessages<Response>(stream);
 
                 if (msg != null)
                 {
                     _socketRcvBuffer.PopFront((int)stream.Position);
 
-                    RequestMsg request = null;
+                    Request request = null;
 
                     if (msg.Result != null)
                     {
-                        Tuple<RequestMsg, Result> tuple = null;
+                        Tuple<Request, Result> tuple = null;
 
                         _sentRequests.TryGetValue(msg.Result.Request, out tuple);
 
@@ -497,7 +500,7 @@ namespace Xceder
             return messageList;
         }
 
-        private void notifyRcvProtoMsg(Tuple<RequestMsg, ResponseMsg> pair)
+        private void notifyRcvProtoMsg(Tuple<Request, Response> pair)
         {
             try
             {
@@ -509,9 +512,9 @@ namespace Xceder
             }
         }
 
-        private RequestMsg createRequestMsg()
+        private Request createRequestMsg()
         {
-            RequestMsg request = new RequestMsg();
+            Request request = new Request();
 
             request.RequestUTC = (ulong)(DateTime.UtcNow - EPOCH).TotalMilliseconds;
 
@@ -521,7 +524,7 @@ namespace Xceder
         }
 
         //<exception cref="Exception"></exception>
-        private ulong send(RequestMsg message)
+        private ulong send(Request message)
         {
             ulong requestID = 0;
 
@@ -569,7 +572,7 @@ namespace Xceder
 
             var assembly = GetType().GetTypeInfo().Assembly;
 
-            Stream resource = assembly.GetManifestResourceStream("xcederRSA.pub");
+            System.IO.Stream resource = assembly.GetManifestResourceStream("xcederRSA.pub");
 
             StreamReader streamReader = new StreamReader(resource);
 
@@ -612,7 +615,7 @@ namespace Xceder
         /// <returns></returns>
         public ulong sendLogin(string userID, string password)
         {
-            RequestMsg request = new RequestMsg();
+            Request request = new Request();
 
             var logonRequest = request.Logon = new Logon();
 
@@ -629,7 +632,7 @@ namespace Xceder
 
         private ulong sendLogOut(string reason)
         {
-            RequestMsg request = new RequestMsg();
+            Request request = new Request();
 
             request.Logoff = reason;
 
@@ -645,7 +648,7 @@ namespace Xceder
         /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
         public ulong registerAccount(string userID, string email, string password)
         {
-            RequestMsg request = createRequestMsg();
+            Request request = createRequestMsg();
 
             var account = request.Account = new Account();
             var particular = request.Account.Particular = new Particular();
@@ -664,7 +667,7 @@ namespace Xceder
         /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
         public ulong requestOTP(string email)
         {
-            RequestMsg request = createRequestMsg();
+            Request request = createRequestMsg();
 
             request.PasswordChange = new PasswordChange();
 
@@ -682,7 +685,7 @@ namespace Xceder
         /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
         public ulong requestPWDReset(string email, string OTP, string newPassword)
         {
-            RequestMsg request = createRequestMsg();
+            Request request = createRequestMsg();
 
             var passwordChange = request.PasswordChange = new PasswordChange();
 
@@ -705,7 +708,7 @@ namespace Xceder
         /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
         public ulong subscribePrice(ulong[] instrumentIDAry, bool isUnSubscribe = false)
         {
-            RequestMsg request = createRequestMsg();
+            Request request = createRequestMsg();
 
             var marketData = request.MarketData = new InstrumentSubscription();
 
@@ -722,7 +725,7 @@ namespace Xceder
         /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
         public void sendPingRequest()
         {
-            RequestMsg request = createRequestMsg();
+            Request request = createRequestMsg();
 
             var ping = request.Ping = new Ping();
 
@@ -738,7 +741,7 @@ namespace Xceder
         /// <returns>0 means fail, otherwise the sent request ID for this order</returns>
         public ulong submitOrder(OrderParams orderParams)
         {
-            RequestMsg request = createRequestMsg();
+            Request request = createRequestMsg();
 
             Order order = new Order();
 

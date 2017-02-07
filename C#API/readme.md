@@ -17,9 +17,10 @@ in the VS IDE can just simply restore the NuGet packages in the solution popup m
 2. Install the google protobuf tools package (Google.Protobuf.Tools) through NuGet package manager  
 3. Install the microsoft reactive package (System.Reactive) through NuGet package manager
 4. Install the microsoft secure string package (System.Security.SecureString) through NuGet package manager
-5. Configure the project build events to generate the protobuf message classes in project "Build Events\Pre-Build event command line"
+5. Install the microsoft dbs package (System.Net.NameResolution) through NuGet package manager
+6. Configure the project build events to generate the protobuf message classes in project "Build Events\Pre-Build event command line"
 
-		"$(USERPROFILE)packages\.nuget\Google.Protobuf.Tools\3.2.0\tools\windows_x64\protoc.exe"  --proto_path="$(ProjectDir).."  --csharp_out=$(ProjectDir)protobuf  $(ProjectDir)..\gateway.proto
+		"$(USERPROFILE)\.nuget\packages\Google.Protobuf.Tools\3.2.0\tools\windows_x64\protoc.exe"  --proto_path="$(USERPROFILE)\.nuget\packages\Google.Protobuf.Tools\3.2.0\tools"  --proto_path="$(ProjectDir).." --csharp_out=$(ProjectDir) $(ProjectDir)..\gateway.proto
 	
 # Files
 

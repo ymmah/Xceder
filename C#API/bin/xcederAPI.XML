@@ -4,6 +4,37 @@
         <name>xcederAPI</name>
     </assembly>
     <members>
+        <member name="T:Xceder.XcederStream">
+            <summary>
+            provide the event stream from the Client
+            </summary>
+        </member>
+        <member name="M:Xceder.XcederStream.#ctor(Xceder.Client)">
+            <summary>
+            constructor
+            </summary>
+            <param name="xcederClient"></param>
+        </member>
+        <member name="M:Xceder.XcederStream.connect">
+            <summary>
+            connect to the stream to emit the event
+            </summary>
+        </member>
+        <member name="P:Xceder.XcederStream.RcvMsgStream">
+            <summary>
+            return the recieve message event stream
+            </summary>
+        </member>
+        <member name="P:Xceder.XcederStream.SendMsgStream">
+            <summary>
+            return the send message event stream. this is to monitor the sent message
+            </summary>
+        </member>
+        <member name="P:Xceder.XcederStream.ErrorStream">
+            <summary>
+            this is to monitor the error event
+            </summary>
+        </member>
         <member name="T:Xceder.PemKeyUtils">
             <summary>
             extract the key parameters from the pem key file
@@ -179,7 +210,7 @@
         </member>
         <member name="E:Xceder.Client.RcvMessageEvent">
             <summary>
-            provide the message receive event. if the message isn't reply for the sent request, the RequestMsg will be null 
+            provide the message receive event. if the message isn't reply for the sent request, the Request will be null 
             </summary>
         </member>
         <member name="E:Xceder.Client.PostSendMessageEvent">
@@ -238,11 +269,12 @@
             <param name="reqID">request ID</param>
             <returns>instance of Result</returns>
         </member>
-        <member name="M:Xceder.Client.start(System.Net.IPEndPoint,System.Boolean)">
+        <member name="M:Xceder.Client.start(System.String,System.Int32,System.Boolean)">
             <summary>
             start to connect to the server
             </summary>
-            <param name="server">server IP info</param>
+            <param name="server">server IP or domain</param>
+            <param name="port">port number</param>
             <param name="forceReconnect">indicate whether reconnect to the server if it is already connected</param>
         </member>
         <member name="M:Xceder.Client.stop(System.String)">
@@ -421,6 +453,172 @@
             <summary>
             Days of week enumeration.
             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.RequestIDFieldNumber">
+            <summary>Field number for the "requestID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.RequestID">
+             <summary>
+            request ID, should be unique enough to receive the request Result
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.RequestUTCFieldNumber">
+            <summary>Field number for the "requestUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.RequestUTC">
+             <summary>
+            this is the timestamp from client side when request is submitted
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.ExtensionFieldNumber">
+            <summary>Field number for the "extension" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.Extension">
+             <summary>
+            it is used as request extension for some system, for example, xceder Web need this to update the watch list
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.PingFieldNumber">
+            <summary>Field number for the "ping" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.LogonFieldNumber">
+            <summary>Field number for the "logon" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.Logon">
+             <summary>
+            login system for registered user
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.LogoffFieldNumber">
+            <summary>Field number for the "logoff" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.Logoff">
+             <summary>
+            logoff message to logoff current session
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.PasswordChangeFieldNumber">
+            <summary>Field number for the "passwordChange" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.AccountFieldNumber">
+            <summary>Field number for the "account" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.Account">
+             <summary>
+            register new account or update the account detail
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.QueryRequestFieldNumber">
+            <summary>Field number for the "queryRequest" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.MarketDataFieldNumber">
+            <summary>Field number for the "marketData" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.MarketData">
+            <summary>
+            subscribe/unsubscribe market data
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.InstrumentsFieldNumber">
+            <summary>Field number for the "instruments" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.Instruments">
+            <summary>
+            subscribe/unsubscribe the instrument change
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.InstrumentStatusFieldNumber">
+            <summary>Field number for the "instrumentStatus" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.InstrumentStatus">
+             <summary>
+            subscribe/unsubscribe the instrument status change
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.OrderFieldNumber">
+            <summary>Field number for the "order" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Request.SpreaderFieldNumber">
+            <summary>Field number for the "spreader" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Request.Spreader">
+             <summary>
+            request to create/update spreader, the new spreader ID should be 0.
+            only allow to change the spreader which status isn't RUN
+            to delete spreader, just specify the ID with the empty name
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Request.RequestOneofCase">
+            <summary>Enum of possible cases for the "request" oneof.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Response">
+            <summary>
+            Server to Client message, server can include different fields in a single message
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.ResultFieldNumber">
+            <summary>Field number for the "result" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.Result">
+             <summary>
+            this is mainly for the request reply. it can be ignored for the server side initiated broadcasting messages, such as ping, price updates
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.ExtensionFieldNumber">
+            <summary>Field number for the "extension" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.QueryResultFieldNumber">
+            <summary>Field number for the "queryResult" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.QueryResult">
+            <summary>
+            Reports with requested information.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.MarketDatasFieldNumber">
+            <summary>Field number for the "marketDatas" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.PingFieldNumber">
+            <summary>Field number for the "ping" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.LogonResultFieldNumber">
+            <summary>Field number for the "logonResult" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.LogonResult">
+            <summary>
+            Session level messages from server.
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.NoticeFieldNumber">
+            <summary>Field number for the "notice" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.ServiceStatusFieldNumber">
+            <summary>Field number for the "serviceStatus" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.InstrumentsFieldNumber">
+            <summary>Field number for the "instruments" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.InstrumentStatusFieldNumber">
+            <summary>Field number for the "instrumentStatus" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.SpreaderIDFieldNumber">
+            <summary>Field number for the "spreaderID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.SpreaderID">
+             <summary>
+            this is the result for the spreader creation successfully
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.OrderReportsFieldNumber">
+            <summary>Field number for the "orderReports" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.OrderReports">
+             <summary>
+            this will be sent when the spreader leg order is submitted by server, or execution report for the order status
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.Response.ResponseOneofCase">
+            <summary>Enum of possible cases for the "response" oneof.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.Exchange.CodeFieldNumber">
             <summary>Field number for the "code" field.</summary>
@@ -649,172 +847,6 @@
             Icap Electronic Broking (Us)
              </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.RequestIDFieldNumber">
-            <summary>Field number for the "requestID" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.RequestID">
-             <summary>
-            request ID, should be unique enough to receive the request Result
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.RequestUTCFieldNumber">
-            <summary>Field number for the "requestUTC" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.RequestUTC">
-             <summary>
-            this is the timestamp from client side when request is submitted
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.QueryRequestFieldNumber">
-            <summary>Field number for the "queryRequest" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.OrderFieldNumber">
-            <summary>Field number for the "order" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.MarketDataFieldNumber">
-            <summary>Field number for the "marketData" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.MarketData">
-            <summary>
-            subscribe/unsubscribe market data
-            </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.PingFieldNumber">
-            <summary>Field number for the "ping" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.LogonFieldNumber">
-            <summary>Field number for the "logon" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.Logon">
-             <summary>
-            login system for registered user
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.LogoffFieldNumber">
-            <summary>Field number for the "logoff" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.Logoff">
-             <summary>
-            logoff message to logoff current session
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.PasswordChangeFieldNumber">
-            <summary>Field number for the "passwordChange" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.AccountFieldNumber">
-            <summary>Field number for the "account" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.Account">
-             <summary>
-            register new account or update the account detail
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.WatchListFieldNumber">
-            <summary>Field number for the "watchList" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.WatchList">
-             <summary>
-            update client's watch list, only can update own watch list
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.InstrumentStatusFieldNumber">
-            <summary>Field number for the "instrumentStatus" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.InstrumentStatus">
-             <summary>
-            subscribe/unsubscribe the instrument status change
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.LayoutsFieldNumber">
-            <summary>Field number for the "layouts" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.Layouts">
-             <summary>
-            upload the application layout to server
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.RequestMsg.SpreaderFieldNumber">
-            <summary>Field number for the "spreader" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.RequestMsg.Spreader">
-             <summary>
-            request to create/update spreader, the new spreader ID should be 0.
-            only allow to change the spreader which status isn't RUN
-            to delete spreader, just specify the ID with the empty name
-             </summary>
-        </member>
-        <member name="T:Com.Xceder.Messages.RequestMsg.RequestOneofCase">
-            <summary>Enum of possible cases for the "request" oneof.</summary>
-        </member>
-        <member name="T:Com.Xceder.Messages.ResponseMsg">
-            <summary>
-            Server to Client message, server can include different fields in a single message
-            </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.ResultFieldNumber">
-            <summary>Field number for the "result" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.ResponseMsg.Result">
-             <summary>
-            this is mainly for the request reply. it can be ignored for the server side initiated broadcasting messages, such as ping, price updates
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.QueryResultFieldNumber">
-            <summary>Field number for the "queryResult" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.ResponseMsg.QueryResult">
-            <summary>
-            Reports with requested information.
-            </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.MarketDataFieldNumber">
-            <summary>Field number for the "marketData" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.PingFieldNumber">
-            <summary>Field number for the "ping" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.LogonResultFieldNumber">
-            <summary>Field number for the "logonResult" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.ResponseMsg.LogonResult">
-            <summary>
-            Session level messages from server.
-            </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.NoticeFieldNumber">
-            <summary>Field number for the "notice" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.ServiceStatusFieldNumber">
-            <summary>Field number for the "serviceStatus" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.InstrumentStatusFieldNumber">
-            <summary>Field number for the "instrumentStatus" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.WatchListSyncTimeFieldNumber">
-            <summary>Field number for the "watchListSyncTime" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.LayoutSyncTimeFieldNumber">
-            <summary>Field number for the "layoutSyncTime" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.SpreaderIDFieldNumber">
-            <summary>Field number for the "spreaderID" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.ResponseMsg.SpreaderID">
-             <summary>
-            this is the result for the spreader creation successfully
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.ResponseMsg.OrderReportsFieldNumber">
-            <summary>Field number for the "orderReports" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.ResponseMsg.OrderReports">
-             <summary>
-            this will be sent when the spreader leg order is submitted by server, or execution report for the order status
-             </summary>
-        </member>
-        <member name="T:Com.Xceder.Messages.ResponseMsg.ResponseOneofCase">
-            <summary>Enum of possible cases for the "response" oneof.</summary>
-        </member>
         <member name="F:Com.Xceder.Messages.DeviceToken.TypeFieldNumber">
             <summary>Field number for the "type" field.</summary>
         </member>
@@ -826,6 +858,9 @@
         </member>
         <member name="T:Com.Xceder.Messages.DeviceToken.Types">
             <summary>Container for nested types declared in the DeviceToken message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Account.ExtensionFieldNumber">
+            <summary>Field number for the "extension" field.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.Account.AccountIDFieldNumber">
             <summary>Field number for the "accountID" field.</summary>
@@ -882,14 +917,6 @@
         <member name="F:Com.Xceder.Messages.Account.PrevLoginRecordFieldNumber">
             <summary>Field number for the "prevLoginRecord" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.Account.WatchListSyncTimeFieldNumber">
-            <summary>Field number for the "watchListSyncTime" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.Account.WatchListSyncTime">
-             <summary>
-            the latest watch list sync timestamp
-             </summary>
-        </member>
         <member name="F:Com.Xceder.Messages.Account.TradingRuleUpdateTimeFieldNumber">
             <summary>Field number for the "tradingRuleUpdateTime" field.</summary>
         </member>
@@ -903,9 +930,6 @@
         </member>
         <member name="F:Com.Xceder.Messages.Account.LoginModeFieldNumber">
             <summary>Field number for the "loginMode" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.Account.LayoutSyncTimeFieldNumber">
-            <summary>Field number for the "layoutSyncTime" field.</summary>
         </member>
         <member name="T:Com.Xceder.Messages.Account.Types">
             <summary>Container for nested types declared in the Account message type.</summary>
@@ -1303,6 +1327,9 @@
             Request for information.
             </summary>
         </member>
+        <member name="F:Com.Xceder.Messages.Query.ExtensionFieldNumber">
+            <summary>Field number for the "extension" field.</summary>
+        </member>
         <member name="F:Com.Xceder.Messages.Query.OrderFieldNumber">
             <summary>Field number for the "order" field.</summary>
         </member>
@@ -1317,9 +1344,6 @@
         <member name="F:Com.Xceder.Messages.Query.InstrumentsFieldNumber">
             <summary>Field number for the "instruments" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.Query.WatchListFieldNumber">
-            <summary>Field number for the "watchList" field.</summary>
-        </member>
         <member name="F:Com.Xceder.Messages.Query.AccountTradingRuleFieldNumber">
             <summary>Field number for the "accountTradingRule" field.</summary>
         </member>
@@ -1331,9 +1355,6 @@
         <member name="F:Com.Xceder.Messages.Query.SupportBrokerExchangesFieldNumber">
             <summary>Field number for the "supportBrokerExchanges" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.Query.AppLayoutFieldNumber">
-            <summary>Field number for the "appLayout" field.</summary>
-        </member>
         <member name="F:Com.Xceder.Messages.Query.CalendarFieldNumber">
             <summary>Field number for the "calendar" field.</summary>
         </member>
@@ -1343,23 +1364,14 @@
         <member name="T:Com.Xceder.Messages.Query.QueryOneofCase">
             <summary>Enum of possible cases for the "query" oneof.</summary>
         </member>
-        <member name="T:Com.Xceder.Messages.Query.Types">
-            <summary>Container for nested types declared in the Query message type.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.Query.Types.QueryLayout.AccountFieldNumber">
-            <summary>Field number for the "account" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.Query.Types.QueryLayout.LayoutIDFieldNumber">
-            <summary>Field number for the "layoutID" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.Query.Types.QueryLayout.FromSyncTimeFieldNumber">
-            <summary>Field number for the "fromSyncTime" field.</summary>
-        </member>
         <member name="T:Com.Xceder.Messages.QueryResult">
              <summary>
             *
             Pagination is done in the server side automatically. Client should always query the server until return empty records
              </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.ExtensionFieldNumber">
+            <summary>Field number for the "extension" field.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.QueryResult.OrdersReportsFieldNumber">
             <summary>Field number for the "ordersReports" field.</summary>
@@ -1372,17 +1384,11 @@
         <member name="F:Com.Xceder.Messages.QueryResult.LogsFieldNumber">
             <summary>Field number for the "logs" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.QueryResult.WatchListFieldNumber">
-            <summary>Field number for the "watchList" field.</summary>
-        </member>
         <member name="F:Com.Xceder.Messages.QueryResult.AccountTradingRuleFieldNumber">
             <summary>Field number for the "accountTradingRule" field.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.QueryResult.SupportedExchangesFieldNumber">
             <summary>Field number for the "supportedExchanges" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.QueryResult.LayoutsFieldNumber">
-            <summary>Field number for the "layouts" field.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.QueryResult.CalendarFieldNumber">
             <summary>Field number for the "calendar" field.</summary>
@@ -1393,8 +1399,8 @@
         <member name="F:Com.Xceder.Messages.QueryResult.SpreadersFieldNumber">
             <summary>Field number for the "spreaders" field.</summary>
         </member>
-        <member name="T:Com.Xceder.Messages.QueryResult.ResponseOneofCase">
-            <summary>Enum of possible cases for the "response" oneof.</summary>
+        <member name="T:Com.Xceder.Messages.QueryResult.ResultOneofCase">
+            <summary>Enum of possible cases for the "result" oneof.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.ExchangeCalendar.ExchangeFieldNumber">
             <summary>Field number for the "exchange" field.</summary>
@@ -3306,39 +3312,6 @@
         <member name="F:Com.Xceder.Messages.Instrument.Types.Leg.QtyFieldNumber">
             <summary>Field number for the "qty" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.WatchList.TitleFieldNumber">
-            <summary>Field number for the "title" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.WatchList.RemarkFieldNumber">
-            <summary>Field number for the "remark" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.WatchList.AccessTimeFieldNumber">
-            <summary>Field number for the "accessTime" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.WatchList.AccessTime">
-             <summary>
-            this is the local time UTC
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.WatchList.SyncTimeFieldNumber">
-            <summary>Field number for the "syncTime" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.WatchList.SyncTime">
-             <summary>
-            this is the server side UTC. when sync, we only take the server side time. when upload change to server, it should be 0
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.WatchList.InstrumentIDFieldNumber">
-            <summary>Field number for the "instrumentID" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.WatchList.InstrumentID">
-             <summary>
-            empty list means delete this watch list
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.WatchLists.WatchListFieldNumber">
-            <summary>Field number for the "watchList" field.</summary>
-        </member>
         <member name="F:Com.Xceder.Messages.AccountTradingRules.AccountFieldNumber">
             <summary>Field number for the "account" field.</summary>
         </member>
@@ -3356,23 +3329,6 @@
         </member>
         <member name="F:Com.Xceder.Messages.AccountTradingRules.UpdateTimeUTCFieldNumber">
             <summary>Field number for the "updateTimeUTC" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.AppLayouts.LayoutsFieldNumber">
-            <summary>Field number for the "layouts" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.AppLayout.LayoutIDFieldNumber">
-            <summary>Field number for the "layoutID" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.AppLayout.DetailFieldNumber">
-            <summary>Field number for the "detail" field.</summary>
-        </member>
-        <member name="P:Com.Xceder.Messages.AppLayout.Detail">
-             <summary>
-            max length is 10K bytes
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.AppLayout.SyncTimeFieldNumber">
-            <summary>Field number for the "syncTime" field.</summary>
         </member>
     </members>
 </doc>

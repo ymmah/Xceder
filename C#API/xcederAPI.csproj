@@ -43,6 +43,7 @@
     <EmbeddedResource Include="xcederRSA.pub" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="XcederStream.cs" />
     <Compile Include="PemKeyUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CircularBuffer.cs" />
@@ -51,7 +52,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"$(USERPROFILE)\.nuget\packages\Google.Protobuf.Tools\3.2.0\tools\windows_x64\protoc.exe"  --proto_path="$(ProjectDir).."  --csharp_out=$(ProjectDir) $(ProjectDir)..\gateway.proto
+    <PreBuildEvent>"$(USERPROFILE)\.nuget\packages\Google.Protobuf.Tools\3.2.0\tools\windows_x64\protoc.exe"  --proto_path="$(USERPROFILE)\.nuget\packages\Google.Protobuf.Tools\3.2.0\tools"  --proto_path="$(ProjectDir).." --csharp_out=$(ProjectDir) $(ProjectDir)..\gateway.proto
 </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
