@@ -7,10 +7,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.Sockets;
 using Com.Xceder.Messages;
-using System.Reactive.Linq;
-using System.Reactive.Disposables;
 using System.Security.Cryptography;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Xceder
 {
@@ -147,7 +146,7 @@ namespace Xceder
      */
     public class Client
     {
-        const int BUFFER_SIZE = 1024 * 1024;
+        private const int BUFFER_SIZE = 1024 * 1024;
 
         private CircularBuffer<byte> _socketRcvBuffer = new CircularBuffer<byte>(BUFFER_SIZE * 10);
 
@@ -161,39 +160,55 @@ namespace Xceder
         public event EventHandler<Tuple<Request, Response>> RcvMessageEvent;
 
         /// <summary>
-        /// after the message is sent successfully, this event will be triggered with the sent message
+        /// error event for the error encountered when try to receive the message from the socket
         /// </summary>
-        public event EventHandler<Request> PostSendMessageEvent;
+        public event EventHandler<Exception> RcvErrorEvent;
 
         /// <summary>
-        /// error event for the error encountered 
-        /// </summary>
-        public event EventHandler<Exception> ErrorEvent;
+        /// after the message is sent, this event will be triggered with the sent message and exception if any. If it is successful sent out, the exception will be null
+        /// </summary>       
+        public event EventHandler<Tuple<Request, Exception>> PostSendMessageEvent;
 
         private long sentRequestID = (long)DateTime.UtcNow.TimeOfDay.TotalSeconds;
 
-        //store all sent request and result from the server
-        private ConcurrentDictionary<ulong, Tuple<Request, Result>> _sentRequests = new ConcurrentDictionary<ulong, Tuple<Request, Result>>();
+        /// <summary>
+        /// store the sent request and will be retrieved to trigger the received message event 
+        /// </summary>
+        private ConcurrentDictionary<ulong, Request> _sentRequests = new ConcurrentDictionary<ulong, Request>();
 
         private readonly object _lock = new object();
 
         private const int CONNECT_CHECK_PERIOD = 60 * 1000;
 
         private DateTime LastRcvMsgTime { get; set; }
-        private IDisposable _connectionCheckHandle = Disposable.Empty;
 
-        private SocketAsyncEventArgs currentSocketAsyncArgs = null;
+        private Socket connectedSocket = null;
 
         private MemoryStream protoStream = new MemoryStream(BUFFER_SIZE);
 
+        private readonly System.Threading.Timer timer;
+
+        private readonly Dictionary<SocketAsyncOperation, Action<SocketAsyncEventArgs>> socketCompleteHandlerMap = new Dictionary<SocketAsyncOperation, Action<SocketAsyncEventArgs>>();
+
         /// <summary>
-        /// indicate whether the connection is started 
+        /// Client constructor
         /// </summary>
-        public bool Started
+        public Client()
+        {
+            timer = new System.Threading.Timer(onTimer, this, CONNECT_CHECK_PERIOD, CONNECT_CHECK_PERIOD);
+
+            socketCompleteHandlerMap.Add(SocketAsyncOperation.Connect, onConnectComplete);
+            socketCompleteHandlerMap.Add(SocketAsyncOperation.Receive, onRcvMsgComplete);
+        }
+
+        /// <summary>
+        /// indicate whether the server is connected 
+        /// </summary>
+        public bool Connected
         {
             get
             {
-                return currentSocketAsyncArgs != null;
+                return connectedSocket != null;
             }
         }
 
@@ -232,7 +247,6 @@ namespace Xceder
         {
             get { return _accountInfo; }
         }
-
 
         ///<exception cref="Exception"></exception>
         private TMessage extractMessages<TMessage>(System.IO.Stream stream) where TMessage : IMessage<TMessage>, new()
@@ -276,43 +290,14 @@ namespace Xceder
             return _sentRequests.ContainsKey(reqID);
         }
 
-        /// <summary>
-        /// return the sent request Result by the specified ID
-        /// </summary>
-        /// <param name="reqID">request ID</param>
-        /// <returns>instance of Result</returns>
-        public Result getRequestResult(ulong reqID)
+        private void onTimer(object state)
         {
-            Result result = null;
-            Tuple<Request, Result> tuple = null;
-
-            _sentRequests.TryGetValue(reqID, out tuple);
-
-            if (tuple != null)
+            if (Connected && (DateTime.Now - LastRcvMsgTime).TotalMilliseconds >= CONNECT_CHECK_PERIOD)
             {
-                result = tuple.Item2;
-            }
-
-            return result;
-        }
-
-        private void checkConnection()
-        {
-            if (Started && (DateTime.Now - LastRcvMsgTime).TotalMilliseconds >= CONNECT_CHECK_PERIOD)
-            {
-                Debug.WriteLine("re-send login message for the idle connection ( idle >= " + (CONNECT_CHECK_PERIOD / 1000) + ") seconds");
+                Debug.WriteLine("send ping message for the idle connection ( idle >= " + (CONNECT_CHECK_PERIOD / 1000) + ") seconds");
 
                 sendPingRequest();
             }
-        }
-
-        private void scheduleDeadConnectionCheck()
-        {
-            _connectionCheckHandle.Dispose();
-
-            Debug.WriteLine("schedule dead connection check with the period=" + (CONNECT_CHECK_PERIOD / 1000) + "seconds");
-
-            _connectionCheckHandle = Observable.Interval(TimeSpan.FromMilliseconds(CONNECT_CHECK_PERIOD)).Subscribe(p => checkConnection());
         }
 
         /// <summary>
@@ -320,13 +305,12 @@ namespace Xceder
         /// </summary>
         /// <param name="server">server IP or domain</param>
         /// <param name="port">port number</param>
-        /// <param name="forceReconnect">indicate whether reconnect to the server if it is already connected</param>
-        public void start(string server, int port, bool forceReconnect = false)
+        /// <returns>Task to wait on the async result, true means connected, false means fail</returns>
+        public Task<bool> connect(string server, int port)
         {
-            if (!forceReconnect && Started && server.Equals(currentSocketAsyncArgs.RemoteEndPoint))
-                return;
+            close("close before start");
 
-            stop("stop before start");
+            var tcs = new TaskCompletionSource<bool>();
 
             try
             {
@@ -334,96 +318,130 @@ namespace Xceder
 
                 lock (_lock)
                 {
-                    currentSocketAsyncArgs = connectAsync(new IPEndPoint(serverAddr, port));
-
-                    scheduleDeadConnectionCheck();
+                    connectAsync(new IPEndPoint(serverAddr, port), tcs);
                 }
             }
             catch (Exception ex)
             {
-                ErrorEvent?.Invoke(this, ex);
+                tcs.SetException(ex);
             }
+
+            return tcs.Task;
         }
 
-        private SocketAsyncEventArgs connectAsync(IPEndPoint server)
+        private void connectAsync(IPEndPoint server, TaskCompletionSource<bool> tcs)
         {
             Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             SocketAsyncEventArgs eventArgs = new SocketAsyncEventArgs();
 
             eventArgs.RemoteEndPoint = server;
-            eventArgs.UserToken = s;
+            eventArgs.UserToken = tcs;
             eventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(onSocketComplete);
-            eventArgs.SetBuffer(new byte[BUFFER_SIZE], 0, BUFFER_SIZE);
-            s.ConnectAsync(currentSocketAsyncArgs);
+            //eventArgs.SetBuffer(new byte[BUFFER_SIZE], 0, BUFFER_SIZE);
 
-            return eventArgs;
+            if (!s.ConnectAsync(eventArgs))
+                onSocketComplete(s, eventArgs);
         }
 
         private void onSocketComplete(object sender, SocketAsyncEventArgs e)
         {
-            switch (e.LastOperation)
+            Action<SocketAsyncEventArgs> handler;
+
+            if (socketCompleteHandlerMap.TryGetValue(e.LastOperation, out handler))
             {
-                case SocketAsyncOperation.Connect:
-                    e.ConnectSocket.ReceiveAsync(e);
-                    break;
-
-                case SocketAsyncOperation.Receive:
-                    onRcvMsg(e);
-                    break;
-
-                default:
-                    break;
+                handler.Invoke(e);
             }
         }
 
-        private void onRcvMsg(SocketAsyncEventArgs asyncArgs)
+        private void onConnectComplete(SocketAsyncEventArgs e)
         {
-            try
+            bool isSuccess = e.SocketError == SocketError.Success;
+
+            var tcs = (TaskCompletionSource<bool>)e.UserToken;
+
+            if (isSuccess)
             {
-                if (!Started)
-                    return;
+                tcs.SetResult(true);
 
-                int bytesRead = asyncArgs.BytesTransferred;
-
-                if (bytesRead > 0)
+                lock (_lock)
                 {
-                    List<Tuple<Request, Response>> messageList;
+                    connectedSocket = e.ConnectSocket;
 
-                    LastRcvMsgTime = DateTime.Now;
+                    SocketAsyncEventArgs eventArgs = new SocketAsyncEventArgs();
 
-                    // There might be more data, so store the data received so far.
-                    for (int index = 0; index < bytesRead; index++)
+                    eventArgs.UserToken = connectedSocket;
+                    eventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(onSocketComplete);
+                    eventArgs.SetBuffer(new byte[BUFFER_SIZE], 0, BUFFER_SIZE);
+
+                    connectedSocket.ReceiveAsync(eventArgs);
+                }                
+            }
+            else
+            {
+                tcs.SetException(new SocketException((int)e.SocketError));
+            }
+        }
+
+        private void onRcvMsgComplete(SocketAsyncEventArgs asyncArgs)
+        {
+            if (Connected)
+            {
+                try
+                {
+                    bool isSuccess = asyncArgs.SocketError == SocketError.Success;
+
+                    if (isSuccess)
                     {
-                        _socketRcvBuffer.PushBack(asyncArgs.Buffer[index]);
+                        processRcvBytes(asyncArgs);
                     }
-
-                    //time to parse the message
-                    messageList = processRcvBytes();
-
-                    messageList.ForEach(t =>
+                    else
                     {
-                        notifyRcvProtoMsg(t);
-                    });
+                        throw new SocketException((int)asyncArgs.SocketError);
+                    }
                 }
-
-                // continue to receive the data
-                if (bytesRead > 0)
+                catch (Exception e)
                 {
-                    asyncArgs.SetBuffer(0, BUFFER_SIZE);
-                    asyncArgs.ConnectSocket.ReceiveAsync(asyncArgs);
-                }
-                else
-                {
-                    throw new Exception("socket is closed because receiving bytes " + bytesRead.ToString() + " (should >= 0)");
+                    RcvErrorEvent?.Invoke(this, e);
                 }
             }
-            catch (Exception e)
-            {
-                Debug.WriteLine("when it is started=" + Started + ", recieve exception when process socket message:" + e.Message + System.Environment.NewLine + e.StackTrace);
+        }
 
-                if (Started)
-                    ErrorEvent?.Invoke(this, e);
+        private void processRcvBytes(SocketAsyncEventArgs asyncArgs)
+        {
+            int bytesRead = asyncArgs.BytesTransferred;
+
+            if (bytesRead > 0)
+            {
+                List<Tuple<Request, Response>> messageList;
+
+                LastRcvMsgTime = DateTime.Now;
+
+                // There might be more data, so store the data received so far.
+                for (int index = 0; index < bytesRead; index++)
+                {
+                    _socketRcvBuffer.PushBack(asyncArgs.Buffer[index]);
+                }
+
+                //time to parse the message
+                messageList = processRcvBytes();
+
+                messageList.ForEach(t =>
+                {
+                    notifyRcvProtoMsg(t);
+                });
+            }
+
+            // continue to receive the data
+            if (bytesRead > 0)
+            {
+                asyncArgs.SetBuffer(0, BUFFER_SIZE);
+
+                ((Socket)asyncArgs.UserToken).ReceiveAsync(asyncArgs);
+            }
+            else
+            {
+                throw new Exception("socket is closed because receiving bytes " + bytesRead.ToString() + " (should >= 0)");
             }
         }
 
@@ -431,20 +449,18 @@ namespace Xceder
         /// stop the current connection
         /// </summary>
         /// <param name="reason">sepcify the stop reason</param>
-        public void stop(string reason)
+        public void close(string reason)
         {
             lock (_lock)
             {
                 try
                 {
-                    _connectionCheckHandle.Dispose();
-
-                    if (currentSocketAsyncArgs != null && currentSocketAsyncArgs.ConnectSocket != null)
+                    if (connectedSocket != null)
                     {
                         sendLogOut(reason);
 
-                        currentSocketAsyncArgs.ConnectSocket.Shutdown(SocketShutdown.Both);
-                        currentSocketAsyncArgs.ConnectSocket.Dispose();
+                        connectedSocket.Shutdown(SocketShutdown.Both);
+                        connectedSocket.Dispose();
                     }
                 }
                 catch (Exception ex)
@@ -452,7 +468,7 @@ namespace Xceder
                     Debug.WriteLine("encounter exception:" + ex.Message + Environment.NewLine + ex.StackTrace);
                 }
 
-                currentSocketAsyncArgs = null;
+                connectedSocket = null;
             }
 
             //discard those uncomplete received bytes
@@ -480,15 +496,7 @@ namespace Xceder
 
                     if (msg.Result != null)
                     {
-                        Tuple<Request, Result> tuple = null;
-
-                        _sentRequests.TryGetValue(msg.Result.Request, out tuple);
-
-                        if (tuple != null)
-                        {
-                            request = tuple.Item1;
-                            _sentRequests[msg.Result.Request] = Tuple.Create(tuple.Item1, msg.Result);
-                        }
+                        _sentRequests.TryRemove(msg.Result.Request, out request);
                     }
 
                     messageList.Add(Tuple.Create(request, msg));
@@ -523,10 +531,11 @@ namespace Xceder
             return request;
         }
 
-        //<exception cref="Exception"></exception>
-        private ulong send(Request message)
+        private void send(Request message)
         {
             ulong requestID = 0;
+
+            Exception exception = null;
 
             try
             {
@@ -538,9 +547,7 @@ namespace Xceder
 
                     byte[] data = protoStream.ToArray();
 
-                    Socket socket = currentSocketAsyncArgs.ConnectSocket;
-
-                    socket.Send(data);
+                    connectedSocket.Send(data);
                 }
 
                 Result result = new Result();
@@ -550,18 +557,14 @@ namespace Xceder
 
                 requestID = message.RequestID;
 
-                _sentRequests[requestID] = Tuple.Create(message, result);
-
-                PostSendMessageEvent?.Invoke(this, message);
+                _sentRequests[requestID] = message;
             }
             catch (Exception ex)
             {
-                ErrorEvent?.Invoke(this, ex);
-
-                requestID = 0;
+                exception = ex;
             }
 
-            return requestID;
+            PostSendMessageEvent?.Invoke(this, Tuple.Create(message, exception));
         }
 
         private RSA loadPublicKey()
@@ -572,7 +575,7 @@ namespace Xceder
 
             var assembly = GetType().GetTypeInfo().Assembly;
 
-            System.IO.Stream resource = assembly.GetManifestResourceStream("xcederRSA.pub");
+            System.IO.Stream resource = assembly.GetManifestResourceStream("Xceder.xcederRSA.pub");
 
             StreamReader streamReader = new StreamReader(resource);
 
@@ -612,8 +615,7 @@ namespace Xceder
         /// </summary>
         /// <param name="userID"></param>
         /// <param name="password"></param>
-        /// <returns></returns>
-        public ulong sendLogin(string userID, string password)
+        public void sendLogin(string userID, string password)
         {
             Request request = new Request();
 
@@ -627,16 +629,16 @@ namespace Xceder
             logonRequest.Password = rsaEncrypt(request.RequestUTC.ToString() + "," + password);
             logonRequest.ClientApp = "C#";
 
-            return send(request);
+            send(request);
         }
 
-        private ulong sendLogOut(string reason)
+        private void sendLogOut(string reason)
         {
             Request request = new Request();
 
             request.Logoff = reason;
 
-            return send(request);
+            send(request);
         }
 
         /// <summary>
@@ -645,8 +647,7 @@ namespace Xceder
         /// <param name="userID"></param>
         /// <param name="email"></param>
         /// <param name="password"></param>
-        /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
-        public ulong registerAccount(string userID, string email, string password)
+        public void registerAccount(string userID, string email, string password)
         {
             Request request = createRequestMsg();
 
@@ -657,15 +658,14 @@ namespace Xceder
             account.Password = rsaEncrypt(request.RequestUTC.ToString() + "," + password);
             particular.Email = email;
 
-            return send(request);
+            send(request);
         }
 
         /// <summary>
         /// request an one time password for the password change
         /// </summary>
         /// <param name="email"></param>
-        /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
-        public ulong requestOTP(string email)
+        public void requestOTP(string email)
         {
             Request request = createRequestMsg();
 
@@ -673,7 +673,7 @@ namespace Xceder
 
             request.PasswordChange.Email = email;
 
-            return send(request);
+            send(request);
         }
 
         /// <summary>
@@ -682,8 +682,7 @@ namespace Xceder
         /// <param name="email"></param>
         /// <param name="OTP">one time password gotten by the requestOTP()</param>
         /// <param name="newPassword"></param>
-        /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
-        public ulong requestPWDReset(string email, string OTP, string newPassword)
+        public void requestPWDReset(string email, string OTP, string newPassword)
         {
             Request request = createRequestMsg();
 
@@ -695,7 +694,7 @@ namespace Xceder
             passwordChange.CurrentPassword = "";
             passwordChange.NewPassword = newPassword;
 
-            return send(request);
+            send(request);
         }
 
 
@@ -705,8 +704,7 @@ namespace Xceder
         /// </summary>
         /// <param name="instrumentIDAry"></param>
         /// <param name="isUnSubscribe"></param>
-        /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
-        public ulong subscribePrice(ulong[] instrumentIDAry, bool isUnSubscribe = false)
+        public void subscribePrice(ulong[] instrumentIDAry, bool isUnSubscribe = false)
         {
             Request request = createRequestMsg();
 
@@ -716,13 +714,12 @@ namespace Xceder
 
             marketData.Action = isUnSubscribe ? InstrumentSubscription.Types.ACTION.Unsubscribe : InstrumentSubscription.Types.ACTION.Subscribe;
 
-            return send(request);
+            send(request);
         }
 
         /// <summary>
         /// send the ping request to the server to ensure the connection status
         /// </summary>
-        /// <returns>0 means fail, otherwise the sent request ID for this request</returns>
         public void sendPingRequest()
         {
             Request request = createRequestMsg();
@@ -738,8 +735,7 @@ namespace Xceder
         /// submit the order
         /// </summary>
         /// <param name="orderParams"></param>
-        /// <returns>0 means fail, otherwise the sent request ID for this order</returns>
-        public ulong submitOrder(OrderParams orderParams)
+        public void submitOrder(OrderParams orderParams)
         {
             Request request = createRequestMsg();
 
@@ -753,7 +749,7 @@ namespace Xceder
 
             order.Params = orderParams;
 
-            return send(request);
+            send(request);
         }
 
         /// <summary>
@@ -763,8 +759,7 @@ namespace Xceder
         /// <param name="newQty">new order qty, 0 means withdraw the target order</param>
         /// <param name="newLimitPrice"></param>
         /// <param name="newStopPrice"></param>
-        /// <returns></returns>
-        public ulong replaceOrWithdrawOrder(ulong targetClOrdID, uint newQty, ulong newLimitPrice, ulong newStopPrice)
+        public void replaceOrWithdrawOrder(ulong targetClOrdID, uint newQty, ulong newLimitPrice, ulong newStopPrice)
         {
             OrderParams orderParams = new OrderParams();
 
@@ -773,7 +768,7 @@ namespace Xceder
             orderParams.LimitPrice = newLimitPrice;
             orderParams.StopPrice = newStopPrice;
 
-            return submitOrder(orderParams);
+            submitOrder(orderParams);
         }
     }
 }

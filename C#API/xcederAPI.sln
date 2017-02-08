@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xcederAPI", "xcederAPI.csproj", "{9D0A8CDB-7EC1-416E-B605-97712400C733}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{4E93174F-1652-40D4-98DC-C011BCB8998D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9D0A8CDB-7EC1-416E-B605-97712400C733} = {9D0A8CDB-7EC1-416E-B605-97712400C733}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

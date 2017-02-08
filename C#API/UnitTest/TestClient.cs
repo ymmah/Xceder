@@ -1,22 +1,74 @@
-﻿using Com.Xceder.Messages;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
+using System.Threading.Tasks;
 using System;
+using System.Reactive.Linq;
+using Com.Xceder.Messages;
 
 namespace Xceder
 {
     [TestClass]
     public class TestClient
     {
+        private bool LastSentHasError;
+        private Request.RequestOneofCase LastSentRequestType;
+
         [TestMethod]
         public void TestLogin()
         {
-            Client client = new Client();
+            var client = new Client();
 
-            XcederStream stream = new Xceder.XcederStream(client);
+            var stream = new XcederStream(client);
 
-            client.start("192.168.1.104", 8082, false);
+            stream.SendMsgStream.Subscribe(onSendMsg);
+            stream.RcvMsgStream.Subscribe(onRcvMsg);
+            stream.RcvErrorStream.Subscribe(onRcvError);
 
-            IConnectableObservable<Tuple<Request, Response>> loginResultStream = stream.RcvMsgStream.Where(ev => { return ev.Item1 != null && ev.Item1.RequestCase == Request.RequestOneofCase.Logon; }).Select(ev => { return ev.Item2.Result; }).Publish();
+            var task = client.connect("192.168.1.106", 81);
+
+            try
+            {
+                task.Wait();
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+            Assert.AreEqual(task.Status, TaskStatus.Faulted);
+
+            task = client.connect("192.168.1.106", 8082);
+
+            task.Wait();
+
+            Assert.IsTrue(task.Result);
+
+            LastSentHasError = false;
+            LastSentRequestType = Request.RequestOneofCase.Logon;
+
+            client.sendLogin("dreamer", "test");
+
+            Thread.Sleep(100000);
+        }
+
+        private void onRcvError(Exception ex)
+        {
+
+        }
+
+        private void onRcvMsg(Tuple<Request, Response> tuple)
+        {
+
+        }
+
+        private void onSendMsg(Tuple<Request, Exception> tuple)
+        {
+            Assert.AreEqual(tuple.Item1.RequestCase, LastSentRequestType);
+
+            if (LastSentHasError)
+                Assert.IsNotNull(tuple.Item2);
+            else
+                Assert.IsNull(tuple.Item2);
         }
     }
 }

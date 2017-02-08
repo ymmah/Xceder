@@ -3,3 +3,7 @@
 /C#API/bin/Debug/
 /C#API/obj/
 /C#API/bin/Release/
+/C#API/UnitTest/obj/
+/C#API/UnitTest/bin/
+/C#API/packages/
+/C#API/TestResults/

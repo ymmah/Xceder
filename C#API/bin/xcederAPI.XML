@@ -11,9 +11,19 @@
         </member>
         <member name="M:Xceder.XcederStream.#ctor(Xceder.Client)">
             <summary>
-            constructor
+            hook the specified Client instance
             </summary>
             <param name="xcederClient"></param>
+        </member>
+        <member name="M:Xceder.XcederStream.#ctor">
+            <summary>
+            create a Client instance and hook its events
+            </summary>
+        </member>
+        <member name="P:Xceder.XcederStream.XcederClient">
+            <summary>
+            used Client instance for this stream 
+            </summary>
         </member>
         <member name="M:Xceder.XcederStream.connect">
             <summary>
