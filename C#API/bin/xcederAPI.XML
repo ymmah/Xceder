@@ -4,45 +4,20 @@
         <name>xcederAPI</name>
     </assembly>
     <members>
-        <member name="T:Xceder.XcederStream">
+        <member name="T:Xceder.Properties.Resources">
             <summary>
-            provide the event stream from the Client
+              A strongly-typed resource class, for looking up localized strings, etc.
             </summary>
         </member>
-        <member name="M:Xceder.XcederStream.#ctor(Xceder.Client)">
+        <member name="P:Xceder.Properties.Resources.ResourceManager">
             <summary>
-            hook the specified Client instance
-            </summary>
-            <param name="xcederClient"></param>
-        </member>
-        <member name="M:Xceder.XcederStream.#ctor">
-            <summary>
-            create a Client instance and hook its events
+              Returns the cached ResourceManager instance used by this class.
             </summary>
         </member>
-        <member name="P:Xceder.XcederStream.XcederClient">
+        <member name="P:Xceder.Properties.Resources.Culture">
             <summary>
-            used Client instance for this stream 
-            </summary>
-        </member>
-        <member name="M:Xceder.XcederStream.connect">
-            <summary>
-            connect to the stream to emit the event
-            </summary>
-        </member>
-        <member name="P:Xceder.XcederStream.RcvMsgStream">
-            <summary>
-            return the recieve message event stream
-            </summary>
-        </member>
-        <member name="P:Xceder.XcederStream.SendMsgStream">
-            <summary>
-            return the send message event stream. this is to monitor the sent message
-            </summary>
-        </member>
-        <member name="P:Xceder.XcederStream.ErrorStream">
-            <summary>
-            this is to monitor the error event
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
             </summary>
         </member>
         <member name="T:Xceder.PemKeyUtils">
@@ -218,24 +193,29 @@
         <member name="T:Xceder.Client">
             <summary>handle the xceder server connection</summary>
         </member>
-        <member name="E:Xceder.Client.RcvMessageEvent">
+        <member name="E:Xceder.Client.ResponseEvent">
             <summary>
-            provide the message receive event. if the message isn't reply for the sent request, the Request will be null 
+            provide the server broadcast event.For example, the real time market data update
             </summary>
         </member>
-        <member name="E:Xceder.Client.PostSendMessageEvent">
+        <member name="E:Xceder.Client.NetWorkErrorEvent">
             <summary>
-            after the message is sent successfully, this event will be triggered with the sent message
+            error event for the error encountered when try to receive the message from the socket
             </summary>
         </member>
-        <member name="E:Xceder.Client.ErrorEvent">
+        <member name="F:Xceder.Client._sentRequests">
             <summary>
-            error event for the error encountered 
+            store the sent request and will be retrieved to trigger the received message event 
             </summary>
         </member>
-        <member name="P:Xceder.Client.Started">
+        <member name="M:Xceder.Client.#ctor">
             <summary>
-            indicate whether the connection is started 
+            Client constructor
+            </summary>
+        </member>
+        <member name="P:Xceder.Client.Connected">
+            <summary>
+            indicate whether the server is connected 
             </summary>
         </member>
         <member name="M:Xceder.Client.convertUTC(System.UInt64)">
@@ -272,34 +252,27 @@
             <param name="reqID">requet ID</param>
             <returns>true: sent out successfully, false: not sent</returns>
         </member>
-        <member name="M:Xceder.Client.getRequestResult(System.UInt64)">
-            <summary>
-            return the sent request Result by the specified ID
-            </summary>
-            <param name="reqID">request ID</param>
-            <returns>instance of Result</returns>
-        </member>
-        <member name="M:Xceder.Client.start(System.String,System.Int32,System.Boolean)">
+        <member name="M:Xceder.Client.connect(System.String,System.Int32)">
             <summary>
             start to connect to the server
             </summary>
             <param name="server">server IP or domain</param>
             <param name="port">port number</param>
-            <param name="forceReconnect">indicate whether reconnect to the server if it is already connected</param>
+            <returns>Task to wait on the async result, true means connected, false means fail</returns>
         </member>
-        <member name="M:Xceder.Client.stop(System.String)">
+        <member name="M:Xceder.Client.close(System.String)">
             <summary>
             stop the current connection
             </summary>
             <param name="reason">sepcify the stop reason</param>
         </member>
-        <member name="M:Xceder.Client.sendLogin(System.String,System.String)">
+        <member name="M:Xceder.Client.login(System.String,System.String)">
             <summary>
             send login request to the server. 
             </summary>
             <param name="userID"></param>
             <param name="password"></param>
-            <returns></returns>
+            <returns>ansyc task result for this request</returns>
         </member>
         <member name="M:Xceder.Client.registerAccount(System.String,System.String,System.String)">
             <summary>
@@ -308,14 +281,14 @@
             <param name="userID"></param>
             <param name="email"></param>
             <param name="password"></param>
-            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+            <returns>ansyc task result for this request</returns>
         </member>
         <member name="M:Xceder.Client.requestOTP(System.String)">
             <summary>
             request an one time password for the password change
             </summary>
             <param name="email"></param>
-            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+            <returns>ansyc task result for this request</returns>
         </member>
         <member name="M:Xceder.Client.requestPWDReset(System.String,System.String,System.String)">
             <summary>
@@ -324,7 +297,17 @@
             <param name="email"></param>
             <param name="OTP">one time password gotten by the requestOTP()</param>
             <param name="newPassword"></param>
-            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.queryInstrument(System.String,Com.Xceder.Messages.Instrument.Types.PRODUCT,Com.Xceder.Messages.Exchange.Types.EXCHANGE,Com.Xceder.Messages.BROKER)">
+            <summary>
+            query the instrument info
+            </summary>
+            <param name="symbol"></param>
+            <param name="product">target product, default value "UnknownType" means query all products</param>
+            <param name="exchange">target exchange only, default value "NonExch" means query all exchanges</param>
+            <param name="broker">target broker only, default value "Xceder" means all brokers</param>
+            <returns>ansyc task result for this request</returns>
         </member>
         <member name="M:Xceder.Client.subscribePrice(System.UInt64[],System.Boolean)">
             <summary>
@@ -332,20 +315,28 @@
             </summary>
             <param name="instrumentIDAry"></param>
             <param name="isUnSubscribe"></param>
-            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+            <returns>ansyc task result for this request</returns>
         </member>
-        <member name="M:Xceder.Client.sendPingRequest">
+        <member name="M:Xceder.Client.subscribePrice(System.UInt64,System.Boolean)">
+            <summary>
+            subscribe one instrument market data
+            </summary>
+            <param name="instrumentID"></param>
+            <param name="isUnSubscribe"></param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.pingServer">
             <summary>
             send the ping request to the server to ensure the connection status
             </summary>
-            <returns>0 means fail, otherwise the sent request ID for this request</returns>
+            <returns>ansyc task result for this request</returns>
         </member>
         <member name="M:Xceder.Client.submitOrder(Com.Xceder.Messages.OrderParams)">
             <summary>
             submit the order
             </summary>
             <param name="orderParams"></param>
-            <returns>0 means fail, otherwise the sent request ID for this order</returns>
+            <returns>ansyc task result for this request</returns>
         </member>
         <member name="M:Xceder.Client.replaceOrWithdrawOrder(System.UInt64,System.UInt32,System.UInt64,System.UInt64)">
             <summary>
@@ -355,7 +346,7 @@
             <param name="newQty">new order qty, 0 means withdraw the target order</param>
             <param name="newLimitPrice"></param>
             <param name="newStopPrice"></param>
-            <returns></returns>
+            <returns>ansyc task result for this request</returns>
         </member>
         <member name="T:Com.Xceder.Messages.GatewayReflection">
             <summary>Holder for reflection information generated from gateway.proto</summary>
