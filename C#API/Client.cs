@@ -150,31 +150,24 @@ namespace Xceder
 
         private CircularBuffer<byte> _socketRcvBuffer = new CircularBuffer<byte>(BUFFER_SIZE * 10);
 
-        private Account _accountInfo = new Account();
-
         private static DateTime EPOCH = new DateTime(1970, 1, 1);
 
         /// <summary>
-        /// provide the message receive event. if the message isn't reply for the sent request, the Request will be null 
+        /// provide the server broadcast event.For example, the real time market data update
         /// </summary>
-        public event EventHandler<Tuple<Request, Response>> RcvMessageEvent;
+        public event EventHandler<Response> ResponseEvent;
 
         /// <summary>
         /// error event for the error encountered when try to receive the message from the socket
         /// </summary>
-        public event EventHandler<Exception> RcvErrorEvent;
+        public event EventHandler<Exception> NetWorkErrorEvent;
 
-        /// <summary>
-        /// after the message is sent, this event will be triggered with the sent message and exception if any. If it is successful sent out, the exception will be null
-        /// </summary>       
-        public event EventHandler<Tuple<Request, Exception>> PostSendMessageEvent;
-
-        private long sentRequestID = (long)DateTime.UtcNow.TimeOfDay.TotalSeconds;
+        private long sentRequestID = 0;
 
         /// <summary>
         /// store the sent request and will be retrieved to trigger the received message event 
         /// </summary>
-        private ConcurrentDictionary<ulong, Request> _sentRequests = new ConcurrentDictionary<ulong, Request>();
+        private ConcurrentDictionary<ulong, Tuple<Request, TaskCompletionSource<Tuple<Request, Response>>>> _sentRequests = new ConcurrentDictionary<ulong, Tuple<Request, TaskCompletionSource<Tuple<Request, Response>>>>();
 
         private readonly object _lock = new object();
 
@@ -183,8 +176,6 @@ namespace Xceder
         private DateTime LastRcvMsgTime { get; set; }
 
         private Socket connectedSocket = null;
-
-        private MemoryStream protoStream = new MemoryStream(BUFFER_SIZE);
 
         private readonly System.Threading.Timer timer;
 
@@ -199,6 +190,8 @@ namespace Xceder
 
             socketCompleteHandlerMap.Add(SocketAsyncOperation.Connect, onConnectComplete);
             socketCompleteHandlerMap.Add(SocketAsyncOperation.Receive, onRcvMsgComplete);
+
+            AccountInfo = new Account();
         }
 
         /// <summary>
@@ -245,7 +238,7 @@ namespace Xceder
         /// </summary>
         public Account AccountInfo
         {
-            get { return _accountInfo; }
+            get; private set;
         }
 
         ///<exception cref="Exception"></exception>
@@ -296,7 +289,7 @@ namespace Xceder
             {
                 Debug.WriteLine("send ping message for the idle connection ( idle >= " + (CONNECT_CHECK_PERIOD / 1000) + ") seconds");
 
-                sendPingRequest();
+                pingServer();
             }
         }
 
@@ -338,7 +331,6 @@ namespace Xceder
             eventArgs.RemoteEndPoint = server;
             eventArgs.UserToken = tcs;
             eventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(onSocketComplete);
-            //eventArgs.SetBuffer(new byte[BUFFER_SIZE], 0, BUFFER_SIZE);
 
             if (!s.ConnectAsync(eventArgs))
                 onSocketComplete(s, eventArgs);
@@ -347,6 +339,8 @@ namespace Xceder
         private void onSocketComplete(object sender, SocketAsyncEventArgs e)
         {
             Action<SocketAsyncEventArgs> handler;
+
+            Debug.WriteLine(e.LastOperation + " is completed");
 
             if (socketCompleteHandlerMap.TryGetValue(e.LastOperation, out handler))
             {
@@ -374,8 +368,9 @@ namespace Xceder
                     eventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(onSocketComplete);
                     eventArgs.SetBuffer(new byte[BUFFER_SIZE], 0, BUFFER_SIZE);
 
-                    connectedSocket.ReceiveAsync(eventArgs);
-                }                
+                    if (!connectedSocket.ReceiveAsync(eventArgs))
+                        onSocketComplete(connectedSocket, e);
+                }
             }
             else
             {
@@ -393,7 +388,28 @@ namespace Xceder
 
                     if (isSuccess)
                     {
-                        processRcvBytes(asyncArgs);
+                        int bytesRead = asyncArgs.BytesTransferred;
+
+                        if (bytesRead > 0)
+                        {
+                            saveToBuffer(asyncArgs.Buffer, bytesRead);
+
+                            // continue to receive the data
+                            asyncArgs.SetBuffer(0, BUFFER_SIZE);
+
+                            var socket = (Socket)asyncArgs.UserToken;
+                            if (!socket.ReceiveAsync(asyncArgs))
+                                onSocketComplete(socket, asyncArgs);
+                            else
+                            {
+                                //time to parse the message
+                                processBuffer();
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("socket is closed because receiving bytes " + bytesRead.ToString() + " (should >= 0)");
+                        }
                     }
                     else
                     {
@@ -402,46 +418,19 @@ namespace Xceder
                 }
                 catch (Exception e)
                 {
-                    RcvErrorEvent?.Invoke(this, e);
+                    NetWorkErrorEvent?.Invoke(this, e);
                 }
             }
         }
 
-        private void processRcvBytes(SocketAsyncEventArgs asyncArgs)
+        private void saveToBuffer(byte[] rcvBytes, int bytesRead)
         {
-            int bytesRead = asyncArgs.BytesTransferred;
+            LastRcvMsgTime = DateTime.Now;
 
-            if (bytesRead > 0)
+            // There might be more data, so store the data received so far.
+            for (int index = 0; index < bytesRead; index++)
             {
-                List<Tuple<Request, Response>> messageList;
-
-                LastRcvMsgTime = DateTime.Now;
-
-                // There might be more data, so store the data received so far.
-                for (int index = 0; index < bytesRead; index++)
-                {
-                    _socketRcvBuffer.PushBack(asyncArgs.Buffer[index]);
-                }
-
-                //time to parse the message
-                messageList = processRcvBytes();
-
-                messageList.ForEach(t =>
-                {
-                    notifyRcvProtoMsg(t);
-                });
-            }
-
-            // continue to receive the data
-            if (bytesRead > 0)
-            {
-                asyncArgs.SetBuffer(0, BUFFER_SIZE);
-
-                ((Socket)asyncArgs.UserToken).ReceiveAsync(asyncArgs);
-            }
-            else
-            {
-                throw new Exception("socket is closed because receiving bytes " + bytesRead.ToString() + " (should >= 0)");
+                _socketRcvBuffer.PushBack(rcvBytes[index]);
             }
         }
 
@@ -474,11 +463,13 @@ namespace Xceder
             //discard those uncomplete received bytes
             while (!_socketRcvBuffer.IsEmpty)
                 _socketRcvBuffer.PopFront(_socketRcvBuffer.Size);
+
+            AccountInfo = new Account();
         }
 
-        private List<Tuple<Request, Response>> processRcvBytes()
+        private void processBuffer()
         {
-            List<Tuple<Request, Response>> messageList = new List<Tuple<Request, Response>>();
+            List<Response> messageList = new List<Response>();
 
             Response msg = null;
 
@@ -492,31 +483,40 @@ namespace Xceder
                 {
                     _socketRcvBuffer.PopFront((int)stream.Position);
 
+                    Tuple<Request, TaskCompletionSource<Tuple<Request, Response>>> pair = null;
+
                     Request request = null;
+
+                    Tuple<Request, Response> responsePair;
 
                     if (msg.Result != null)
                     {
-                        _sentRequests.TryRemove(msg.Result.Request, out request);
-                    }
+                        _sentRequests.TryRemove(msg.Result.Request, out pair);
 
-                    messageList.Add(Tuple.Create(request, msg));
+                        request = pair.Item1;
+
+                        responsePair = Tuple.Create(request, msg);
+
+                        //request reponse will be emited through Task
+                        pair.Item2.SetResult(responsePair);
+                    }
+                    else
+                        broadcastProtoMsg(msg);
                 }
                 else
                     break;
             }
-
-            return messageList;
         }
 
-        private void notifyRcvProtoMsg(Tuple<Request, Response> pair)
+        private void broadcastProtoMsg(Response response)
         {
             try
             {
-                RcvMessageEvent?.Invoke(this, pair);
+                ResponseEvent?.Invoke(this, response);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("encounter exception when rocess the recieved proto msg:" + pair.Item2.ToString() + " error:" + ex.Message + Environment.NewLine + ex.StackTrace);
+                Debug.WriteLine("encounter exception when rocess the recieved proto msg:" + response.ToString() + " error:" + ex.Message + Environment.NewLine + ex.StackTrace);
             }
         }
 
@@ -531,18 +531,18 @@ namespace Xceder
             return request;
         }
 
-        private void send(Request message)
+        private Task<Tuple<Request, Response>> send(Request message)
         {
-            ulong requestID = 0;
-
             Exception exception = null;
+
+            var tcs = new TaskCompletionSource<Tuple<Request, Response>>();
 
             try
             {
+                MemoryStream protoStream = new MemoryStream(BUFFER_SIZE);
+
                 lock (_lock)
                 {
-                    protoStream.Seek(0, SeekOrigin.Begin);
-
                     message.WriteDelimitedTo(protoStream);
 
                     byte[] data = protoStream.ToArray();
@@ -550,21 +550,16 @@ namespace Xceder
                     connectedSocket.Send(data);
                 }
 
-                Result result = new Result();
-
-                result.ResultCode = ERRORCODE.Processing;
-                result.Request = message.RequestID;
-
-                requestID = message.RequestID;
-
-                _sentRequests[requestID] = message;
+                _sentRequests[message.RequestID] = Tuple.Create(message, tcs);
             }
             catch (Exception ex)
             {
                 exception = ex;
+
+                tcs.SetException(ex);
             }
 
-            PostSendMessageEvent?.Invoke(this, Tuple.Create(message, exception));
+            return tcs.Task;
         }
 
         private RSA loadPublicKey()
@@ -615,9 +610,10 @@ namespace Xceder
         /// </summary>
         /// <param name="userID"></param>
         /// <param name="password"></param>
-        public void sendLogin(string userID, string password)
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> login(string userID, string password)
         {
-            Request request = new Request();
+            Request request = createRequestMsg();
 
             var logonRequest = request.Logon = new Logon();
 
@@ -629,12 +625,12 @@ namespace Xceder
             logonRequest.Password = rsaEncrypt(request.RequestUTC.ToString() + "," + password);
             logonRequest.ClientApp = "C#";
 
-            send(request);
+            return send(request);
         }
 
         private void sendLogOut(string reason)
         {
-            Request request = new Request();
+            Request request = createRequestMsg();
 
             request.Logoff = reason;
 
@@ -647,25 +643,29 @@ namespace Xceder
         /// <param name="userID"></param>
         /// <param name="email"></param>
         /// <param name="password"></param>
-        public void registerAccount(string userID, string email, string password)
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> registerAccount(string userID, string email, string password)
         {
             Request request = createRequestMsg();
 
             var account = request.Account = new Account();
             var particular = request.Account.Particular = new Particular();
 
+            password = Convert.ToBase64String((MD5.Create().ComputeHash(System.Text.Encoding.UTF8.GetBytes(password))));
+
             account.UserID = userID;
             account.Password = rsaEncrypt(request.RequestUTC.ToString() + "," + password);
             particular.Email = email;
 
-            send(request);
+            return send(request);
         }
 
         /// <summary>
         /// request an one time password for the password change
         /// </summary>
         /// <param name="email"></param>
-        public void requestOTP(string email)
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> requestOTP(string email)
         {
             Request request = createRequestMsg();
 
@@ -673,7 +673,7 @@ namespace Xceder
 
             request.PasswordChange.Email = email;
 
-            send(request);
+            return send(request);
         }
 
         /// <summary>
@@ -682,7 +682,8 @@ namespace Xceder
         /// <param name="email"></param>
         /// <param name="OTP">one time password gotten by the requestOTP()</param>
         /// <param name="newPassword"></param>
-        public void requestPWDReset(string email, string OTP, string newPassword)
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> requestPWDReset(string email, string OTP, string newPassword)
         {
             Request request = createRequestMsg();
 
@@ -694,17 +695,40 @@ namespace Xceder
             passwordChange.CurrentPassword = "";
             passwordChange.NewPassword = newPassword;
 
-            send(request);
+            return send(request);
         }
 
+        /// <summary>
+        /// query the instrument info
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="product">target product, default value "UnknownType" means query all products</param>
+        /// <param name="exchange">target exchange only, default value "NonExch" means query all exchanges</param>
+        /// <param name="broker">target broker only, default value "Xceder" means all brokers</param>
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> queryInstrument(string symbol, Instrument.Types.PRODUCT product = Instrument.Types.PRODUCT.UnknownType, Exchange.Types.EXCHANGE exchange = Exchange.Types.EXCHANGE.NonExch, BROKER broker = BROKER.Xceder)
+        {
+            Request request = createRequestMsg();
 
+            var query = request.QueryRequest = new Query();
+
+            var conditions = query.Instruments = new QueryConditions();
+
+            conditions.Broker = broker;
+            conditions.Exchange = exchange;
+            conditions.Symbol = symbol;
+            conditions.Product = product;
+
+            return send(request);
+        }
 
         /// <summary>
         /// subscribe or unsubscribe the specified instrument IDs market data
         /// </summary>
         /// <param name="instrumentIDAry"></param>
         /// <param name="isUnSubscribe"></param>
-        public void subscribePrice(ulong[] instrumentIDAry, bool isUnSubscribe = false)
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> subscribePrice(ulong[] instrumentIDAry, bool isUnSubscribe = false)
         {
             Request request = createRequestMsg();
 
@@ -714,13 +738,25 @@ namespace Xceder
 
             marketData.Action = isUnSubscribe ? InstrumentSubscription.Types.ACTION.Unsubscribe : InstrumentSubscription.Types.ACTION.Subscribe;
 
-            send(request);
+            return send(request);
+        }
+
+        /// <summary>
+        /// subscribe one instrument market data
+        /// </summary>
+        /// <param name="instrumentID"></param>
+        /// <param name="isUnSubscribe"></param>
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> subscribePrice(ulong instrumentID, bool isUnSubscribe = false)
+        {
+            return subscribePrice(new ulong[] { instrumentID }, isUnSubscribe);
         }
 
         /// <summary>
         /// send the ping request to the server to ensure the connection status
         /// </summary>
-        public void sendPingRequest()
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> pingServer()
         {
             Request request = createRequestMsg();
 
@@ -728,14 +764,15 @@ namespace Xceder
 
             ping.PingUTC = toEpochMilliseconds(DateTime.Now);
 
-            send(request);
+            return send(request);
         }
 
         /// <summary>
         /// submit the order
         /// </summary>
         /// <param name="orderParams"></param>
-        public void submitOrder(OrderParams orderParams)
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> submitOrder(OrderParams orderParams)
         {
             Request request = createRequestMsg();
 
@@ -749,7 +786,7 @@ namespace Xceder
 
             order.Params = orderParams;
 
-            send(request);
+            return send(request);
         }
 
         /// <summary>
@@ -759,7 +796,8 @@ namespace Xceder
         /// <param name="newQty">new order qty, 0 means withdraw the target order</param>
         /// <param name="newLimitPrice"></param>
         /// <param name="newStopPrice"></param>
-        public void replaceOrWithdrawOrder(ulong targetClOrdID, uint newQty, ulong newLimitPrice, ulong newStopPrice)
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> replaceOrWithdrawOrder(ulong targetClOrdID, uint newQty, ulong newLimitPrice, ulong newStopPrice)
         {
             OrderParams orderParams = new OrderParams();
 
@@ -768,7 +806,7 @@ namespace Xceder
             orderParams.LimitPrice = newLimitPrice;
             orderParams.StopPrice = newStopPrice;
 
-            submitOrder(orderParams);
+            return submitOrder(orderParams);
         }
     }
 }

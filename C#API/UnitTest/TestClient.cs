@@ -4,71 +4,190 @@ using System.Threading.Tasks;
 using System;
 using System.Reactive.Linq;
 using Com.Xceder.Messages;
+using System.Collections.Generic;
 
 namespace Xceder
 {
     [TestClass]
     public class TestClient
     {
-        private bool LastSentHasError;
-        private Request.RequestOneofCase LastSentRequestType;
+        private bool lastSentHasError;
+        private Request.RequestOneofCase lastSentRequestType;
+        private ERRORCODE lastSentRequestResultCode;
+
+        private bool isResponded = false;
 
         [TestMethod]
         public void TestLogin()
         {
-            var client = new Client();
+            login();
+        }
 
-            var stream = new XcederStream(client);
+        [TestMethod]
+        public void TestSubscribePrice()
+        {
+            var stream = login();
+            var client = stream.XcederClient;
 
-            stream.SendMsgStream.Subscribe(onSendMsg);
-            stream.RcvMsgStream.Subscribe(onRcvMsg);
-            stream.RcvErrorStream.Subscribe(onRcvError);
+            var instruments = queryInstrument(client, "ES", Instrument.Types.PRODUCT.Fut);
 
-            var task = client.connect("192.168.1.106", 81);
+            var requestTask = client.subscribePrice(instruments[0].Identity.Id);
+
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.MarketData);
+
+            requestTask.Wait();
+
+            assertSendRequestResult(requestTask);
+        }
+
+        private IList<Instrument> queryInstrument(Client client, string symbol, Instrument.Types.PRODUCT product = Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE exch = Exchange.Types.EXCHANGE.NonExch, BROKER broker = BROKER.Xceder)
+        {
+            var requestTask = client.queryInstrument(symbol, product);
+
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.QueryRequest);
+
+            requestTask.Wait();
+
+            assertSendRequestResult(requestTask);
+
+            var instruments = requestTask.Result.Item2.QueryResult.Instruments.Instrument;
+
+            foreach (var i in instruments)
+            {
+                Assert.AreEqual(symbol, i.Identity.Symbol);
+
+                if (product != Instrument.Types.PRODUCT.UnknownType)
+                    Assert.AreEqual(product, i.Product);
+
+                if (broker != BROKER.Xceder)
+                    Assert.AreEqual(broker, i.Identity.Broker);
+
+                if (exch != Exchange.Types.EXCHANGE.NonExch)
+                    Assert.AreEqual(exch, i.Identity.Exchange);
+            }
+
+            return instruments;
+        }
+
+        private XcederStream connectToServer()
+        {
+            string server = "192.168.1.106";
+
+            var stream = new XcederStream();
+
+            stream.ResponseStream.Subscribe(onResponse);
+            stream.NetworkErrorStream.Subscribe(onNetworkError);
+
+            var task = stream.XcederClient.connect(server, 81);
 
             try
             {
                 task.Wait();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
 
             Assert.AreEqual(task.Status, TaskStatus.Faulted);
 
-            task = client.connect("192.168.1.106", 8082);
+            task = stream.XcederClient.connect(server, 8082);
 
             task.Wait();
 
             Assert.IsTrue(task.Result);
 
-            LastSentHasError = false;
-            LastSentRequestType = Request.RequestOneofCase.Logon;
-
-            client.sendLogin("dreamer", "test");
-
-            Thread.Sleep(100000);
+            return stream;
         }
 
-        private void onRcvError(Exception ex)
+        private XcederStream login()
         {
+            var stream = connectToServer();
 
+            var client = stream.XcederClient;
+
+            string userID = "testUser" + DateTime.Now;
+            string pwd = "testUser";
+
+            var requestTask = client.login(userID, "test");
+
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Logon, ERRORCODE.InvalidUserid);
+
+            requestTask.Wait();
+
+            assertSendRequestResult(requestTask);
+
+            requestTask = client.registerAccount(userID, userID + "@fake.com", pwd);
+
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Account, ERRORCODE.Success);
+
+            requestTask.Wait();
+
+            assertSendRequestResult(requestTask);
+
+            requestTask = client.login(userID, "pwd");
+
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Logon, ERRORCODE.WrongPassword);
+
+            requestTask.Wait();
+
+            assertSendRequestResult(requestTask);
+
+            requestTask = client.login(userID, pwd);
+
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Logon);
+
+            requestTask.Wait();
+
+            assertSendRequestResult(requestTask);
+
+            return stream;
         }
 
-        private void onRcvMsg(Tuple<Request, Response> tuple)
+        private void waitResponse()
         {
+            isResponded = false;
 
+            while (!isResponded)
+            {
+                Thread.Sleep(3000);
+            }
         }
 
-        private void onSendMsg(Tuple<Request, Exception> tuple)
+        private void setLastSentRequestExpectation(bool hasError, Request.RequestOneofCase requestType, ERRORCODE resultCode = ERRORCODE.Success)
         {
-            Assert.AreEqual(tuple.Item1.RequestCase, LastSentRequestType);
+            lastSentHasError = hasError;
+            lastSentRequestType = requestType;
+            lastSentRequestResultCode = resultCode;
+        }
 
-            if (LastSentHasError)
-                Assert.IsNotNull(tuple.Item2);
+        private void assertSendRequestResult(Task<Tuple<Request, Response>> task)
+        {
+            if (lastSentHasError)
+            {
+                Assert.IsTrue(task.IsFaulted);
+            }
             else
-                Assert.IsNull(tuple.Item2);
+            {
+                var pair = task.Result;
+
+                var request = pair.Item1;
+                var response = pair.Item2;
+
+                Assert.AreEqual(lastSentRequestType, request.RequestCase);
+                Assert.AreEqual(lastSentRequestResultCode, response.Result.ResultCode);
+                Assert.AreEqual(request.RequestID, response.Result.Request);
+            }
+        }
+
+        private void onNetworkError(Exception ex)
+        {
+
+        }
+
+        private void onResponse(Response response)
+        {
+
         }
     }
 }

@@ -19,11 +19,19 @@ namespace Xceder
         {
             XcederClient = xcederClient;
 
-            RcvMsgStream = Observable.FromEventPattern<Tuple<Request, Response>>(xcederClient, "RcvMessageEvent").Select(ev => { return ev.EventArgs; }).Publish();
+            ResponseStream = Observable.FromEventPattern<Response>(xcederClient, "ResponseEvent").Select(ev => { return ev.EventArgs; }).Publish();
+            NetworkErrorStream = Observable.FromEventPattern<Exception>(xcederClient, "NetWorkErrorEvent").Select(ev => { return ev.EventArgs; }).Publish();
 
-            SendMsgStream = Observable.FromEventPattern<Tuple<Request, Exception>>(xcederClient, "PostSendMessageEvent").Select(ev => { return ev.EventArgs; });
+            ResponseStream.Connect();
+            NetworkErrorStream.Connect();
+        }
 
-            RcvErrorStream = Observable.FromEventPattern<Exception>(xcederClient, "RcvErrorEvent").Select(ev => { return ev.EventArgs; }).Publish();
+        /// <summary>
+        /// create a Client instance and hook its event
+        /// </summary>
+        public XcederStream() : this(new Client())
+        {
+
         }
 
         /// <summary>
@@ -35,34 +43,17 @@ namespace Xceder
         }
 
         /// <summary>
-        /// connect to the stream to emit the event
-        /// </summary>
-        public void connect()
-        {
-            RcvMsgStream.Connect();
-            RcvErrorStream.Connect();
-        }
-
-        /// <summary>
         /// return the recieve message event stream
         /// </summary>
-        public IConnectableObservable<Tuple<Request, Response>> RcvMsgStream
+        public IConnectableObservable<Response> ResponseStream
         {
             get; private set;
         }
 
         /// <summary>
-        /// return the send message event stream. this is to monitor the sent message
+        /// return the network error event stream
         /// </summary>
-        public IObservable<Tuple<Request,Exception>> SendMsgStream
-        {
-            get; private set;
-        }
-
-        /// <summary>
-        /// this is to monitor the error event
-        /// </summary>
-        public IConnectableObservable<Exception> RcvErrorStream
+        public IConnectableObservable<Exception> NetworkErrorStream
         {
             get; private set;
         }
