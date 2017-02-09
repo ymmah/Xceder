@@ -415,7 +415,12 @@ namespace Xceder
 
 
             byte[] psbytes = new byte[secpswd.Length];
+
+#if STANDARDLIB
             unmanagedPswd = SecureStringMarshal.SecureStringToGlobalAllocAnsi(secpswd);
+#else
+            unmanagedPswd = Marshal.SecureStringToGlobalAllocAnsi(secpswd);
+#endif
             Marshal.Copy(unmanagedPswd, psbytes, 0, psbytes.Length);
             Marshal.ZeroFreeGlobalAllocAnsi(unmanagedPswd);
 

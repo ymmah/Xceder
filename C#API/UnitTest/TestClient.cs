@@ -34,7 +34,7 @@ namespace Xceder
 
             var requestTask = client.subscribePrice(instruments[0].Identity.Id);
 
-            setLastSentRequestExpectation(false, Request.RequestOneofCase.MarketData);
+          setLastSentRequestExpectation(false, Request.RequestOneofCase.MarketData);
 
             requestTask.Wait();
 
@@ -42,6 +42,35 @@ namespace Xceder
 
             waitResponse(60);
         }
+
+        [TestMethod]
+        public void TestOrder()
+        {
+            var stream = login();
+            var client = stream.XcederClient;
+
+            var instruments = queryInstrument(client, "ES", Instrument.Types.PRODUCT.Fut);
+
+            OrderParams orderParams = new OrderParams();
+
+            orderParams.Instrument = instruments[0].Identity.Id;
+            orderParams.LimitPrice = 2;
+            orderParams.Side = SIDE.Buy;
+            orderParams.OrderQty = 10;
+            orderParams.OrderType = Order.Types.TYPE.Lmt;
+            orderParams.TimeInForce = Order.Types.TIMEINFORCE.Day;
+            
+            var requestTask = client.submitOrder(orderParams);
+
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Order, ERRORCODE.NoTradingaccount);
+
+            requestTask.Wait();
+
+            assertSendRequestResult(requestTask);
+
+            waitResponse(60);
+        }
+
 
         private IList<Instrument> queryInstrument(Client client, string symbol, Instrument.Types.PRODUCT product = Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE exch = Exchange.Types.EXCHANGE.NonExch, BROKER broker = BROKER.Xceder)
         {
@@ -87,7 +116,7 @@ namespace Xceder
             {
                 task.Wait();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }
@@ -187,7 +216,7 @@ namespace Xceder
 
         private void onNetworkError(Exception ex)
         {
-
+            Assert.Fail("recieve network error:{0}\n{1}", ex.Message, ex.StackTrace);
         }
 
         private void onResponse(Response response)

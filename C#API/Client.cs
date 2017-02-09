@@ -498,7 +498,12 @@ namespace Xceder
 
                         responsePair = Tuple.Create(request, msg);
 
-                        //request reponse will be emited through Task
+                        if(msg.LogonResult != null)
+                        {
+                            AccountInfo = msg.LogonResult.Account;
+                        }
+
+                        //request response will be emitted through Task
                         requestPair.Item2.SetResult(responsePair);
                     }
                     else
@@ -600,8 +605,18 @@ namespace Xceder
 
             RSA rsa = loadPublicKey();
 
+            byte[] bytes;
+
             if (rsa != null)
-                result = Convert.ToBase64String(loadPublicKey().Encrypt(dataBytes, RSAEncryptionPadding.Pkcs1));
+            {
+
+#if STANDARDLIB
+                bytes = rsa.Encrypt(dataBytes, RSAEncryptionPadding.Pkcs1);
+#else
+                bytes = ((RSACryptoServiceProvider)rsa).Encrypt(dataBytes, false);
+#endif
+                result = Convert.ToBase64String(bytes);
+            }
 
             return result;
         }

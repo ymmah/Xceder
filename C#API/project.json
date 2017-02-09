@@ -3,7 +3,6 @@
   "dependencies": {
     "Google.Protobuf": "3.2.0",
     "Google.Protobuf.Tools": "3.2.0",
-    "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
     "NETStandard.Library": "1.6.0",
     "System.Net.NameResolution": "4.3.0",
     "System.Security.SecureString": "4.3.0"

@@ -1,49 +1,9 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>xcederAPI</name>
+        <name>xcederAPINet45</name>
     </assembly>
     <members>
-        <member name="T:Xceder.PemKeyUtils">
-            <summary>
-            extract the key parameters from the pem key file
-            </summary>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.GetRSAProviderFromPemFile(System.String)">
-            <summary>
-            extract the key parameters from the file
-            </summary>
-            <param name="pemfile"></param>
-            <returns>return null if fail</returns>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPublicKey(System.String)">
-            <summary>
-            Get the binary RSA PUBLIC key
-            </summary>
-            <param name="keyVal"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.DecodeX509PublicKey(System.Byte[])">
-            <summary>
-            Parses binary asn.1 X509 SubjectPublicKeyInfo; returns RSACryptoServiceProvider
-            </summary>
-            <param name="x509key"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.DecodeRSAPrivateKey(System.Byte[])">
-            <summary>
-            Parses binary ans.1 RSA private key; returns RSACryptoServiceProvider
-            </summary>
-            <param name="privkey"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPrivateKey(System.String)">
-            <summary>
-            Get the binary RSA PRIVATE key, decrypting if necessary
-            </summary>
-            <param name="instr"></param>
-            <returns></returns>
-        </member>
         <member name="T:Xceder.CircularBuffer`1">
             <summary>
             Circular buffer.
@@ -331,6 +291,46 @@
             <param name="newLimitPrice"></param>
             <param name="newStopPrice"></param>
             <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="T:Xceder.PemKeyUtils">
+            <summary>
+            extract the key parameters from the pem key file
+            </summary>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.GetRSAProviderFromPemFile(System.String)">
+            <summary>
+            extract the key parameters from the file
+            </summary>
+            <param name="pemfile"></param>
+            <returns>return null if fail</returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPublicKey(System.String)">
+            <summary>
+            Get the binary RSA PUBLIC key
+            </summary>
+            <param name="keyVal"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeX509PublicKey(System.Byte[])">
+            <summary>
+            Parses binary asn.1 X509 SubjectPublicKeyInfo; returns RSACryptoServiceProvider
+            </summary>
+            <param name="x509key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeRSAPrivateKey(System.Byte[])">
+            <summary>
+            Parses binary ans.1 RSA private key; returns RSACryptoServiceProvider
+            </summary>
+            <param name="privkey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPrivateKey(System.String)">
+            <summary>
+            Get the binary RSA PRIVATE key, decrypting if necessary
+            </summary>
+            <param name="instr"></param>
+            <returns></returns>
         </member>
         <member name="T:Com.Xceder.Messages.GatewayReflection">
             <summary>Holder for reflection information generated from gateway.proto</summary>

@@ -10,6 +10,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTe
 		{9D0A8CDB-7EC1-416E-B605-97712400C733} = {9D0A8CDB-7EC1-416E-B605-97712400C733}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xcederAPINet45", "xcederAPINet45\xcederAPINet45.csproj", "{4E95A4A5-D60D-489B-A4CF-E9316920E6C9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9D0A8CDB-7EC1-416E-B605-97712400C733} = {9D0A8CDB-7EC1-416E-B605-97712400C733}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest4.5", "UnitTest4.5\UnitTest4.5.csproj", "{7348E125-6597-4C66-A3D8-063C51B0FAF9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4E95A4A5-D60D-489B-A4CF-E9316920E6C9} = {4E95A4A5-D60D-489B-A4CF-E9316920E6C9}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +34,14 @@ Global
 		{4E93174F-1652-40D4-98DC-C011BCB8998D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E93174F-1652-40D4-98DC-C011BCB8998D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E93174F-1652-40D4-98DC-C011BCB8998D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E95A4A5-D60D-489B-A4CF-E9316920E6C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E95A4A5-D60D-489B-A4CF-E9316920E6C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E95A4A5-D60D-489B-A4CF-E9316920E6C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E95A4A5-D60D-489B-A4CF-E9316920E6C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7348E125-6597-4C66-A3D8-063C51B0FAF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7348E125-6597-4C66-A3D8-063C51B0FAF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7348E125-6597-4C66-A3D8-063C51B0FAF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7348E125-6597-4C66-A3D8-063C51B0FAF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
