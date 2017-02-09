@@ -5,6 +5,7 @@ using System;
 using System.Reactive.Linq;
 using Com.Xceder.Messages;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Xceder
 {
@@ -38,6 +39,8 @@ namespace Xceder
             requestTask.Wait();
 
             assertSendRequestResult(requestTask);
+
+            waitResponse(60);
         }
 
         private IList<Instrument> queryInstrument(Client client, string symbol, Instrument.Types.PRODUCT product = Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE exch = Exchange.Types.EXCHANGE.NonExch, BROKER broker = BROKER.Xceder)
@@ -71,7 +74,7 @@ namespace Xceder
 
         private XcederStream connectToServer()
         {
-            string server = "192.168.1.106";
+            string server = "gatewaydev.xceder.com";
 
             var stream = new XcederStream();
 
@@ -144,13 +147,15 @@ namespace Xceder
             return stream;
         }
 
-        private void waitResponse()
+        private void waitResponse(int timeoutLoop = 0)
         {
             isResponded = false;
 
-            while (!isResponded)
+            while (!isResponded && timeoutLoop != 0)
             {
-                Thread.Sleep(3000);
+                timeoutLoop--;
+
+                Thread.Sleep(1000);
             }
         }
 
@@ -187,7 +192,7 @@ namespace Xceder
 
         private void onResponse(Response response)
         {
-
+            Debug.WriteLine(response.ToString());
         }
     }
 }

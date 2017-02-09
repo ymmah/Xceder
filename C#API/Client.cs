@@ -483,22 +483,23 @@ namespace Xceder
                 {
                     _socketRcvBuffer.PopFront((int)stream.Position);
 
-                    Tuple<Request, TaskCompletionSource<Tuple<Request, Response>>> pair = null;
-
-                    Request request = null;
+                    Tuple<Request, TaskCompletionSource<Tuple<Request, Response>>> requestPair = null;
 
                     Tuple<Request, Response> responsePair;
 
                     if (msg.Result != null)
                     {
-                        _sentRequests.TryRemove(msg.Result.Request, out pair);
+                        _sentRequests.TryRemove(msg.Result.Request, out requestPair);
+                    }
 
-                        request = pair.Item1;
+                    if (requestPair != null)
+                    {
+                        Request request = requestPair.Item1;
 
                         responsePair = Tuple.Create(request, msg);
 
                         //request reponse will be emited through Task
-                        pair.Item2.SetResult(responsePair);
+                        requestPair.Item2.SetResult(responsePair);
                     }
                     else
                         broadcastProtoMsg(msg);
