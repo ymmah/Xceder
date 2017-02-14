@@ -40,7 +40,7 @@ namespace Xceder
 
             assertSendRequestResult(requestTask);
 
-            waitResponse(60);
+            waitResponse(10);
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace Xceder
 
             assertSendRequestResult(requestTask);
 
-            waitResponse(60);
+            waitResponse(10);
         }
 
 
