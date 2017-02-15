@@ -29,16 +29,27 @@ namespace Xceder
         {
             var stream = login();
             var client = stream.XcederClient;
+            var lastMonth = DateTime.Now.AddMonths(-1).ToString("yyyyMM");
 
-            var instruments = queryInstrument(client, "ES", Instrument.Types.PRODUCT.Fut);
+            var expiryInLastMonthInstrumentList = queryInstrument(client, "ES", Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE.Cme, lastMonth);
 
-            var requestTask = client.subscribePrice(instruments[0].Identity.Id);
+            Debug.WriteLine("maturity/expiry date is in last month ({0}) counters are {1}", lastMonth, expiryInLastMonthInstrumentList.Count);
 
-          setLastSentRequestExpectation(false, Request.RequestOneofCase.MarketData);
+            var instrumentList = queryInstrument(client, "ES", Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE.Cme);
+
+            var instrument = instrumentList[0];
+
+            Debug.WriteLine("returned total counters are {0}, fist instrument (maturityDate:{1}):{2}", instrumentList.Count, Client.convertEpochDays(instrument.MaturityEpochDays), instrument);
+
+            var requestTask = client.subscribePrice(instrument.Identity.Id);
+
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.MarketData);
 
             requestTask.Wait();
 
             assertSendRequestResult(requestTask);
+
+            Debug.WriteLine("returned market data for subscription: {0}", requestTask.Result.Item2.MarketDatas);
 
             waitResponse(10);
         }
@@ -49,7 +60,7 @@ namespace Xceder
             var stream = login();
             var client = stream.XcederClient;
 
-            var instruments = queryInstrument(client, "ES", Instrument.Types.PRODUCT.Fut);
+            var instruments = queryInstrument(client, "ES", Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE.Cme);
 
             OrderParams orderParams = new OrderParams();
 
@@ -59,7 +70,7 @@ namespace Xceder
             orderParams.OrderQty = 10;
             orderParams.OrderType = Order.Types.TYPE.Lmt;
             orderParams.TimeInForce = Order.Types.TIMEINFORCE.Day;
-            
+
             var requestTask = client.submitOrder(orderParams);
 
             setLastSentRequestExpectation(false, Request.RequestOneofCase.Order, ERRORCODE.NoTradingaccount);
@@ -68,13 +79,28 @@ namespace Xceder
 
             assertSendRequestResult(requestTask);
 
+            Debug.WriteLine("returned order status report for submission: {0}", requestTask.Result.Item2.OrderReports);
+
+            var orderReportAry = requestTask.Result.Item2.OrderReports.OrderReport;
+
+            var executionReportAry = orderReportAry[orderReportAry.Count - 1].Report;
+
+            var lastestExecReport = executionReportAry[executionReportAry.Count - 1];
+
+            //withdraw the order need use the clOrdID, which is returned by the server when submit the order
+            requestTask = client.replaceOrWithdrawOrder(lastestExecReport.OrderID.ClOrdID, 0, 0, 0);
+
+            requestTask.Wait();
+
+            Debug.WriteLine("returned order status report for withdraw request: {0}", requestTask.Result.Item2.OrderReports);
+
             waitResponse(10);
         }
 
 
-        private IList<Instrument> queryInstrument(Client client, string symbol, Instrument.Types.PRODUCT product = Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE exch = Exchange.Types.EXCHANGE.NonExch, BROKER broker = BROKER.Xceder)
+        private IList<Instrument> queryInstrument(Client client, string symbol, Instrument.Types.PRODUCT product = Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE exch = Exchange.Types.EXCHANGE.NonExch, string targetMaturiyDate = "", BROKER broker = BROKER.Xceder)
         {
-            var requestTask = client.queryInstrument(symbol, product);
+            var requestTask = client.queryInstrument(symbol, product, exch, targetMaturiyDate, broker);
 
             setLastSentRequestExpectation(false, Request.RequestOneofCase.QueryRequest);
 
@@ -216,12 +242,83 @@ namespace Xceder
 
         private void onNetworkError(Exception ex)
         {
-            Assert.Fail("recieve network error:{0}\n{1}", ex.Message, ex.StackTrace);
+            Debug.WriteLine("recieve network error:{0}\n{1}", ex.Message, ex.StackTrace);
         }
 
         private void onResponse(Response response)
         {
-            Debug.WriteLine(response.ToString());
+            switch (response.ResponseCase)
+            {
+                case Response.ResponseOneofCase.OrderReports:
+                    OrderReports orderReports = response.OrderReports;
+
+                    foreach (var orderReport in orderReports.OrderReport)
+                    {
+                        Debug.WriteLine("recieve the order/exeuction report message:{0}", orderReport);
+                    }
+                    break;
+
+                case Response.ResponseOneofCase.MarketDatas:
+                    MarketDatas marketDatas = response.MarketDatas;
+
+                    foreach (var marketData in marketDatas.MarketData)
+                    {
+                        Debug.WriteLine("recieve the market data update message:{0}", marketData);
+                    }
+
+                    break;
+
+                case Response.ResponseOneofCase.Ping:
+                    Ping pingMsg = response.Ping;
+
+                    Debug.WriteLine("recieve the ping message:{0}", pingMsg);
+                    break;
+
+                case Response.ResponseOneofCase.Notice:
+                    NoticeMessages noticeMsgs = response.Notice;
+
+                    foreach (var noticeMsg in noticeMsgs.Notice)
+                    {
+                        Debug.WriteLine("recieve the notice message:{0}", noticeMsg);
+                    }
+                    break;
+
+                case Response.ResponseOneofCase.ServiceStatus:
+                    ServiceStatuses serviceStatuses = response.ServiceStatus;
+
+                    foreach (var status in serviceStatuses.Status)
+                    {
+                        Debug.WriteLine("recieve the service status message:{0}", status);
+                    }
+                    break;
+
+                case Response.ResponseOneofCase.Instruments:
+                    Instruments instruments = response.Instruments;
+
+                    foreach (var instrument in instruments.Instrument)
+                    {
+                        Debug.WriteLine("recieve the new instrument message:{0}", instrument);
+                    }
+                    break;
+
+                case Response.ResponseOneofCase.InstrumentStatus:
+                    InstrumentStatuses instrumentStatuses = response.InstrumentStatus;
+
+                    foreach (var instrumentStatus in instrumentStatuses.Status)
+                    {
+                        Debug.WriteLine("recieve the instrument status change message:{0}", instrumentStatus);
+                    }
+                    break;
+
+                case Response.ResponseOneofCase.SpreaderID:
+                case Response.ResponseOneofCase.LogonResult:
+                case Response.ResponseOneofCase.QueryResult:
+                case Response.ResponseOneofCase.None:
+                case Response.ResponseOneofCase.Extension:
+                default:
+                    Assert.Fail("this should not in broadcast message from server");
+                    break;
+            }
         }
     }
 }

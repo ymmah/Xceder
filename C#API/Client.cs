@@ -10,6 +10,7 @@ using Com.Xceder.Messages;
 using System.Security.Cryptography;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace Xceder
 {
@@ -206,13 +207,23 @@ namespace Xceder
         }
 
         /// <summary>
-        /// convert the long UTC milliseconds into DateTime object
+        /// convert the UTC milliseconds into DateTime object
         /// </summary>
         /// <param name="UTCMillis">target UTC milliseconds</param>
         /// <returns>return a DateTime object</returns>
         public static DateTime convertUTC(ulong UTCMillis)
         {
             return EPOCH.AddMilliseconds(UTCMillis).ToLocalTime();
+        }
+
+        /// <summary>
+        /// convert the epoch days into DateTime object
+        /// </summary>
+        /// <param name="epochDays">target epoch days</param>
+        /// <returns>return a DateTime object</returns>
+        public static DateTime convertEpochDays(uint epochDays)
+        {
+            return EPOCH.AddDays(epochDays).ToLocalTime();
         }
 
         /// <summary>
@@ -223,6 +234,18 @@ namespace Xceder
         public static ulong toEpochMilliseconds(DateTime localTime)
         {
             return (ulong)(localTime.ToUniversalTime() - EPOCH).TotalMilliseconds;
+        }
+
+        /// <summary>
+        /// convert the local DateTime object into the epoch days
+        /// </summary>
+        /// <param name="localTime">target local datetime object</param>
+        /// <returns>epoch days</returns>
+        public static uint toEpochDays(DateTime localTime)
+        {
+            var val = toEpochMilliseconds(localTime) / (3600.0 * 1000 * 24);
+
+            return (uint)Math.Ceiling(val);
         }
 
         /// <summary>
@@ -498,7 +521,7 @@ namespace Xceder
 
                         responsePair = Tuple.Create(request, msg);
 
-                        if(msg.LogonResult != null)
+                        if (msg.LogonResult != null)
                         {
                             AccountInfo = msg.LogonResult.Account;
                         }
@@ -718,13 +741,16 @@ namespace Xceder
         /// query the instrument info
         /// </summary>
         /// <param name="symbol"></param>
-        /// <param name="product">target product, default value "UnknownType" means query all products</param>
-        /// <param name="exchange">target exchange only, default value "NonExch" means query all exchanges</param>
-        /// <param name="broker">target broker only, default value "Xceder" means all brokers</param>
+        /// <param name="product">limit the result to the specified product only, default value "UnknownType" means query all products</param>
+        /// <param name="exchange">limit the result to the specified exchange only, default value "NonExch" means query all exchanges</param>
+        /// <param name="maturityDate">limit the result to the specified maturity date YYYYMM only, default value "" means all maturity date</param>
+        /// <param name="broker">limit the result to the specified broker only, default value "Xceder" means all brokers</param>
         /// <returns>ansyc task result for this request</returns>
-        public Task<Tuple<Request, Response>> queryInstrument(string symbol, Instrument.Types.PRODUCT product = Instrument.Types.PRODUCT.UnknownType, Exchange.Types.EXCHANGE exchange = Exchange.Types.EXCHANGE.NonExch, BROKER broker = BROKER.Xceder)
+        public Task<Tuple<Request, Response>> queryInstrument(string symbol, Instrument.Types.PRODUCT product = Instrument.Types.PRODUCT.UnknownType, Exchange.Types.EXCHANGE exchange = Exchange.Types.EXCHANGE.NonExch, string maturityDate = "", BROKER broker = BROKER.Xceder)
         {
             Request request = createRequestMsg();
+
+            Tuple<uint, uint> epochPeriod = calPeriod(maturityDate);
 
             var query = request.QueryRequest = new Query();
 
@@ -735,7 +761,45 @@ namespace Xceder
             conditions.Symbol = symbol;
             conditions.Product = product;
 
-            return send(request);
+            return send(request).ContinueWith(r =>
+            {
+                var result = r.Result;
+
+                if (epochPeriod != null)
+                {
+                    var array = result.Item2.QueryResult.Instruments.Instrument;
+
+                    var size = array.Count;
+
+                    while (size-- > 0)
+                    {
+                        var instrument = array[size];
+
+                        if (instrument.MaturityEpochDays < epochPeriod.Item1 || instrument.MaturityEpochDays > epochPeriod.Item2)
+                        {
+                            array.RemoveAt(size);
+                        }
+                    }
+                }
+
+                return result;
+            });
+        }
+
+        private Tuple<uint, uint> calPeriod(string date)
+        {
+            Tuple<uint, uint> epochPeriod = null;
+
+            DateTime targetDate;
+
+            if (DateTime.TryParseExact(date, "yyyyMM", null, DateTimeStyles.None, out targetDate))
+            {
+                var endOfMonth = new DateTime(targetDate.Year, targetDate.Month, DateTime.DaysInMonth(targetDate.Year, targetDate.Month));
+
+                epochPeriod = Tuple.Create(toEpochDays(targetDate), toEpochDays(endOfMonth));
+            }
+
+            return epochPeriod;
         }
 
         /// <summary>

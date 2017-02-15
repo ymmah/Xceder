@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections;
+using Xceder;
 
 namespace Xceder
 {
@@ -40,7 +41,7 @@ namespace Xceder
         }
 
         /// <summary>
-		/// Initializes a new instance of the <see cref="CircularBuffer.CircularBuffer`1"/> class.
+		/// Initializes a new instance of the <see cref="CircularBuffer.CircularBuffer"/> class.
 		/// 
 		/// </summary>
 		/// <param name='capacity'>
