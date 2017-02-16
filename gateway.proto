@@ -1,5 +1,5 @@
 ///////////////////////////////////////
-//version 20170208
+//version 20170216
 //the string size (not speicified) should be within 255 bytes
 
 syntax = "proto3";
@@ -1021,7 +1021,7 @@ message Order
         LASTTRADE = 2;
     }
     
-    enum MANUALORDER
+    enum SUBMITMODE
     {
         AUTOMATED = 0;
         MANUAL = 1;
@@ -1042,7 +1042,7 @@ message Order
     //this is for the multipe leg orders. normally it should be 0 for non-leg orders
     uint32 leg = 5;
     
-    MANUALORDER indicator = 6;
+    SUBMITMODE indicator = 6;
     
     //order detail
     oneof detail
