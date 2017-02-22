@@ -58,6 +58,7 @@ namespace Xceder
         public void TestOrder()
         {
             var stream = login();
+
             var client = stream.XcederClient;
 
             var instruments = queryInstrument(client, "ES", Instrument.Types.PRODUCT.Fut, Exchange.Types.EXCHANGE.Cme);
@@ -158,14 +159,17 @@ namespace Xceder
             return stream;
         }
 
-        private XcederStream login()
+        private XcederStream login(string userID = "", string pwd = "")
         {
             var stream = connectToServer();
 
             var client = stream.XcederClient;
 
-            string userID = "testUser" + DateTime.Now;
-            string pwd = "testUser";
+            if (string.IsNullOrWhiteSpace(userID))
+                userID = "testUser" + DateTime.Now;
+
+            if (string.IsNullOrWhiteSpace(pwd))
+                pwd = "testUser";
 
             var requestTask = client.login(userID, "test");
 
