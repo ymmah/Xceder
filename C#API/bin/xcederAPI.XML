@@ -572,50 +572,81 @@
         </member>
         <member name="P:Com.Xceder.Messages.Response.QueryResult">
             <summary>
-            Reports with requested information.
+            reply for the query request
             </summary>
         </member>
         <member name="F:Com.Xceder.Messages.Response.MarketDatasFieldNumber">
             <summary>Field number for the "marketDatas" field.</summary>
         </member>
+        <member name="P:Com.Xceder.Messages.Response.MarketDatas">
+            <summary>
+            broadcast message for the price updates
+            </summary>
+        </member>
         <member name="F:Com.Xceder.Messages.Response.PingFieldNumber">
             <summary>Field number for the "ping" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.Ping">
+            <summary>
+            server reply for the Ping request
+            </summary>
         </member>
         <member name="F:Com.Xceder.Messages.Response.LogonResultFieldNumber">
             <summary>Field number for the "logonResult" field.</summary>
         </member>
         <member name="P:Com.Xceder.Messages.Response.LogonResult">
             <summary>
-            Session level messages from server.
+            reply for the logon request
             </summary>
         </member>
         <member name="F:Com.Xceder.Messages.Response.NoticeFieldNumber">
             <summary>Field number for the "notice" field.</summary>
         </member>
+        <member name="P:Com.Xceder.Messages.Response.Notice">
+            <summary>
+            broadcast message for notice
+            </summary>
+        </member>
         <member name="F:Com.Xceder.Messages.Response.ServiceStatusFieldNumber">
             <summary>Field number for the "serviceStatus" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.ServiceStatus">
+            <summary>
+            broadcadst message for the service status updates
+            </summary>
         </member>
         <member name="F:Com.Xceder.Messages.Response.InstrumentsFieldNumber">
             <summary>Field number for the "instruments" field.</summary>
         </member>
+        <member name="P:Com.Xceder.Messages.Response.Instruments">
+            <summary>
+            broadcast message for the new instruments
+            </summary>
+        </member>
         <member name="F:Com.Xceder.Messages.Response.InstrumentStatusFieldNumber">
             <summary>Field number for the "instrumentStatus" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.InstrumentStatus">
+            <summary>
+            broadcast message for the instrument status change
+            </summary>
         </member>
         <member name="F:Com.Xceder.Messages.Response.SpreaderIDFieldNumber">
             <summary>Field number for the "spreaderID" field.</summary>
         </member>
         <member name="P:Com.Xceder.Messages.Response.SpreaderID">
-             <summary>
-            this is the result for the spreader creation successfully
-             </summary>
+            <summary>
+            reply for the spreader creation request
+            </summary>
         </member>
         <member name="F:Com.Xceder.Messages.Response.OrderReportsFieldNumber">
             <summary>Field number for the "orderReports" field.</summary>
         </member>
         <member name="P:Com.Xceder.Messages.Response.OrderReports">
-             <summary>
-            this will be sent when the spreader leg order is submitted by server, or execution report for the order status
-             </summary>
+            <summary>
+            execution report for the order submission request; broadcast message for the order execution report
+            if the submitted order is algo order, this is used to report the order triggered by server
+            </summary>
         </member>
         <member name="T:Com.Xceder.Messages.Response.ResponseOneofCase">
             <summary>Enum of possible cases for the "response" oneof.</summary>
@@ -845,6 +876,11 @@
              <summary>
             TT
             Icap Electronic Broking (Us)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Exchange.Types.EXCHANGE.Dgcx">
+             <summary>
+            Dubai Gold &amp; Commodities Exchange Dmcc
              </summary>
         </member>
         <member name="F:Com.Xceder.Messages.DeviceToken.TypeFieldNumber">

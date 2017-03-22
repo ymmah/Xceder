@@ -1,5 +1,5 @@
 ///////////////////////////////////////
-//version 20170216
+//version 20170313
 //the string size (not speicified) should be within 255 bytes
 
 syntax = "proto3";
@@ -476,6 +476,9 @@ message Exchange
         GMEX = 74;
         FIX = 75;
         TSE = 76;
+        
+        //Dubai Gold & Commodities Exchange Dmcc
+        DGCX = 77;
     }
     
     EXCHANGE code = 1;
