@@ -1,5 +1,5 @@
 ///////////////////////////////////////
-//version 20170313
+//version 20170404
 //the string size (not speicified) should be within 255 bytes
 
 syntax = "proto3";
@@ -10,45 +10,43 @@ package com.xceder.messages;
 
 option optimize_for = SPEED;
 
-message Request
-{
+message Request {
     //request ID, should be unique enough to receive the request Result
     uint64 requestID = 1;
-    
+
     //this is the timestamp from client side when request is submitted
     uint64 requestUTC = 2;
-    
-    oneof request
-    {
+
+    oneof request {
         //it is used as request extension for some system, for example, xceder Web need this to update the watch list
         google.protobuf.Any extension = 3;
-    
+
         Ping ping = 4;
-    
+
         //login system for registered user
         Logon logon = 5;
-    
+
         //logoff message to logoff current session
         string logoff = 6;
-    
+
         PasswordChange passwordChange = 7;
-    
+
         //register new account or update the account detail
         Account account = 8;
-    
+
         Query queryRequest = 9;
-        
+
         // subscribe/unsubscribe market data
         InstrumentSubscription marketData = 10;
-        
+
         // subscribe/unsubscribe the instrument change
         InstrumentSubscription instruments = 11;
-    
+
         //subscribe/unsubscribe the instrument status change
         InstrumentSubscription instrumentStatus = 12;
-    
+
         Order order = 13;
-    
+
         //request to create/update spreader, the new spreader ID should be 0.
         //only allow to change the spreader which status isn't RUN
         //to delete spreader, just specify the ID with the empty name
@@ -57,63 +55,62 @@ message Request
 }
 
 // Server to Client message, server can include different fields in a single message
-message Response
-{
+message Response {
     //this is mainly for the request reply. it can be ignored for the server side initiated broadcasting messages, such as ping, price updates
     Result result = 1;
-    
-    oneof response
-    {
+
+    oneof response {
         google.protobuf.Any extension = 2;
-    
+
         // reply for the query request
         QueryResult queryResult = 3;
-    
+
         // broadcast message for the price updates
         MarketDatas marketDatas = 4;
-    
+
         // server reply for the Ping request
         Ping ping = 5;
-        
+
         // reply for the logon request
         LogonResult logonResult = 6;
-        
+
         // broadcast message for notice
         NoticeMessages notice = 7;
-        
+
         // broadcadst message for the service status updates
-        ServiceStatuses  serviceStatus = 8;
-    
+        ServiceStatuses serviceStatus = 8;
+
         // broadcast message for the new instruments
         Instruments instruments = 9;
-        
+
         // broadcast message for the instrument status change
         InstrumentStatuses instrumentStatus = 10;
-        
+
         // reply for the spreader creation request
         uint64 spreaderID = 11;
-        
+
         // execution report for the order submission request; broadcast message for the order execution report
         // if the submitted order is algo order, this is used to report the order triggered by server
         OrderReports orderReports = 12;
+
+        // sent by the server when the position is changed, for example, the order is filled
+        Positions positions = 13;
     }
 }
 
-enum ID_TYPE
-{
+enum ID_TYPE {
     INSTRUMENT = 0;
     SPREADER = 1;
     ORDER = 2;
 }
 
 // Result code.
-enum ERRORCODE
-{
+enum ERROR {
     PROCESSING = 0;
-    
+
     // success codes
     SUCCESS = 1;
-    
+
     // failure codes (>=100)
     FAILURE = 100;
 
@@ -123,26 +120,26 @@ enum ERRORCODE
     // One-time password is required for this user but it was not sent, repeat logon
     // with one-time password.
     NO_ONETIME_PASSWORD = 102;
-    
+
     NO_TRADINGACCOUNT = 103;
-    
+
     OTP_EXPIRED = 104;
-    
+
     OTP_NOT_FOUND = 105;
-    
+
     NETWORK_ERROR = 106;
-    
+
     CANCELLED = 107;
-    
+
     CONNECTION_DOWN = 108;
-    
+
     CONNECTION_NOT_CONFIGURE = 109;
-    
+
     // Requested data is outside of allowed range.
     OUTSIDE_ALLOWED_RANGE = 110;
-    
+
     UNKNOWN_REQUEST = 111;
-    
+
     // User password is expired, only change password operation is allowed.
     PASSWORD_EXPIRED = 112;
 
@@ -164,30 +161,28 @@ enum ERRORCODE
     TIMEOUTOFSYNC = 119;
 
     DUPLICATE_USER = 120;
-    
-    
-    
+
+
     NOT_LOGIN = 130;
-    
+
     NOT_SUPPORT = 131;
-    
+
     // Requested information is not found.
     NOT_FOUND = 132;
-    
+
     NOT_FOUND_ORDER = 133;
-    
-    
-    
+
+
     INVALID_PARAMS = 140;
-    
+
     INVALID_INSTRUMENTID = 141;
-    
+
     INVALID_CLORDID = 142;
-    
+
     INVALID_USERID = 143;
-    
+
     INVALID_BROKER = 144;
-    
+
     INVALID_EMAIL = 145;
 
     INVALID_ORDER_SUBMITUSER = 146;
@@ -195,7 +190,7 @@ enum ERRORCODE
     INVALID_ORDER_QTY = 147;
 
     INVALID_LIMIT_PRICE = 148;
-    
+
     INVALID_STOP_PRICE = 149;
 
     INVALID_ORDER_TYPE = 150;
@@ -203,66 +198,59 @@ enum ERRORCODE
     INVALID_ORDER_SUBMIT_TIME = 151;
 
     INVALID_ORDER_TIMEINFORCE = 152;
-    
+
     INVALID_CHAINCLORDID = 153;
-    
+
     INVALID_SYMBOL = 154;
-    
+
     INVALID_SIDE = 155;
-    
+
     INSTRUMENT_EXPIRED = 156;
-    
+
     INSTRUMENT_NOT_TRADABLE = 157;
-    
+
     INSTRUMENT_NO_PRICE_ACCESS = 158;
-    
-    
-    
+
     /* Order related errors */
     //tag should be less than 255
     ORDER_TAG_TOOLONG = 160;
-    
+
     ORDER_NOT_REPLACEABLE = 161;
-    
-    
-    
-    
+
     /* Spreader related errors */
     SPREADER_DUPLICATE_NAME = 171;
-    
+
     SPREADER_NO_QUOTING = 172;
-    
+
     SPREADER_NO_LEGS = 173;
-    
+
     SPREADER_NO_INSTRUMENT_ACCESS = 174;
-    
+
     SPREADER_DUPLICATE_ORDER = 175;
-    
+
     SPREADER_INVALID_ID = 176;
-    
+
     SPREADER_INVALID_LEG_INSTRUMENT = 177;
-    
+
     SPREADER_INVALID_LEG_RATIO = 178;
-    
+
     SPREADER_INVALID_LEG_PRICEWEIGHT = 179;
-    
+
     //for example syntax error
     SPREADER_INVALID_LEG_RULES = 180;
-    
+
     //leg order has failure, for example, fail to withdraw some leg orders
     SPREADER_LEG_FAILURE = 181;
-    
-    
+
     /* Algo related errors */
     //can't modify the algo/spreader because of active orders
     ALGO_ACTIVE_ORDER = 190;
 }
 
-enum BROKER
-{
+enum BROKER {
     //also means any/unspecified broker
     XCEDER = 0;
-    
+
     SQUARE = 1;
     KGI = 2;
     PHILLIP = 3;
@@ -270,29 +258,29 @@ enum BROKER
     UOB = 5;
     CQG = 6;
     TT = 7;
+
+    //中国国际期货
+    CIFCO = 8;
 }
 
-enum SIDE
-{
+enum SIDE {
     NO_SIDE = 0;
-    
+
     // Describes purchasing side of a trade.
     BUY = 1;
-    
+
     // Describes selling side of a trade.
     SELL = 2;
 }
 
-enum OTP_PURPOSE
-{
+enum OTP_PURPOSE {
     RESET_PWD = 0;
     EMAIL_CONFIRM = 1;
     PHONE_CONFIRM = 2;
 }
 
 // Days of week enumeration.
-enum DAYOFWEEK
-{
+enum DAYOFWEEK {
     SUNDAY = 0;
     MONDAY = 1;
     TUESDAY = 2;
@@ -302,149 +290,147 @@ enum DAYOFWEEK
     SATURDAY = 6;
 }
 
-message Exchange
-{
-    enum  EXCHANGE
-    {
+message Exchange {
+    enum EXCHANGE {
         //means not specified
         NON_EXCH = 0;
-        
+
         OTC = 1;
-        
+
         ///中国金融期货交易所
         CCFX = 2;
-        
+
         //SHANGHAI GOLD EXCHANGE
         SGEX = 3;
-        
+
         //CHINA FOREIGN EXCHANGE TRADE SYSTEM
         XCFE = 4;
-        
+
         ///大连商品交易所
         XDCE = 5;
-        
+
         ///上海期货交易所
         XSGE = 6;
-        
+
         //SHANGHAI INTERNATIONAL ENERGY EXCHANGE
         XINE = 7;
-        
+
         //SHENZHEN STOCK EXCHANGE
         XSHE = 8;
-        
+
         //SHENZHEN STOCK EXCHANGE - SHENZHEN - HONG KONG STOCK CONNECT
         XSEC = 9;
-        
+
         //SHANGHAI STOCK EXCHANGE
         XSHG = 10;
-        
+
         //SHANGHAI STOCK EXCHANGE - SHANGHAI - HONG KONG STOCK CONNECT
         XSSC = 11;
-        
+
         ///郑州商品交易所
         XZCE = 12;
-        
+
         //SINGAPORE MERCANTILE EXCHANGE PTE LTD
         SMEX = 13;
-        
+
         //SINGAPORE EXCHANGE
         XSES = 14;
-        
+
         //SINGAPORE COMMODITY EXCHANGE
         XSCE = 15;
-        
+
         //SINGAPORE EXCHANGE DERIVATIVES CLEARING LIMITED
         XSIM = 16;
-        
+
         //CHICAGO MERCANTILE EXCHANGE
         XCME = 17;
-        
+
         //CME SWAPS MARKETS (CBOT)
         CBTS = 18;
-        
+
         //CME SWAPS MARKETS (COMEX)
         CECS = 19;
-        
+
         //CME SWAPS MARKETS (CME)
         CMES = 20;
-        
+
         //CHICAGO MERCANTILE EXCHANGE (FLOOR)
         FCME = 21;
-        
+
         //CME GLOBEX
         GLBX = 22;
-        
+
         //INTERNATIONAL MONETARY MARKET
         XIMM = 23;
-        
+
         //INDEX AND OPTIONS MARKET
         XIOM = 24;
-        
+
         //CURRENEX
         XCUR = 25;
-        
+
         //ICAP EUROPE
         ICAP = 26;
-        
+
         //BROKERTEC
         BTEE = 27;
-        
+
         //BM&FBOVESPA S.A. - BOLSA DE VALORES, MERCADORIAS E FUTUROS
         BVMF = 28;
-        
+
         //CHICAGO BOARD OPTIONS EXCHANGE
         XCBO = 29;
-        
+
         //CBOE FUTURES EXCHANGE
         XCBF = 30;
-        
+
         //CHICAGO BOARD OF TRADE
         XCBT = 31;
-        
+
         //LONDON METAL EXCHANGE
         XLME = 32;
-        
+
         //LONDON STOCK EXCHANGE
         XLON = 34;
-        
+
         //LONDON STOCK EXCHANGE - DERIVATIVES MARKET
         XLOD = 35;
-        
+
         //JAPAN EXCHANGE GROUP
         XJPX = 36;
-        
+
         //OSAKA EXCHANGE
         XOSE = 37;
-        
+
         //OSAKA EXCHANGE J-NET
         XOSJ = 38;
-        
+
         //TOKYO STOCK EXCHANGE
         XTKS = 39;
-        
+
         //TOKYO FINANCIAL  EXCHANGE
         XTFF = 40;
-        
+
         //TOKYO COMMODITY EXCHANGE
         XTKT = 41;
-        
+
         //ASX - ALL MARKETS
         XASX = 42;
-        
+
         //ASX - TRADE24
         XSFE = 43;
-        
+
         //Eurex Exchange
         XEUR = 44;
-        
+
         //EUROPEAN CLIMATE EXCHANGE
         ECXE = 45;
-        
+
         //INTERCONTINENTAL EXCHANGE
         IEPA = 46;
-        
+
         //BTEC = 47;
-        
+
         //TT
         //Icap Electronic Broking (Us)
         BTec = 48;
@@ -476,33 +462,31 @@ message Exchange
         GMEX = 74;
         FIX = 75;
         TSE = 76;
-        
+
         //Dubai Gold & Commodities Exchange Dmcc
         DGCX = 77;
     }
-    
+
     EXCHANGE code = 1;
     string name = 2;
     sint32 timezone = 3;
 }
 
-message DeviceToken
-{
-    enum DEVICE_TYPE
-    {
+message DeviceToken {
+    enum DEVICE_TYPE {
         UNKNOW_DEVICE = 0;
-        
+
         IPHONE = 1;
-        
+
         IPAD = 2;
-        
+
         ANDROID = 3;
-        
+
         PC = 4;
-        
+
         MAC = 5;
     }
-    
+
     DEVICE_TYPE type = 1;
 
     string token = 2;
@@ -511,49 +495,45 @@ message DeviceToken
 }
 
 message Account {
-    
-    enum LOGIN_MODE
-    {
+
+    enum LOGIN_MODE {
         PASSWORD = 0;
-        
+
         OATH2 = 1;
-        
+
         OTP = 2;
     }
-    
-    enum ROLE
-    {
+
+    enum ROLE {
         ANONYMOUSE = 0; // Anonymouse users
-        
+
         CLIENT = 1; // normal client
-        
+
         TR = 2; // trading representative, such as dealers
-        
+
         ADMIN = 3; // administrator
-        
+
         DEMO = 4; // For demostration purpose
-        
+
         APPS = 5; // applications, such as computer trading system
     }
-    
-    enum CONNECTION
-    {
+
+    enum CONNECTION {
         SIMULATION = 0;
         LIVE = 1;
         ALL = 2;
     }
-    
-    enum STATUS
-    {
+
+    enum STATUS {
         UNVERIFIED = 0;
 
         VERIFIED = 1;
-        
+
         SUSPEND = 2;
     }
-    
+
     google.protobuf.Any extension = 1;
-    
+
     //it is server side created account ID, when register new user, it should be just 0
     uint32 accountID = 2;
 
@@ -581,23 +561,21 @@ message Account {
 
     //the latest account trading rule update timestamp
     uint64 tradingRuleUpdateTime = 12;
-    
+
     CONNECTION allowedConnection = 13;
-    
+
     LOGIN_MODE loginMode = 14;
 }
 
-message Particular
-{
-    enum GENDER
-    {
+message Particular {
+    enum GENDER {
         UNKNOWN = 0;
-        
+
         MALE = 1;
-        
+
         FEMALE = 2;
     }
-    
+
     string firstName = 1;
 
     string surName = 2;
@@ -626,8 +604,7 @@ message Particular
     repeated DeviceToken mobileDeviceTokens = 12;
 }
 
-message LoginRecord
-{
+message LoginRecord {
     string authBy = 1;
 
     uint64 loginUTC = 2;
@@ -654,15 +631,14 @@ message LoginRecord
 //each request will get a process error result from the server before the actual result disseminated
 //because of the async process, later when remote side reject the request, the error will be disseminated accordingly
 //client side need use the reqID to determine which request this error is for
-message Result
-{
+message Result {
     //request's ID, submitted in the RequestMsg
     uint64 request = 1;
 
     //id of the result source server
     uint32 serverID = 2;
 
-    ERRORCODE resultCode = 3;
+    ERROR resultCode = 3;
 
     string remark = 4;
 
@@ -677,70 +653,64 @@ message Result
     uint32 requestFromPort = 9;
 }
 
-message Service
-{
-    enum SERVICE
-    {
+message Service {
+    enum SERVICE {
         SVCALL = 0;
-        
+
         PRICE = 1;
         ORDER = 2;
-        
+
         SPREADER = 3;
-        
+
         ALGO = 4;
     }
-    
+
     BROKER broker = 1;
     SERVICE svc = 2;
     Exchange.EXCHANGE exchange = 3;
 }
 
-message ServiceStatus
-{
-    enum STATUS
-    {
+message ServiceStatus {
+    enum STATUS {
         UNKNOWN = 0;
-        
+
         CONNECTING = 1;
-        
+
         //line is up and can take requests
         READY = 2;
-    
+
         //network connection is broken
         BROKEN = 3;
-        
+
         //disconnect from broker in trading hour either caused by network issue or counter party system
         DISCONNECT = 4;
-        
+
         //session is over
         CLOSE = 5;
     }
-    
+
     uint32 serverID = 1;
     Service service = 2;
     STATUS status = 3;
 }
 
-message ServiceStatuses
-{
+message ServiceStatuses {
     repeated ServiceStatus status = 1;
 }
 
 // Logon into the system and opening a new session.
-message Logon
-{
-	// User login ID.
-	string userID = 1;
+message Logon {
+    // User login ID.
+    string userID = 1;
 
-	// User's password.
-	string password = 2;
+    // User's password.
+    string password = 2;
 
-	// User's one time password, might be required according to the user's settings.
-	uint32 OTP = 3;
+    // User's one time password, might be required according to the user's settings.
+    uint32 OTP = 3;
 
-	// Identifier of the client application.
-	string clientApp = 4;
+    // Identifier of the client application.
+    string clientApp = 4;
 
     //specify the minimum pushing message gap (in seconds) from the server, such as price, order status updates. this excludes those reponse of
     //requests. if it is 0, means no delay on the pushing message.
@@ -749,37 +719,32 @@ message Logon
 }
 
 // Result of the successful logon
-message LogonResult
-{
+message LogonResult {
     Account account = 1;
 
-	// URL for a client to reconnect in case of redirection.
-	string redirectURL = 2;
+    // URL for a client to reconnect in case of redirection.
+    string redirectURL = 2;
 }
 
 // Message to change user's password.
-message PasswordChange
-{
-	// Currently used password.
-	string currentPassword = 1;
+message PasswordChange {
+    // Currently used password.
+    string currentPassword = 1;
 
-	// New password that user wants to use. put blank means request the reset token
-	string newPassword = 2;
+    // New password that user wants to use. put blank means request the reset token
+    string newPassword = 2;
 
     string email = 3;
 }
 
-message NoticeMessages
-{
+message NoticeMessages {
     repeated NoticeMessage notice = 1;
 }
 
 // Text message from server.
-message NoticeMessage
-{
-	// Type of the message.
-	enum TYPE
-	{
+message NoticeMessage {
+    // Type of the message.
+    enum TYPE {
         // General information.
         INFO = 0;
 
@@ -787,112 +752,106 @@ message NoticeMessage
         WARNING = 1;
 
         // Critical error message.
-		ERROR = 2;
-	}
+        ERROR = 2;
+    }
 
-	// This field is associated with MessageType enum type.
+    // This field is associated with MessageType enum type.
     TYPE type = 1;
 
-	// Information about source of the message.
-	string source = 2;
+    // Information about source of the message.
+    string source = 2;
 
-	// Message subject.
-	string subject = 3;
+    // Message subject.
+    string subject = 3;
 
-	// Message text.
-	string text = 4;
+    // Message text.
+    string text = 4;
 
-	// Optional time when this message is expired, it should be hidden from user after this time (UTC).
-	uint64 expirationUTC = 5;
+    // Optional time when this message is expired, it should be hidden from user after this time (UTC).
+    uint64 expirationUTC = 5;
 }
 
 // Ping request which can be initiated by any side to ensure connection is alive. Both client and
 // server sides must respond such request with Ping.
-message Ping
-{
-	// initiator time
-	uint64 pingUTC = 1;
+message Ping {
+    // initiator time
+    uint64 pingUTC = 1;
 
-	// responser time
-	uint64 pongUTC = 2;
+    // responser time
+    uint64 pongUTC = 2;
 }
 
 // Request for information.
-message Query
-{
-    oneof query
-    {
+message Query {
+    oneof query {
         google.protobuf.Any extension = 1;
-    
+
         // Request for a list of historical orders according to a search criteria.
         QueryConditions order = 2;
 
         QueryConditions log = 3;
 
         QueryConditions instruments = 4;
-    
+
         //always query the whole rules to ensure the data intact.
         uint32 accountTradingRule = 5;
 
         bool supportBrokerExchanges = 6;
-    
-        QueryConditions calendar = 7;
-    
-        QueryConditions spreader = 8;
-	}
-}
 
+        QueryConditions calendar = 7;
+
+        QueryConditions spreader = 8;
+
+        QueryConditions position = 9;
+    }
+}
 
 /**
 Pagination is done in the server side automatically. Client should always query the server until return empty records
 */
-message QueryResult
-{
-    oneof result
-    {
+message QueryResult {
+    oneof result {
         google.protobuf.Any extension = 1;
-    
+
         // Report with a list of historical orders according to specified parameters.
         OrderReports ordersReports = 2;
-        
+
         RequestLogs logs = 3;
-        
+
         AccountTradingRules accountTradingRule = 4;
-        
+
         BrokerExchanges supportedExchanges = 5;
-        
+
         ExchangeCalendar calendar = 6;
-        
+
         Instruments instruments = 7;
-    
+
         Spreaders spreaders = 8;
+
+        Positions positions = 9;
     }
 }
 
-message ExchangeCalendar
-{
-    message Holiday
-    {
+message ExchangeCalendar {
+    message Holiday {
         uint32 epochDay = 1;
         string holiday = 2;
         uint32 hours = 3;
     }
-    
+
     Exchange.EXCHANGE exchange = 1;
-    
+
     repeated Holiday holiday = 2;
 }
 
-message BrokerExchanges
-{
+message BrokerExchanges {
     repeated BROKER broker = 1;
-    
+
     repeated Exchange.EXCHANGE exchange = 2;
 }
 
 //based on different data, the parameter may be used differently
-message QueryConditions
-{
+message QueryConditions {
     //include this time, this can be 0
     uint64 fromUTC = 1;
 
@@ -901,173 +860,161 @@ message QueryConditions
 
     //if this query related to particular broker
     BROKER broker = 3;
-    
+
     //if this query related to particular broker
     Exchange.EXCHANGE exchange = 4;
-    
+
     //if this query related to particular symbol
     //for spreader query, it is the spreader name
     string symbol = 5;
-    
+
     //if this query related to particular product type
     Instrument.PRODUCT product = 6;
-    
+
     //if this query related to particular instrument, when this is set for instrument query, the above condition will be ignored
     //in spreader query, it is the spreader ID
     uint64 instrumentID = 7;
-    
+
     //if  this query related to the particular user, only allow to query itself or its client account's info
     //0 means query itself info
-    uint32 account = 8;
+    uint32 userID = 8;
 }
 
-message OrderReports
-{
+message OrderReports {
     repeated OrderReport orderReport = 1;
 }
 
-message OrderReport
-{
+message OrderReport {
     //if it is not empty, must have the reports
     Order order = 1;
-    
+
     //can be used without order
     repeated ExecutionReport report = 2;
 }
 
-message RequestLogs
-{
+message RequestLogs {
     repeated RequestLog logs = 1;
 }
 
-message RequestLog
-{
+message RequestLog {
     Request request = 1;
 
     Result result = 2;
 }
 
 // Trade routing order. It is used as new order request and as a part of order status updates.
-message Order
-{
+message Order {
     //FIX OrdType char code
-	enum TYPE
-	{
+    enum TYPE {
         // Limit order, buy or sell by price that is the same or better then specified limit price.
         LMT = 0;
 
         // Stop order, Order becomes a Market when market reaches order's stop price
-		// (which is on opposite side of market).
-		STP = 1;
+        // (which is on opposite side of market).
+        STP = 1;
 
-		// Stop-limit order, Order becomes a Limit when market reaches order's stop price.
-		STL = 2;
-        
+        // Stop-limit order, Order becomes a Limit when market reaches order's stop price.
+        STL = 2;
+
         // Market order, buy or sell by the best available opposite price.
         MKT = 3;
     }
-    
+
     //FIX TimeInForce
-    enum TIMEINFORCE
-    {
+    enum TIMEINFORCE {
         DAY = 0;
-        
+
         //Good Till Cancel
         GTC = 1;
-        
+
         //At the Opening
         OPG = 2;
-        
+
         //Immediate or Cancel
         IOC = 3;
-        
+
         //Fill or Kill
         FOK = 4;
-        
+
         //Good Till Crossing
         //GTX = 5;
-        
+
         //Good Till Date
         //GTD = 6;
-    
+
         //Good in Session
         GIS = 8;
     }
-    
-    enum EXECINSTRUCTION
-	{
-		// All or None (fill order only completely).
-		AON = 0;
 
-		// Iceberg (show only part of order size).
-		ICEBERG = 1;
+    enum EXECINSTRUCTION {
+        // All or None (fill order only completely).
+        AON = 0;
 
-		// Quantity triggered (aka DOM Triggered, honor additional quantity threshold for triggering).
-		QT = 2;
+        // Iceberg (show only part of order size).
+        ICEBERG = 1;
 
-		// Trailing order (price of the order is following market one direction by specific offset).
-		TRAIL = 3;
+        // Quantity triggered (aka DOM Triggered, honor additional quantity threshold for triggering).
+        QT = 2;
 
-		// Funari (Limit order becomes a Market on Close).
-		FUNARI = 4;
+        // Trailing order (price of the order is following market one direction by specific offset).
+        TRAIL = 3;
 
-		// Market if Touched (Limit order becomes a Market when market reaches order's limit price).
-		MIT = 5;
+        // Funari (Limit order becomes a Market on Close).
+        FUNARI = 4;
 
-		// Market Limit Market is a limit order that is used to place a buy order above the best offer
-		// to fill by the best offer or a sell order below the best bid to fill by the best bid.
-		MLM = 6;
-	}
+        // Market if Touched (Limit order becomes a Market when market reaches order's limit price).
+        MIT = 5;
 
-	enum TRAILINGPEG
-	{
-		// Trail the best bid.
-		BESTBID = 0;
+        // Market Limit Market is a limit order that is used to place a buy order above the best offer
+        // to fill by the best offer or a sell order below the best bid to fill by the best bid.
+        MLM = 6;
+    }
 
-		// Trail the best ask.
-		BESTASK = 1;
+    enum TRAILINGPEG {
+        // Trail the best bid.
+        BESTBID = 0;
 
-		// Trail the last trade.
-		LASTTRADE = 2;
-	}
-    
-    enum SUBMITMODE
-    {
+        // Trail the best ask.
+        BESTASK = 1;
+
+        // Trail the last trade.
+        LASTTRADE = 2;
+    }
+
+    enum SUBMITMODE {
         AUTOMATED = 0;
         MANUAL = 1;
     }
 
     // this order owner user ID.
     uint32 account = 1;
-    
+
     // who placed the order.
     uint32 enterBy = 2;
-    
-    //order source time when an order was submitted (UTC).
-	uint64 submitUTC = 3;
 
-	// tag for this order
+    //order source time when an order was submitted (UTC).
+    uint64 submitUTC = 3;
+
+    // tag for this order
     string tag = 4;
-    
+
     //this is for the multipe leg orders. normally it should be 0 for non-leg orders
     uint32 leg = 5;
-    
+
     SUBMITMODE indicator = 6;
-    
+
     //order detail
-    oneof detail
-    {
+    oneof detail {
         OrderParams params = 7;
-    
+
         CompoundOrder compound = 8;
     }
 }
 
-message OrderParams
-{
+message OrderParams {
     //if this order is replaced/withdraw, this is its original clOrdID. otherwise, it should be 0
     uint64 origClOrdID = 1;
-    
+
     //instrument/spreader ID
     uint64 instrument = 2;
 
@@ -1077,9 +1024,9 @@ message OrderParams
     Order.TYPE orderType = 4;
 
     repeated Order.EXECINSTRUCTION execInstruction = 5;
-    
+
     Order.TIMEINFORCE timeInForce = 6;
-    
+
     // Total positive size of the order. if the qty is 0, means the order is requested to be cancelled
     uint32 orderQty = 7;
 
@@ -1100,7 +1047,7 @@ message OrderParams
     uint64 goodThruUTC = 12;
 
     uint32 regulatoryAlgorithm = 13;
-    
+
     // Maximum offset between market and limit prices for trail orders.
     uint32 trailOffset = 14;
 
@@ -1119,246 +1066,231 @@ message OrderParams
 
     //ISO 3 charactor currency
     string currency = 19;
-    
+
     // True if order is used for closing/ reducing a position, opening/ increasing otherwise
     // default is false, means open position
     bool close = 20;
-    
+
     // True if the order is aggressive (Fixed Income specific order modifier).
     bool aggressive = 21;
 }
 
 // Compound order.
-message CompoundOrder
-{
+message CompoundOrder {
     // Type of the compound order.
-	enum TYPE
-	{
+    enum TYPE {
         // Order Places Order.
-		// [Partial] fill of the first entry triggers [partial] placement of all other orders.
-		OPO = 0;
+        // [Partial] fill of the first entry triggers [partial] placement of all other orders.
+        OPO = 0;
 
-		// Order Cancels Order. This type allows several compound order entires.
-		// [Partial] fill of any order triggers [partial] canceling of all other orders.
-		OCO = 1;
+        // Order Cancels Order. This type allows several compound order entires.
+        // [Partial] fill of any order triggers [partial] canceling of all other orders.
+        OCO = 1;
     }
-    
+
     TYPE type = 1;
 
-	// ID of the compound order assigned by client.
-	string compoundID = 2;
-    
+    // ID of the compound order assigned by client.
+    string compoundID = 2;
+
     string remark = 3;
 
     // Indicates whether compound order execution shall happen on a complete fill (true) or partial fill (false)
     bool completeFill = 4;
 
-	repeated OrderParams order = 5;
+    repeated OrderParams order = 5;
 }
 
-message Spreaders
-{
+message Spreaders {
     repeated Spreader speader = 1;
 }
 
-message Spreader
-{
-    enum QUOTING_MODE
-    {
+message Spreader {
+    enum QUOTING_MODE {
         //If the hedge market quantity drops below the minimum hedge quantity, the associated quoting order will be pulled
         //from the market and will not be resubmitted even if sufficient hedge market volume reappears at some later time.
         ALL_NONE = 0;
-        
+
         //Resubmits a quoting order when there is sufficient hedge volume.
         //Note: that with this option, the spread order will persist and remain working even though no quoting orders are
         //working in the market; quoting orders will automatically be resubmitted if sufficient hedge quantity returns.
         ALL_NONE_RESUBMIT = 1;
-    
+
         //Leans on only the inside market of the hedge legs and, therefore, only considers the size of the hedge leg’s inside
         //market. If that volume is less than the minimum hedge quantity, the quoting order will be reduced to the largest
         //size that could be fully hedged at the inside market of the hedge leg(s).
         DYNAMIC_INSIDELEAN = 2;
     }
-    
-    enum COUPONFREQ
-    {
+
+    enum COUPONFREQ {
         ANNUAL = 0;
         MONTHLY = 1;
         QUARTERLY = 2;
         SEMIANNUALLY = 3;
     }
-    
-    enum DAYCOUNTTYPE
-    {
+
+    enum DAYCOUNTTYPE {
         //actual number of days based on an actual calendar year (leap year counts for 366 days)
         ACTUAL = 0;
-        
+
         //actual number of days based on a 365-day calendar year
         D365 = 1;
-        
+
         //actual number of days based on a 360-day calendar year
         D360 = 2;
-        
+
         //Count is the number of days based on a 365 day calendar year, where the second date is changed from the 31st to
         //the 30th only if the first date falls on the 30th or 31st
         D365_30 = 3;
-        
+
         //Count is the number of days based on a 360 day calendar year, where the second date is changed from the 31st to
         //the 30th only if the first date falls on the 30th or 31st
         D360_30 = 4;
-        
+
         //number of days based on a 360 day calendar year, where the second date is changed from the 31st to the 30th
         D365_30E = 5;
     }
-    
-    enum YIELD_TYPE
-    {
+
+    enum YIELD_TYPE {
         //Instrument price is in yield, so no conversion is necessary
         TYPE1 = 0;
-        
+
         //(100-price): Yield is calculated by subtracting the instrument price from 100. Calculation for the Euribor.
         TYPE2 = 1;
-        
+
         //((10000-Price)/100): yield is calculated by subtracting the instrument price from 10000 and dividing the result by
         //100. Calculation for the Eurodollar.
         TYPE3 = 2;
-        
+
         //((10000-(Price+Strip Base))/100): Eurodollar Strip type yield, a base (settlement) is added to the instrument price
         //before the Eurodollar conversion. Calculation for the exchange traded Strip, Pack or Bundle.
         TYPE4 = 3;
-        
+
         //((100000-Price)/1000): CBOT 30-day Fed Fund (ZQ) contract.
         TYPE5 = 4;
-        
+
         //Yield To Maturity: Price based on the rate of return if held until the maturity date.
         TYPE6 = 5;
-        
+
         //Par Rate. You must set the Leg.PV01 property as input to this yield calculation.
         TYPE7 = 6;
     }
-    
+
     //how to represent the price for this spread
-    enum TYPE
-    {
+    enum TYPE {
         // Prices display as the implied price of the spread.
         // Leg A Price (*) User-Defined Multiplier – Leg B Price (*) User-Defined Multiplier= Implied Price
         IMPLIED = 0;
-        
+
         //Prices display based on the individual legs' net change from the previous day settlement.
         //If you base spread prices on Net Change , you disable calculations in the Tick Information section.
         //The Calculated Tick Size defaults to 25/100. You can still use the Override Tick Size to change it.
         NETCHANGE = 1;
-        
+
         //Prices display as a percentage ratio (divides Leg A price by Leg B price).
         //The Ratio setting is for two-legged spreads.
         RATIO = 2;
-        
+
         //Prices display in yield. When enabled, an additional set of “Yield” parameters is displayed that can be configured
         //for each leg
         YIELD = 3;
-        
+
         //Prices display based on a custom formula for the implied spread price.
         CUSTOM = 4;
     }
-    
-    message SpreadSlop
-    {
+
+    message SpreadSlop {
         //spread price range for this slop
         double range = 1;
-    
+
         //The worst spread price you will accept
         //When buying, this property applies to prices above the current bid.
         //When selling, this property applies to prices below the current offer.
         double insideSlop = 2;
-    
+
         //The best spread price you will accept
         //When buying, this property applies to prices below the current bid.
         //When selling, this property applies to prices above the current offer.
         double outsideSlop = 3;
     }
-    
-    message InsideQuote
-    {
+
+    message InsideQuote {
         //0: means disable
         //1: Quotes do not adjust toward the inside market unless the new quote price is the inside market
         //n: quoting (n-1) ticks away from the inside market
         uint32 insideTick = 1;
-        
+
         //limit in ticks a quoting order is allowed to work away from the price level that matches the spread differential
         //0: the spread differential price level and the quoting order will always requote to the price that matches the
         //spread differential.
         uint32 distanceLimit = 2;
     }
-    
-    message EventRules
-    {
+
+    message EventRules {
         string preQuoting = 1;
         string preHedging = 2;
         string postHedging = 3;
     }
-    
-    message Leg
-    {
-        enum TYPE
-        {
+
+    message Leg {
+        enum TYPE {
             //send hedge and quoting orders at the same time
             QUOTE = 0;
-            
+
             //send the hedge order only after receiving a full fill of the quoting order
             HEDGE = 1;
         }
-    
-        message ExtraAttributes
-        {
+
+        message ExtraAttributes {
             //When creating spread legs for instruments that trade in yield, you can include the following optional values to use
             //when calculating the yield price:
             //First Coupon Date (firstCouponDate)
             //Dated Date (issueDate)
-        
+
             //first real coupon date, 0 to disable the bond instrument yield to maturity calculation
             uint64 firstCouponDate = 1;
-        
+
             //date on which interest accrual begins,must occur before the first coupon date
             //0 to disable the bond instrument yield to maturity calculation
             uint64 issueDate = 2;
-        
+
             //the factor by which the futures price is multiplied if the specified bond is delivered against it
             double conversionFactor = 3;
-        
+
             //whether to convert 360 days to 365 days
             bool use365Days = 4;
-        
+
             //coupon's annual interest rate
             double couponRate = 5;
-        
+
             COUPONFREQ couponFreq = 6;
-        
+
             //coupon payments always occur on the last day of the month if the settlement date falls on the last day of the month
             //true, if payments always occur on the last day of the month; false, otherwise
             bool endOfMonthCoupon = 7;
-        
+
             //redemption date of the bond. Must be greater than the settlement date and greater than today
             uint64 maturityDate = 8;
-        
+
             //used for converting NPV to a Par Rate for Eris Invoice Futures Spreads
             double PV01 = 9;
-        
+
             //date the trade settles. The value must be less than the maturity date and greater than today.
             uint64 settlementDate = 10;
-        
+
             //settlement price of the contracts in an exchange-traded strip, pack, or bundle
             double stripBase = 11;
-        
+
             YIELD_TYPE yieldType = 12;
         }
-    
+
         uint64 instrument = 1;
-    
+
         TYPE type = 2;
-    
+
         //indicate whether this leg is a short leg
         bool isShortLeg = 3;
-        
+
         //quantity of this leg in relation to the other spread legs
         //The Spread Ratio field allows a value of zero for spreads that require a leg for spread calculation purposes only,
         //and not for entering orders as a part of the spread. When a leg has a value of zero in the Spread Ratio field,
@@ -1367,64 +1299,63 @@ message Spreader
         //when creating the spread fill.
         //Values entered in the Spread Ratio field do not affect the spread price.
         double qtyRatio = 4;
-    
+
         //the multipler in the spread price formula
         double priceWeight = 5;
-        
+
         //number of ticks spreader can adjust the price of the limit order to fill the spread order.
         //Indicates the number of ticks Spreader can adjust the price of the limit order to fill the spread order.
         //Payup Ticks values can be between -9999 and 9999. Enter a positive value to adjust the price into the market, or
         //enter a negative value to adjust the price away from the market. Generally, a positive value is more aggressive and
         //may prevent you from getting legged; whereas a negative value moves away from the market and submits an order that
         //may not get filled, but may result in a better spread price.
-    
+
         //Example: You buy one ES Dec-Mar calendar spread at 6.00 and the quote leg fills at 2134.00. Payup Ticks are set to
         //"-2" for the hedge leg and the contract ticks in ".25" increments. Instead of entering a sell order in the hedge leg
         //for 2128.00 to achieve the spread price, Autospreader adjusts the price 2 ticks away from the market and enters an
         //order at 2128.50. Using this same example but with Payup Ticks set to positive "2", Autospreader adjusts the spread
         //price 2 ticks into the market and enters a hedge order at 2127.50.
         sint32 hedgeTick = 6;
-    
+
         //minimum quantity required for quoting orders to lean against
         //If you want to lean only against the inside market and not lean on multiple levels of depth you can set the
         //qtyLeanDepth to 0 and the minQtyLean to 1.
         uint32 minQtyLean = 7;
-        
+
         //Example: If the quantity on the second leg of the spread is 10 and the trader assigns an qtyLeanDepth of 2,
         //Spreader determines the price level at which 20 contracts of cumulative market quantity exists on the second leg
         //and uses this to determine the price at which it quotes the first leg of the spread.
         uint32 qtyLeanDepth = 8;
-        
+
         QUOTING_MODE quotingMode = 9;
-    
+
         //number of outright leg orders placed at consecutive price levels away from the inside market in addition to the
         //single quoted order for each leg.
         //Note: Queue Holder is only available with two-legged spreads.
         uint32 queueHolderDepth = 10;
-    
-    
+
         //maximum number of ticks a leg price can move in a single price update before pulling the order
         //this defines an order move threshold in the quoting leg.
         //Setting these properties can help prevent legging risks in volatile markets.
         //minimum setting is 1
         uint32 maxQuotePriceMove = 11;
-    
+
         //maximum number of ticks a leg price can move in a single price update before pulling the order from the market
         //this defines a price move threshold in the leaning (hedging) leg.
         //Setting these properties can help prevent legging risks in volatile markets.
         //minimum setting is 1
         uint32 maxHedgePriceMove = 12;
-        
+
         EventRules rules = 13;
-        
+
         //Lets you configure multiple levels of slop to determine when to reprice the quoted outright legs based upon
         //movement in the market
         repeated SpreadSlop slopLevel = 14;
-        
+
         //reduces excessive quoting away from the inside market.
         //legs only requote when they are a set number of ticks away from the inside market
         InsideQuote insideQuote = 15;
-        
+
         //whether should send a hedge order when the quoted order is more than specified qty filled
         //This setting is intended to be used for spreads with quoting orders more than double the quantity of the hedge order
         //Once the entire hedge order fills and there is a quoting order working in the market, the quoting order is now the
@@ -1432,26 +1363,26 @@ message Spreader
         //Example: You are quoting 11 contracts and hedging 1. With Hedge trigger is set at 6, a hedge order is sent when 6
         //of the 11 contracts fill. When not set (0), all 11 contracts need to fill before 1 lot hedge is sent.
         uint32 hedgeTriggerFillQty = 16;
-    
-    
+
+
         ExtraAttributes attribute = 17;
     }
-    
+
     //this will be created by server after it is registered successfully, client side spreader create request should be 0
     uint64 id = 1;
-    
+
     uint32 ownerAcct = 2;
-    
+
     //this must be unique for the owner account
     //if it is blank, will delete the spreader specified by the id
     string name = 3;
-    
+
     string remark = 4;
-    
+
     TYPE type = 5;
-    
+
     string formula = 6;
-    
+
     //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
     //disclosed quantities.
     //When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire spread
@@ -1462,46 +1393,43 @@ message Spreader
     //1 will submit the spread order at a price 1 tick from the previous spread order away from the market.
     //-1 will submit the spread order 1 tick from the previous spread order toward the market.
     uint32 reloadOffset = 7;
-    
+
     //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
     //disclosed quantities.
     //When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire
     //spread order quantity fills.
     //This property specifies the quantity for each child disclosed order.
     uint32 reloadQty = 8;
-    
+
     double tickSize = 9;
-    
+
     repeated Leg leg = 10;
-    
+
     uint64 updateTimeUTC = 11;
 }
 
-message OrderID
-{
+message OrderID {
     // Client order ID of the order at the transaction moment.
     uint64 clOrdID = 1;
-    
+
     //the root order for the seriers replace/withdraw, which is 0 for the first order
     uint64 chainClOrdID = 2;
-    
+
     // If order is modified, this is target order ClOrdID for modification.
     uint64 origClOrdID = 3;
 
     // trading account used for this order
     string tradingAccount = 4;
-    
+
     // Order ID assigned by broker or exchange
     string execOrderID = 5;
 }
 
 // Status of a specific transaction.
 // All attributes are at the transaction moment.
-message ExecutionReport
-{
+message ExecutionReport {
     //keep the 0 for those unknown status
-    enum STATUS
-    {
+    enum STATUS {
         UNKNOWN = 0;
 
         PENDING_NEW = 1;
@@ -1511,17 +1439,17 @@ message ExecutionReport
         PENDING_REPLACE = 3; //(e.g. result of Order Cancel/Replace Request <G>)
 
         NEW = 4;
-    
+
         REPLACED = 5;
-    
+
         PARTIAL_FILL = 6;
 
         //this is mainly for the FIX ExecType RESTATED, order status should has no this value
         RESTATED = 7;
-    
+
         //CQG suspended has other meaning, market is closed and temporarily queued in their server
         SUSPENDED = 8;
-    
+
         //non-working order status
         FILL = 9;
 
@@ -1531,52 +1459,51 @@ message ExecutionReport
 
         EXPIRED = 12;
     }
-    
-    enum REJECTCODE
-    {
+
+    enum REJECTCODE {
         NA = 0;
-        
+
         //FIX OrdRejReason
         BROKER_OPTION = 1;
-    
+
         UNKNOWN_ORDER_SYMBOL = 2;
-    
+
         EXCHANGE_CLOSED = 3;
-    
+
         EXCEEDS_LIMIT = 4;
-    
+
         TOO_LATE = 5;
-    
+
         UNKNOWN_ORDER = 6; //Unknown order
-    
+
         DUPLICATE = 7; //(e.g. dupe ClOrdID <11> ())
-    
+
         DUPLICATE_COMMUNICATED = 8; //Duplicate of a verbally communicated order
-    
+
         STALE = 9;
-    
+
         TRADE_ALONG_REQUIRED = 10;
-    
+
         INVALID_INVESTOR = 11;
-    
+
         UNSUPPORTED = 12; //Unsupported order characteristic
-    
+
         SURVEILLENCE = 13; //Surveillence Option
-    
+
         QUANTITY = 14; //Incorrect quantity
-    
+
         ALLOCATED_QUANTITY = 15; //Incorrect allocated quantity
-    
+
         UNKNOWN_ORDER_ACCOUNT = 16;
-    
+
         INVALID_PRICE_INCREMENT = 19;
     }
 
     //FIX ExecID
     string execID = 1;
-    
+
     OrderID orderID = 2;
-    
+
     //this transaction type
     STATUS execType = 3;
 
@@ -1585,13 +1512,13 @@ message ExecutionReport
 
     //only valid when the status is rejected
     REJECTCODE rejectCode = 5;
-    
+
     // Time of execution/order creation, if not provided, 0.
-	uint64 transactTimeUTC = 6;
+    uint64 transactTimeUTC = 6;
 
     // Time of report received time
     uint64 reportTimeUTC = 7;
-    
+
     uint32 fillQty = 8;
 
     double fillPrice = 9;
@@ -1606,95 +1533,89 @@ message ExecutionReport
     // Remaining (unfilled) order quantity. It is not always equal
     // to order size minus filled size (for example, busted orders violate that).
     uint32 remainingQty = 12;
-    
+
     // Additional transaction details.
-	string remark = 13;
+    string remark = 13;
 
     // If present, identifies the counterpart of the order fill, as reported by the execution system.
     string fillCounterParty = 14;
-    
+
     //which server create this execution report. 0 means it is from counter party
     uint32 sourceServer = 15;
 }
 
-message InstrumentSubscription
-{
-    enum ACTION
-    {
+message InstrumentSubscription {
+    enum ACTION {
         SUBSCRIBE = 0;
-        
+
         UNSUBSCRIBE = 1;
     }
-    
+
     //array of instrument ID
-    repeated uint64 instrument = 1 [packed=true];
-    
+    repeated uint64 instrument = 1 [packed = true];
+
     ACTION action = 2;
 }
 
-message MarketDatas
-{
+message MarketDatas {
     repeated MarketData marketData = 1;
 }
 
-message PriceBar
-{
+message PriceBar {
     uint64 updateTime = 1;
-    
+
     double open = 2;
-    
+
     double high = 3;
-    
+
     double low = 4;
-    
+
     double close = 5;
-    
+
     //traded volume
     uint64 volume = 6;
-    
+
     double settlement = 7;
 }
 
 // Real time data delivery.
 // Snapshot is sent as the first message after subscription and may appear periodically when subscribed.
-message MarketData
-{
+message MarketData {
     //instrument ID
     uint64 instrument = 1;
-    
+
     //the latest update timestamp
     uint64 updateTimeUTC = 2;
-    
+
     PriceBar priceBar = 3;
-    
+
     PriceBar prevPriceBar = 4;
-    
+
     //last trade message
     Quote tradeQuote = 5;
-    
+
     //always sorted by the price from best to worst, (bid: highest -> lowest, ask: lowest -> highest)
     //bid market depth
     repeated Quote bidQuotes = 6;
-    
+
     //always sorted by the price from best to worst, (bid: highest -> lowest, ask: lowest -> highest)
     //ask market depth
     repeated Quote askQuotes = 7;
 }
 
 // Specific quote information. when both price & volume is 0, means the specified entryID should be deleted
-message Quote
-{
-	//this is for MDEntryID
+message Quote {
+    //this is for MDEntryID
     string entryID = 1;
 
     // Time of the quote (UTC).
-	uint64 quoteUTC = 2;
+    uint64 quoteUTC = 2;
 
-	// Quote price. when price & volume are all 0, means remove the specified entry
-	double price = 3;
+    // Quote price. when price & volume are all 0, means remove the specified entry
+    double price = 3;
 
-	// Quote volume (included for BBA only if volume is subscribed).
-	uint64 volume = 4;
+    // Quote volume (included for BBA only if volume is subscribed).
+    uint64 volume = 4;
 
     //refer to FIX tag 277,Space-delimited list of conditions describing a trade
     string tradeCondition = 5;
@@ -1703,79 +1624,37 @@ message Quote
     uint32 numberOfOrders = 6;
 }
 
-message TickRange
-{
+message TickRange {
     double priceRange = 1;
-    
+
     uint32 numTicks = 2;
 }
 
-message InstrumentTradingRule
-{
-    enum CLOSEDEAL_TYPE
-    {
-        NORMAL_DEAL  = 0;
-        
-        SPECFIRST = 1;
-    }
-    
-    enum POSITION_TYPE
-    {
-        NET = 0;
-        
-        GROSS = 1;
-        
-        LONG = 2;
-        
-        SHORT = 3;
-    }
-    
-    enum MORTGAGE_USAGE
-    {
-        ///can't use
-        NONE  = 0;
-        
-        //userd for margin only
-        MARGIN = 1;
-        
-        //used for margin, charge...
-        ALL = 2;
-    }
-    
-    uint32	volumeMultiple = 1;
+message InstrumentTradingRule {
+    uint32 volumeMultiple = 1;
 
-    uint32	maxMarketOrderVolume = 2;
+    uint32 maxMarketOrderVolume = 2;
 
-    uint32	minMarketOrderVolume = 3;
+    uint32 minMarketOrderVolume = 3;
 
-    uint32	maxLimitOrderVolume = 4;
+    uint32 maxLimitOrderVolume = 4;
 
-    uint32	minLimitOrderVolume = 5;
+    uint32 minLimitOrderVolume = 5;
 
-    POSITION_TYPE	positionType = 6;
+    uint32 lotSize = 6;
 
-    bool	includePastPosition = 7;
-
-    CLOSEDEAL_TYPE	closeDealType = 8;
-
-    MORTGAGE_USAGE	mortgageUseRange = 9;
-
-    uint32 lotSize = 10;
-    
     //Size of one base tick for this security
-    double tickSize = 11;
-    
+    double tickSize = 7;
+
     //Size of one point for this security in product native currency
-    double tickValue = 12;
+    double tickValue = 8;
 
     //tick table for price tiers
-    repeated TickRange tickRange = 13;
+    repeated TickRange tickRange = 9;
 }
 
-message EnergyAttributes
-{
-    enum CONTRACT_TERM
-    {
+message EnergyAttributes {
+    enum CONTRACT_TERM {
         //default is monthly
         MONTHLY = 0;
 
@@ -1825,15 +1704,13 @@ message EnergyAttributes
     CONTRACT_TERM contractTerm = 4;
 }
 
-message OptionsAttributes
-{
-    enum  OPTIONS_TYPE
-    {
+message OptionsAttributes {
+    enum OPTIONS_TYPE {
         PUT = 0;
-        
+
         CALL = 1;
     }
-    
+
     OPTIONS_TYPE type = 1;
 
     //only valid for the options
@@ -1846,8 +1723,7 @@ message OptionsAttributes
     uint32 version = 3;
 }
 
-message MarginFormula
-{
+message MarginFormula {
     double longMarginRatio = 1;
 
     double shortMarginRatio = 2;
@@ -1855,31 +1731,26 @@ message MarginFormula
     bool isMaxMarginSideAlgorithm = 3;
 }
 
-message Instruments
-{
+message Instruments {
     repeated Instrument instrument = 1;
 }
 
-message InstrumentStatuses
-{
+message InstrumentStatuses {
     repeated InstrumentStatus status = 1;
 }
 
-message InstrumentStatus
-{
+message InstrumentStatus {
     Instrument.Identity instrument = 1;
-    
+
     Instrument.STATUS status = 2;
-    
+
     string remark = 3;
-    
+
     uint64 updateTimeUTC = 4;
 }
 
-message Instrument
-{
-    enum STATUS
-    {
+message Instrument {
+    enum STATUS {
         UNKNOW_STATUS = 0;
 
         OPENING_DELAY = 1;
@@ -1913,36 +1784,35 @@ message Instrument
         TRADE_DISSEMINATION_TIME = 15;
 
         READY_TO_TRADE_START_OF_SESSION = 16;
-    
+
         NOT_AVAILABLE_FOR_TRADING_END_OF_SESSION = 17;
-        
+
         PRE_OPEN = 18;
 
         OPENING_ROTATION = 19;
 
         FAST_MARKET = 20;
-        
+
         AUCTION = 21;
 
         POST_TRADE = 22;
 
         PRE_TRADE = 23;
-    
+
         NO_PERMISSION = 24;
-        
+
         NOT_TRADED_ON_THIS_MARKET = 50;
-    
+
         UNKNOWN_OR_INVALID = 51;
     }
 
-    enum PRODUCT
-    {
+    enum PRODUCT {
         UNKNOWN_TYPE = 0;
 
         /*AGENCY*/
         //Euro Supranational Coupons
         EUSUPRA = 1;
-        
+
         //Federal Agency Coupon
         FAC = 2;
 
@@ -1951,7 +1821,7 @@ message Instrument
 
         //Private Export Funding
         PEF = 4;
-        
+
         //USD Supranational Coupons
         SUPRA = 5;
 
@@ -1986,7 +1856,7 @@ message Instrument
 
         //Structured Notes
         STRUCT = 16;
-        
+
         //Yankee Corporate Bond
         YANK = 17;
 
@@ -2022,7 +1892,7 @@ message Instrument
 
         //Principal strip of a callable bond or note
         TCAL = 35;
-        
+
         //Principal strip from a non-callable bond or note
         TPRN = 36;
 
@@ -2065,14 +1935,13 @@ message Instrument
 
         //MULTI LEG, for example, spread
         MLEG = 56;
-    
+
         //NDF
         FXNDF = 57;
     }
 
     //FIX IDSource name
-    enum IDSOURCE
-    {
+    enum IDSOURCE {
         UNKNOWN = 0;
 
         SOURCE = 1;
@@ -2109,7 +1978,7 @@ message Instrument
 
         COMMON = 17;
 
-        CLEARING_HOUSE_CLEARING_ORGANIZATION  = 18;
+        CLEARING_HOUSE_CLEARING_ORGANIZATION = 18;
 
         ISDA_FPML_PRODUCT_SPECIFICATION = 19;
 
@@ -2119,44 +1988,42 @@ message Instrument
 
         LETTER_OF_CREDIT = 22;
     }
-    
+
     //there are 2 ways to locate a product. the symbol won't be abled to ensure the uniqueness. For example, futures product
     //will have different maturity date
     //1. id
     //2. exchange+broker+securityID
-    message Identity
-    {
+    message Identity {
         //this is xceder system counter ID. it is global unique and never change after create. it is a value which combines
         //exchange, broker, product and xceder system internal instrument number
         uint64 id = 1;
-    
+
         Exchange.EXCHANGE exchange = 2;
 
         BROKER broker = 3;
-        
-        string	symbol = 4;
+
+        string symbol = 4;
 
         //refer to FIX tag 48 SecurityID
         string securityID = 5;
 
         IDSOURCE idSource = 6;
     }
-    
-    message Leg
-    {
+
+    message Leg {
         Identity instrument = 1;
-        
+
         SIDE side = 2;
-        
+
         double price = 3;
-        
+
         uint32 qty = 4;
     }
-    
+
     Identity identity = 1;
-    
+
     PRODUCT product = 2;
-    
+
     string CFICode = 3;
 
     string description = 4;
@@ -2168,44 +2035,168 @@ message Instrument
     //or expiration date
     uint32 maturityEpochDays = 7;
 
-    uint32	listEpochDay = 8;
+    uint32 listEpochDay = 8;
 
-    uint32	startDeliveryEpochDays = 9;
+    uint32 startDeliveryEpochDays = 9;
 
-    uint32	endDeliveryEpochDays = 10;
+    uint32 endDeliveryEpochDays = 10;
 
     MarginFormula marginCalculation = 11;
 
     string contractSymbol = 12;
-    
+
     InstrumentTradingRule tradingRule = 13;
-    
+
     //key will be the SecurityID
     map<string, Leg> underlying = 14;
-    
+
     //only need for option
     OptionsAttributes optionAttributes = 15;
 
     //it is only for NRG instruments
     EnergyAttributes energyAttributes = 16;
-    
+
     uint64 updateTimeUTC = 17;
-    
+
     //means this instrument is archived, should not avaible for trading
     bool isNonTradable = 18;
 }
 
-message AccountTradingRules
-{
+message AccountTradingRules {
     uint32 account = 1;
 
-    repeated Instrument.PRODUCT allowedProducts = 2 [packed=true];
+    repeated Instrument.PRODUCT allowedProducts = 2 [packed = true];
 
-    repeated uint64 allowedInstruments = 3 [packed=true];
+    repeated uint64 allowedInstruments = 3 [packed = true];
 
-    repeated Instrument.PRODUCT bannedProducts = 4 [packed=true];
+    repeated Instrument.PRODUCT bannedProducts = 4 [packed = true];
 
-    repeated uint64 bannedInstruments = 5 [packed=true];
+    repeated uint64 bannedInstruments = 5 [packed = true];
 
     uint64 updateTimeUTC = 6;
 }
+
+message Positions {
+    repeated Position position = 1;
+}
+
+//investor position report
+message Position {
+
+    enum TYPE {
+        NET = 0;
+
+        LONG = 1;
+
+        SHORT = 2;
+
+        GROSS = 3;
+    }
+
+    message Record {
+        uint64 instrument = 1;
+
+        uint64 updateTimeUTC = 2;
+
+        TYPE type = 3;
+
+        ///持仓
+        uint32 position = 4;
+
+        ///上日持仓
+        uint32 prevPosition = 5;
+
+        ///多头冻结
+        uint32 longFrozen = 6;
+
+        ///空头冻结
+        uint32 shortFrozen = 7;
+
+        ///开仓冻结金额
+        double longFrozenAmount = 8;
+
+        ///开仓冻结金额
+        double shortFrozenAmount = 9;
+
+        ///持仓成本
+        double positionCost = 10;
+
+        ///逐日盯市持仓盈亏
+        double positionProfitByDay = 11;
+
+        ///逐笔对冲持仓盈亏
+        double positionProfitByTrade = 12;
+
+        ///持仓盈亏
+        double positionProfit = 13;
+
+        ///开仓日期
+        uint32 openEpochDays = 14;
+
+        ///开仓成本
+        double openCost = 15;
+
+        ///开仓价
+        double openPrice = 16;
+
+        ///开仓量
+        uint32 openVolume = 17;
+
+        ///平仓日期
+        uint32 closeDate = 18;
+
+        ///平仓量
+        uint32 closeVolume = 19;
+
+        ///平仓价
+        double closePrice = 20;
+
+        ///平仓盈亏
+        double closeProfit = 21;
+
+        ///逐日盯市平仓盈亏
+        double closeProfitByDay = 22;
+
+        ///逐笔对冲平仓盈亏
+        double closeProfitByTrade = 23;
+
+        ///占用的投资者保证金
+        double margin = 24;
+
+        ///需要的交易所保证金
+        double exchMargin = 25;
+
+        ///保证金率
+        double marginRateByMoney = 26;
+
+        ///保证金率(按手数)
+        double marginRateByVolume = 27;
+
+        ///昨结算价
+        double lastSettlementPrice = 28;
+
+        ///结算价
+        double settlementPrice = 29;
+
+        ///冻结的保证金
+        double frozenMargin = 30;
+
+        ///冻结的资金
+        double frozenCash = 31;
+
+        ///冻结的手续费
+        double frozenCommission = 32;
+
+        ///资金差额
+        double cashIn = 33;
+
+        ///手续费
+        double commission = 34;
+    }
+
+    uint32 userID = 1;
+
+    //all user's positions. server will always publish the whole reports for any update
+    repeated Record records = 2;
+}
+
