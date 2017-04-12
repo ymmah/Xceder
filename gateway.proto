@@ -2083,120 +2083,109 @@ message Positions {
 //investor position report
 message Position {
 
-    enum TYPE {
-        NET = 0;
-
-        LONG = 1;
-
-        SHORT = 2;
-
-        GROSS = 3;
-    }
-
     message Record {
         uint64 instrument = 1;
 
         uint64 updateTimeUTC = 2;
 
-        TYPE type = 3;
-
-        ///持仓
-        uint32 position = 4;
+        ///持仓 - 表示空头
+        int32 position = 3;
 
         ///上日持仓
-        uint32 prevPosition = 5;
-
-        ///多头冻结
-        uint32 longFrozen = 6;
-
-        ///空头冻结
-        uint32 shortFrozen = 7;
-
-        ///开仓冻结金额
-        double longFrozenAmount = 8;
-
-        ///开仓冻结金额
-        double shortFrozenAmount = 9;
+        int32 prevPosition = 4;
 
         ///持仓成本
-        double positionCost = 10;
+        double positionCost = 5;
 
         ///逐日盯市持仓盈亏
-        double positionProfitByDay = 11;
+        double positionProfitByDay = 6;
 
         ///逐笔对冲持仓盈亏
-        double positionProfitByTrade = 12;
+        double positionProfitByTrade = 7;
 
         ///持仓盈亏
-        double positionProfit = 13;
+        double positionProfit = 8;
 
         ///开仓日期
-        uint32 openEpochDays = 14;
+        uint32 openEpochDays = 9;
 
         ///开仓成本
-        double openCost = 15;
+        double openCost = 10;
 
         ///开仓价
-        double openPrice = 16;
+        double openPrice = 11;
 
-        ///开仓量
-        uint32 openVolume = 17;
+        ///开仓量 - 表示空头
+        int32 openVolume = 12;
 
         ///平仓日期
-        uint32 closeDate = 18;
+        uint32 closeEpochDays = 13;
 
-        ///平仓量
-        uint32 closeVolume = 19;
+        ///平仓量 - 表示空头
+        int32 closeVolume = 14;
 
         ///平仓价
-        double closePrice = 20;
+        double closePrice = 15;
 
         ///平仓盈亏
-        double closeProfit = 21;
+        double closeProfit = 16;
 
         ///逐日盯市平仓盈亏
-        double closeProfitByDay = 22;
+        double closeProfitByDay = 17;
 
         ///逐笔对冲平仓盈亏
-        double closeProfitByTrade = 23;
+        double closeProfitByTrade = 18;
 
         ///占用的投资者保证金
-        double margin = 24;
+        double margin = 19;
 
         ///需要的交易所保证金
-        double exchMargin = 25;
+        double exchMargin = 20;
 
         ///保证金率
-        double marginRateByMoney = 26;
+        double marginRateByMoney = 21;
 
         ///保证金率(按手数)
-        double marginRateByVolume = 27;
+        double marginRateByVolume = 22;
 
         ///昨结算价
-        double lastSettlementPrice = 28;
+        double lastSettlementPrice = 23;
 
         ///结算价
-        double settlementPrice = 29;
-
-        ///冻结的保证金
-        double frozenMargin = 30;
-
-        ///冻结的资金
-        double frozenCash = 31;
-
-        ///冻结的手续费
-        double frozenCommission = 32;
+        double settlementPrice = 24;
 
         ///资金差额
-        double cashIn = 33;
+        double cashIn = 25;
 
         ///手续费
-        double commission = 34;
+        double commission = 26;
+
+        ///冻结的保证金
+        double frozenMargin = 27;
+
+        ///冻结的资金
+        double frozenCash = 28;
+
+        ///冻结的手续费
+        double frozenCommission = 29;
+
+        ///多头冻结
+        uint32 longFrozen = 30;
+
+        ///空头冻结
+        uint32 shortFrozen = 31;
+
+        ///多头冻结金额
+        double longFrozenAmount = 32;
+
+        ///空头冻结金额
+        double shortFrozenAmount = 33;
     }
 
-    uint32 userID = 1;
+    uint32 account = 1;
 
     //all user's positions. server will always publish the whole reports for any update
-    repeated Record records = 2;
+    //key is the instrument ID
+    map<uint64, Record> records = 2;
 }
 
