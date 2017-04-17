@@ -297,6 +297,13 @@
             <param name="newPassword"></param>
             <returns>ansyc task result for this request</returns>
         </member>
+        <member name="M:Xceder.Client.queryPosition(System.UInt32)">
+            <summary>
+            query the account position info
+            </summary>
+            <param name="account">target account's position</param>
+            <returns>ansyc task result for this request</returns>
+        </member>
         <member name="M:Xceder.Client.queryInstrument(System.String,Com.Xceder.Messages.Instrument.Types.PRODUCT,Com.Xceder.Messages.Exchange.Types.EXCHANGE,System.String,Com.Xceder.Messages.BROKER)">
             <summary>
             query the instrument info
@@ -1410,8 +1417,13 @@
         <member name="F:Com.Xceder.Messages.Query.SpreaderFieldNumber">
             <summary>Field number for the "spreader" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.Query.PositionFieldNumber">
-            <summary>Field number for the "position" field.</summary>
+        <member name="F:Com.Xceder.Messages.Query.AccountPostionFieldNumber">
+            <summary>Field number for the "accountPostion" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Query.AccountPostion">
+             <summary>
+            query account's position
+             </summary>
         </member>
         <member name="T:Com.Xceder.Messages.Query.QueryOneofCase">
             <summary>Enum of possible cases for the "query" oneof.</summary>
