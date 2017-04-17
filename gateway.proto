@@ -802,7 +802,8 @@ message Query {
 
         QueryConditions spreader = 8;
 
-        QueryConditions position = 9;
+        //query account's position
+        uint32 accountPostion = 9;
     }
 }
 

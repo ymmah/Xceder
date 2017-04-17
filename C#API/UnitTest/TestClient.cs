@@ -14,7 +14,7 @@ namespace Xceder
     {
         private bool lastSentHasError;
         private Request.RequestOneofCase lastSentRequestType;
-        private ERRORCODE lastSentRequestResultCode;
+        private ERROR lastSentRequestResultCode;
 
         private bool isResponded = false;
 
@@ -74,7 +74,7 @@ namespace Xceder
 
             var requestTask = client.submitOrder(orderParams);
 
-            setLastSentRequestExpectation(false, Request.RequestOneofCase.Order, ERRORCODE.NoTradingaccount);
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Order, ERROR.NoTradingaccount);
 
             requestTask.Wait();
 
@@ -173,7 +173,7 @@ namespace Xceder
 
             var requestTask = client.login(userID, "test");
 
-            setLastSentRequestExpectation(false, Request.RequestOneofCase.Logon, ERRORCODE.InvalidUserid);
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Logon, ERROR.InvalidUserid);
 
             requestTask.Wait();
 
@@ -181,7 +181,7 @@ namespace Xceder
 
             requestTask = client.registerAccount(userID, userID + "@fake.com", pwd);
 
-            setLastSentRequestExpectation(false, Request.RequestOneofCase.Account, ERRORCODE.Success);
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Account, ERROR.Success);
 
             requestTask.Wait();
 
@@ -189,7 +189,7 @@ namespace Xceder
 
             requestTask = client.login(userID, "pwd");
 
-            setLastSentRequestExpectation(false, Request.RequestOneofCase.Logon, ERRORCODE.WrongPassword);
+            setLastSentRequestExpectation(false, Request.RequestOneofCase.Logon, ERROR.WrongPassword);
 
             requestTask.Wait();
 
@@ -218,7 +218,7 @@ namespace Xceder
             }
         }
 
-        private void setLastSentRequestExpectation(bool hasError, Request.RequestOneofCase requestType, ERRORCODE resultCode = ERRORCODE.Success)
+        private void setLastSentRequestExpectation(bool hasError, Request.RequestOneofCase requestType, ERROR resultCode = ERROR.Success)
         {
             lastSentHasError = hasError;
             lastSentRequestType = requestType;
@@ -311,6 +311,14 @@ namespace Xceder
                     foreach (var instrumentStatus in instrumentStatuses.Status)
                     {
                         Debug.WriteLine("recieve the instrument status change message:{0}", instrumentStatus);
+                    }
+                    break;
+
+                case Response.ResponseOneofCase.Position:
+                    AccountPosition acctPostion = response.Position;
+                    foreach(var postioin in acctPostion.Positions)
+                    {
+                        Debug.WriteLine("recieve the position message:{0}", postioin);
                     }
                     break;
 

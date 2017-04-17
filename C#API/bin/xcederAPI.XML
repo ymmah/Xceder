@@ -353,83 +353,83 @@
         <member name="P:Com.Xceder.Messages.GatewayReflection.Descriptor">
             <summary>File descriptor for gateway.proto</summary>
         </member>
-        <member name="T:Com.Xceder.Messages.ERRORCODE">
+        <member name="T:Com.Xceder.Messages.ERROR">
             <summary>
             Result code.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.Success">
+        <member name="F:Com.Xceder.Messages.ERROR.Success">
             <summary>
             success codes
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.Failure">
+        <member name="F:Com.Xceder.Messages.ERROR.Failure">
             <summary>
             failure codes (>=100)
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.RequestLimitViolation">
+        <member name="F:Com.Xceder.Messages.ERROR.RequestLimitViolation">
             <summary>
             The limit of the request number has been violated.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.NoOnetimePassword">
+        <member name="F:Com.Xceder.Messages.ERROR.NoOnetimePassword">
             <summary>
             One-time password is required for this user but it was not sent, repeat logon
             with one-time password.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.OutsideAllowedRange">
+        <member name="F:Com.Xceder.Messages.ERROR.OutsideAllowedRange">
             <summary>
             Requested data is outside of allowed range.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.PasswordExpired">
+        <member name="F:Com.Xceder.Messages.ERROR.PasswordExpired">
             <summary>
             User password is expired, only change password operation is allowed.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.Redirected">
+        <member name="F:Com.Xceder.Messages.ERROR.Redirected">
             <summary>
             Client is redirected to a different server, new server is specified in redirectUrl.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.AccessDenied">
+        <member name="F:Com.Xceder.Messages.ERROR.AccessDenied">
             <summary>
             The user is not allowed to access this instrument data.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.Disconnected">
+        <member name="F:Com.Xceder.Messages.ERROR.Disconnected">
              <summary>
             connection to broker isn't up
              </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.NotFound">
+        <member name="F:Com.Xceder.Messages.ERROR.NotFound">
             <summary>
             Requested information is not found.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.OrderTagToolong">
+        <member name="F:Com.Xceder.Messages.ERROR.OrderTagToolong">
              <summary>
             tag should be less than 255
              </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.SpreaderDuplicateName">
+        <member name="F:Com.Xceder.Messages.ERROR.SpreaderDuplicateName">
             <summary>
             Spreader related errors 
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.SpreaderInvalidLegRules">
+        <member name="F:Com.Xceder.Messages.ERROR.SpreaderInvalidLegRules">
              <summary>
             for example syntax error
              </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.SpreaderLegFailure">
+        <member name="F:Com.Xceder.Messages.ERROR.SpreaderLegFailure">
              <summary>
             leg order has failure, for example, fail to withdraw some leg orders
              </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERRORCODE.AlgoActiveOrder">
+        <member name="F:Com.Xceder.Messages.ERROR.AlgoActiveOrder">
              <summary>
             can't modify the algo/spreader because of active orders
              </summary>
@@ -437,6 +437,11 @@
         <member name="F:Com.Xceder.Messages.BROKER.Xceder">
              <summary>
             also means any/unspecified broker
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.BROKER.Cifco">
+             <summary>
+            中国国际期货
              </summary>
         </member>
         <member name="F:Com.Xceder.Messages.SIDE.Buy">
@@ -646,6 +651,14 @@
             <summary>
             execution report for the order submission request; broadcast message for the order execution report
             if the submitted order is algo order, this is used to report the order triggered by server
+            </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.PositionFieldNumber">
+            <summary>Field number for the "position" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.Position">
+            <summary>
+            sent by the server when the position is changed, for example, the order is filled
             </summary>
         </member>
         <member name="T:Com.Xceder.Messages.Response.ResponseOneofCase">
@@ -1397,6 +1410,9 @@
         <member name="F:Com.Xceder.Messages.Query.SpreaderFieldNumber">
             <summary>Field number for the "spreader" field.</summary>
         </member>
+        <member name="F:Com.Xceder.Messages.Query.PositionFieldNumber">
+            <summary>Field number for the "position" field.</summary>
+        </member>
         <member name="T:Com.Xceder.Messages.Query.QueryOneofCase">
             <summary>Enum of possible cases for the "query" oneof.</summary>
         </member>
@@ -1434,6 +1450,9 @@
         </member>
         <member name="F:Com.Xceder.Messages.QueryResult.SpreadersFieldNumber">
             <summary>Field number for the "spreaders" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.QueryResult.PositionFieldNumber">
+            <summary>Field number for the "position" field.</summary>
         </member>
         <member name="T:Com.Xceder.Messages.QueryResult.ResultOneofCase">
             <summary>Enum of possible cases for the "result" oneof.</summary>
@@ -1525,10 +1544,10 @@
             in spreader query, it is the spreader ID
              </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.QueryConditions.AccountFieldNumber">
-            <summary>Field number for the "account" field.</summary>
+        <member name="F:Com.Xceder.Messages.QueryConditions.UserIDFieldNumber">
+            <summary>Field number for the "userID" field.</summary>
         </member>
-        <member name="P:Com.Xceder.Messages.QueryConditions.Account">
+        <member name="P:Com.Xceder.Messages.QueryConditions.UserID">
              <summary>
             if  this query related to the particular user, only allow to query itself or its client account's info
             0 means query itself info
@@ -2540,8 +2559,6 @@
         <member name="P:Com.Xceder.Messages.ExecutionReport.AvgFillPrice">
             <summary>
             Average fill price.
-            NOTE: this price is aligned by a tick size so don't use it for OTE/UPL calculation but
-            use prices from individual TRADE elements.
             </summary>
         </member>
         <member name="F:Com.Xceder.Messages.ExecutionReport.RemainingQtyFieldNumber">
@@ -2588,6 +2605,11 @@
         <member name="F:Com.Xceder.Messages.ExecutionReport.Types.STATUS.PendingReplace">
              <summary>
             (e.g. result of Order Cancel/Replace Request &lt;G>)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.ExecutionReport.Types.STATUS.PartialFill">
+             <summary>
+            ExecType will always use FILL, this is for order status only
              </summary>
         </member>
         <member name="F:Com.Xceder.Messages.ExecutionReport.Types.STATUS.Restated">
@@ -2801,9 +2823,6 @@
         <member name="F:Com.Xceder.Messages.TickRange.NumTicksFieldNumber">
             <summary>Field number for the "numTicks" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.VolumeMultipleFieldNumber">
-            <summary>Field number for the "volumeMultiple" field.</summary>
-        </member>
         <member name="F:Com.Xceder.Messages.InstrumentTradingRule.MaxMarketOrderVolumeFieldNumber">
             <summary>Field number for the "maxMarketOrderVolume" field.</summary>
         </member>
@@ -2815,18 +2834,6 @@
         </member>
         <member name="F:Com.Xceder.Messages.InstrumentTradingRule.MinLimitOrderVolumeFieldNumber">
             <summary>Field number for the "minLimitOrderVolume" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.PositionTypeFieldNumber">
-            <summary>Field number for the "positionType" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.IncludePastPositionFieldNumber">
-            <summary>Field number for the "includePastPosition" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.CloseDealTypeFieldNumber">
-            <summary>Field number for the "closeDealType" field.</summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.MortgageUseRangeFieldNumber">
-            <summary>Field number for the "mortgageUseRange" field.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.InstrumentTradingRule.LotSizeFieldNumber">
             <summary>Field number for the "lotSize" field.</summary>
@@ -2853,20 +2860,6 @@
         <member name="P:Com.Xceder.Messages.InstrumentTradingRule.TickRange">
              <summary>
             tick table for price tiers
-             </summary>
-        </member>
-        <member name="T:Com.Xceder.Messages.InstrumentTradingRule.Types">
-            <summary>Container for nested types declared in the InstrumentTradingRule message type.</summary>
-        </member>
-        <!-- Badly formed XML comment ignored for member "F:Com.Xceder.Messages.InstrumentTradingRule.Types.MORTGAGE_USAGE.None" -->
-        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.Types.MORTGAGE_USAGE.Margin">
-             <summary>
-            userd for margin only
-             </summary>
-        </member>
-        <member name="F:Com.Xceder.Messages.InstrumentTradingRule.Types.MORTGAGE_USAGE.All">
-             <summary>
-            used for margin, charge...
              </summary>
         </member>
         <member name="F:Com.Xceder.Messages.EnergyAttributes.DeliveryUnitFieldNumber">
@@ -3365,6 +3358,240 @@
         </member>
         <member name="F:Com.Xceder.Messages.AccountTradingRules.UpdateTimeUTCFieldNumber">
             <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.InstrumentFieldNumber">
+            <summary>Field number for the "instrument" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.StartEpochDaysFieldNumber">
+            <summary>Field number for the "startEpochDays" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.StartEpochDays">
+             <summary>
+            建仓开始日期
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.CompleteEpochDaysFieldNumber">
+            <summary>Field number for the "completeEpochDays" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.CompleteEpochDays">
+             <summary>
+            完全平仓日期
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.PrevPositionFieldNumber">
+            <summary>Field number for the "prevPosition" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.PrevPosition">
+             <summary>
+            昨持仓 负数表示空头
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.PrevPositionAvgPriceFieldNumber">
+            <summary>Field number for the "prevPositionAvgPrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.PrevPositionAvgPrice">
+             <summary>
+            昨持仓均价
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.Position_FieldNumber">
+            <summary>Field number for the "position" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.Position_">
+             <summary>
+            负数表示空头
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.PositionAvgPriceFieldNumber">
+            <summary>Field number for the "positionAvgPrice" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.LongAvgPriceFieldNumber">
+            <summary>Field number for the "longAvgPrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.LongAvgPrice">
+             <summary>
+            多头成交均价
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.LongVolumeFieldNumber">
+            <summary>Field number for the "longVolume" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.LongVolume">
+             <summary>
+            多头成交量
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.ShortAvgPriceFieldNumber">
+            <summary>Field number for the "shortAvgPrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.ShortAvgPrice">
+             <summary>
+            空头成交均价
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.ShortVolumeFieldNumber">
+            <summary>Field number for the "shortVolume" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.ShortVolume">
+             <summary>
+            空头成交量
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.CloseProfitByTradeFieldNumber">
+            <summary>Field number for the "closeProfitByTrade" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.CloseProfitByTrade">
+             <summary>
+            逐笔对冲平仓盈亏
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.MarginFieldNumber">
+            <summary>Field number for the "margin" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.Margin">
+             <summary>
+            占用的投资者保证金
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.ExchMarginFieldNumber">
+            <summary>Field number for the "exchMargin" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.ExchMargin">
+             <summary>
+            需要的交易所保证金
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.MarginRateByMoneyFieldNumber">
+            <summary>Field number for the "marginRateByMoney" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.MarginRateByMoney">
+             <summary>
+            保证金率
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.MarginRateByVolumeFieldNumber">
+            <summary>Field number for the "marginRateByVolume" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.MarginRateByVolume">
+             <summary>
+            保证金率(按手数)
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.PrevSettlementPriceFieldNumber">
+            <summary>Field number for the "prevSettlementPrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.PrevSettlementPrice">
+             <summary>
+            昨结算价
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.SettlementPriceFieldNumber">
+            <summary>Field number for the "settlementPrice" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.SettlementPrice">
+             <summary>
+            结算价
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.CashInFieldNumber">
+            <summary>Field number for the "cashIn" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.CashIn">
+             <summary>
+            资金差额
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.CommissionFieldNumber">
+            <summary>Field number for the "commission" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.Commission">
+             <summary>
+            手续费
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.FrozenMarginFieldNumber">
+            <summary>Field number for the "frozenMargin" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.FrozenMargin">
+             <summary>
+            冻结的保证金
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.FrozenCashFieldNumber">
+            <summary>Field number for the "frozenCash" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.FrozenCash">
+             <summary>
+            冻结的资金
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.FrozenCommissionFieldNumber">
+            <summary>Field number for the "frozenCommission" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.FrozenCommission">
+             <summary>
+            冻结的手续费
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.LongFrozenFieldNumber">
+            <summary>Field number for the "longFrozen" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.LongFrozen">
+             <summary>
+            多头冻结
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.ShortFrozenFieldNumber">
+            <summary>Field number for the "shortFrozen" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.ShortFrozen">
+             <summary>
+            空头冻结
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.LongFrozenAmountFieldNumber">
+            <summary>Field number for the "longFrozenAmount" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.LongFrozenAmount">
+             <summary>
+            多头冻结金额
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Position.ShortFrozenAmountFieldNumber">
+            <summary>Field number for the "shortFrozenAmount" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Position.ShortFrozenAmount">
+             <summary>
+            空头冻结金额
+             </summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.AccountPosition">
+             <summary>
+            investor position report
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountPosition.AccountFieldNumber">
+            <summary>Field number for the "account" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountPosition.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.AccountPosition.UpdateTimeUTC">
+             <summary>
+            latest update time from the record
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.AccountPosition.PositionsFieldNumber">
+            <summary>Field number for the "positions" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.AccountPosition.Positions">
+             <summary>
+            all user's positions. server will always publish the whole reports for any update
+            key is the instrument ID
+             </summary>
         </member>
     </members>
 </doc>

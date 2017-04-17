@@ -738,6 +738,22 @@ namespace Xceder
         }
 
         /// <summary>
+        /// query the account position info
+        /// </summary>
+        /// <param name="account">target account's position</param>
+        /// <returns>ansyc task result for this request</returns>
+        public Task<Tuple<Request, Response>> queryPosition(uint account)
+        {
+            Request request = createRequestMsg();
+
+            var query = request.QueryRequest = new Query();
+
+            query.AccountPostion = account;
+
+            return send(request);
+        }
+
+        /// <summary>
         /// query the instrument info
         /// </summary>
         /// <param name="symbol"></param>
@@ -887,6 +903,6 @@ namespace Xceder
             orderParams.StopPrice = newStopPrice;
 
             return submitOrder(orderParams);
-        }
+        }        
     }
 }
