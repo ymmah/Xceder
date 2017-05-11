@@ -1,5 +1,5 @@
 ///////////////////////////////////////
-//version 20170404
+//version 20170511
 //the string size (not speicified) should be within 255 bytes
 
 syntax = "proto3";
@@ -51,6 +51,8 @@ message Request {
         //only allow to change the spreader which status isn't RUN
         //to delete spreader, just specify the ID with the empty name
         Spreader spreader = 14;
+
+        bool requestTradingHour = 15;
     }
 }
 
@@ -95,6 +97,8 @@ message Response {
 
         // sent by the server when the position is changed, for example, the order is filled
         AccountPosition position = 13;
+
+        ExchangeTradingHours tradingHours = 14;
     }
 }
 
@@ -833,6 +837,30 @@ message QueryResult {
     }
 }
 
+message ExchangeTradingHours {
+    //key is the Exchange.EXCHANGE
+    map<uint32, TradingHours> tradingHourMap = 1;
+}
+
+message TradingHours {
+    //indicate the time zone info as GMT hour offset
+    uint32 timeZone = 1;
+    repeated TradingHour tradingHour = 2;
+}
+
+message TradingHour {
+
+    message WorkingHour {
+        uint32 startSecOfDayUTC = 1;
+        uint32 endSecOfDayUTC = 2;
+    }
+
+    uint32 dayOfYear = 1;
+    string name = 2;
+
+    repeated WorkingHour workingHour = 3;
+}
+
 message ExchangeCalendar {
     message Holiday {
         uint32 epochDay = 1;
@@ -1010,6 +1038,9 @@ message Order {
 
         CompoundOrder compound = 8;
     }
+
+    //server side will store this value after the order is submitted. mainly used in later query result
+    uint64 clOrdID = 9;
 }
 
 message OrderParams {
