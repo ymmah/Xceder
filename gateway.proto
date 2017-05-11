@@ -98,7 +98,7 @@ message Response {
         // sent by the server when the position is changed, for example, the order is filled
         AccountPosition position = 13;
 
-        ExchangeTradingHours tradingHours = 14;
+        ExchangeTradingDays tradingDays = 14;
     }
 }
 
@@ -837,24 +837,25 @@ message QueryResult {
     }
 }
 
-message ExchangeTradingHours {
+message ExchangeTradingDays {
     //key is the Exchange.EXCHANGE
-    map<uint32, TradingHours> tradingHourMap = 1;
+    map<uint32, TradingDays> tradingDayMap = 1;
 }
 
-message TradingHours {
+message TradingDays {
     //indicate the time zone info as GMT hour offset
     uint32 timeZone = 1;
-    repeated TradingHour tradingHour = 2;
+    repeated TradingDay tradingDay = 2;
 }
 
-message TradingHour {
+message TradingDay {
 
     message WorkingHour {
         uint32 startSecOfDayUTC = 1;
         uint32 endSecOfDayUTC = 2;
     }
 
+    //if it is 0, means this is for normal trading days
     uint32 dayOfYear = 1;
     string name = 2;
 
