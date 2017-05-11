@@ -98,6 +98,7 @@ message Response {
         // sent by the server when the position is changed, for example, the order is filled
         AccountPosition position = 13;
 
+        //it can be reponse for the trading hour request of broadcasted by server
         ExchangeTradingDays tradingDays = 14;
     }
 }
@@ -827,8 +828,6 @@ message QueryResult {
 
         BrokerExchanges supportedExchanges = 5;
 
-        ExchangeCalendar calendar = 6;
-
         Instruments instruments = 7;
 
         Spreaders spreaders = 8;
@@ -857,21 +856,9 @@ message TradingDay {
 
     //if it is 0, means this is for normal trading days
     uint32 dayOfYear = 1;
-    string name = 2;
+    string remark = 2;
 
     repeated WorkingHour workingHour = 3;
-}
-
-message ExchangeCalendar {
-    message Holiday {
-        uint32 epochDay = 1;
-        string holiday = 2;
-        uint32 hours = 3;
-    }
-
-    Exchange.EXCHANGE exchange = 1;
-
-    repeated Holiday holiday = 2;
 }
 
 message BrokerExchanges {
