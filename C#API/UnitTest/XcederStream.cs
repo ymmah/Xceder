@@ -43,7 +43,7 @@ namespace Xceder
         }
 
         /// <summary>
-        /// return the recieve message event stream
+        /// return the receive message event stream
         /// </summary>
         public IConnectableObservable<Response> ResponseStream
         {

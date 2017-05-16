@@ -137,20 +137,7 @@ namespace Xceder
             stream.ResponseStream.Subscribe(onResponse);
             stream.NetworkErrorStream.Subscribe(onNetworkError);
 
-            var task = stream.XcederClient.connect(server, 81);
-
-            try
-            {
-                task.Wait();
-            }
-            catch (Exception)
-            {
-
-            }
-
-            Assert.AreEqual(task.Status, TaskStatus.Faulted);
-
-            task = stream.XcederClient.connect(server, 8082);
+            var task = stream.XcederClient.connect(server, 8082);
 
             task.Wait();
 

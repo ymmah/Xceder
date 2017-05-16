@@ -4,356 +4,6 @@
         <name>xcederAPI</name>
     </assembly>
     <members>
-        <member name="T:Xceder.PemKeyUtils">
-            <summary>
-            extract the key parameters from the pem key file
-            </summary>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.GetRSAProviderFromPemFile(System.String)">
-            <summary>
-            extract the key parameters from the file
-            </summary>
-            <param name="pemfile"></param>
-            <returns>return null if fail</returns>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPublicKey(System.String)">
-            <summary>
-            Get the binary RSA PUBLIC key
-            </summary>
-            <param name="keyVal"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.DecodeX509PublicKey(System.Byte[])">
-            <summary>
-            Parses binary asn.1 X509 SubjectPublicKeyInfo; returns RSACryptoServiceProvider
-            </summary>
-            <param name="x509key"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.DecodeRSAPrivateKey(System.Byte[])">
-            <summary>
-            Parses binary ans.1 RSA private key; returns RSACryptoServiceProvider
-            </summary>
-            <param name="privkey"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPrivateKey(System.String)">
-            <summary>
-            Get the binary RSA PRIVATE key, decrypting if necessary
-            </summary>
-            <param name="instr"></param>
-            <returns></returns>
-        </member>
-        <member name="T:Xceder.CircularBuffer`1">
-            <summary>
-            Circular buffer.
-            
-            When writting to a full buffer:
-            PushBack -> removes this[0] / Front()
-            PushFront -> removes this[Size-1] / Back()
-            
-            this implementation is inspired by
-            http://www.boost.org/doc/libs/1_53_0/libs/circular_buffer/doc/circular_buffer.html
-            because I liked their interface.
-            </summary>
-        </member>
-        <member name="F:Xceder.CircularBuffer`1._start">
-            <summary>
-            The _start. Index of the first element in buffer.
-            </summary>
-        </member>
-        <member name="F:Xceder.CircularBuffer`1._end">
-            <summary>
-            The _end. Index after the last element in the buffer.
-            </summary>
-        </member>
-        <member name="F:Xceder.CircularBuffer`1._size">
-            <summary>
-            The _size. Buffer size.
-            </summary>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.#ctor(System.Int32,`0[])">
-            <summary>
-            Initializes a new instance of the <see cref="!:CircularBuffer.CircularBuffer"/> class.
-            
-            </summary>
-            <param name='capacity'>
-            Buffer capacity. Must be positive.
-            </param>
-            <param name='items'>
-            Items to fill buffer with. Items length must be less than capacity.
-            Sugestion: use Skip(x).Take(y).ToArray() to build this argument from
-            any enumerable.
-            </param>
-        </member>
-        <member name="P:Xceder.CircularBuffer`1.Capacity">
-            <summary>
-            Maximum capacity of the buffer. Elements pushed into the buffer after
-            maximum capacity is reached (IsFull = true), will remove an element.
-            </summary>
-        </member>
-        <member name="P:Xceder.CircularBuffer`1.Size">
-            <summary>
-            Current buffer size (the number of elements that the buffer has).
-            </summary>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.Front">
-            <summary>
-            Element at the front of the buffer - this[0].
-            </summary>
-            <returns>The value of the element of type T at the front of the buffer.</returns>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.Back">
-            <summary>
-            Element at the back of the buffer - this[Size - 1].
-            </summary>
-            <returns>The value of the element of type T at the back of the buffer.</returns>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.PushBack(`0)">
-            <summary>
-            Pushes a new element to the back of the buffer. Back()/this[Size-1]
-            will now return this element.
-            
-            When the buffer is full, the element at Front()/this[0] will be 
-            popped to allow for this new element to fit.
-            </summary>
-            <param name="item">Item to push to the back of the buffer</param>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.PushFront(`0)">
-            <summary>
-            Pushes a new element to the front of the buffer. Front()/this[0]
-            will now return this element.
-            
-            When the buffer is full, the element at Back()/this[Size-1] will be 
-            popped to allow for this new element to fit.
-            </summary>
-            <param name="item">Item to push to the front of the buffer</param>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.PopBack(System.Int32)">
-            <summary>
-            Removes the element at the back of the buffer. Decreassing the 
-            Buffer size by 1.
-            </summary>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.PopFront(System.Int32)">
-            <summary>
-            Removes the element at the front of the buffer. Decreassing the 
-            Buffer size by 1.
-            </summary>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.ToArray">
-            <summary>
-            Copies the buffer contents to an array, acording to the logical
-            contents of the buffer (i.e. independent of the internal 
-            order/contents)
-            </summary>
-            <returns>A new array with a copy of the buffer contents.</returns>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.Increment(System.Int32@)">
-            <summary>
-            Increments the provided index variable by one, wrapping
-            around if necessary.
-            </summary>
-            <param name="index"></param>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.Decrement(System.Int32@)">
-            <summary>
-            Decrements the provided index variable by one, wrapping
-            around if necessary.
-            </summary>
-            <param name="index"></param>
-        </member>
-        <member name="M:Xceder.CircularBuffer`1.InternalIndex(System.Int32)">
-            <summary>
-            Converts the index in the argument to an index in <code>_buffer</code>
-            </summary>
-            <returns>
-            The transformed index.
-            </returns>
-            <param name='index'>
-            External index.
-            </param>
-        </member>
-        <member name="T:Xceder.Client">
-            <summary>handle the xceder server connection</summary>
-        </member>
-        <member name="E:Xceder.Client.ResponseEvent">
-            <summary>
-            provide the server broadcast event.For example, the real time market data update
-            </summary>
-        </member>
-        <member name="E:Xceder.Client.NetWorkErrorEvent">
-            <summary>
-            error event for the error encountered when try to receive the message from the socket
-            </summary>
-        </member>
-        <member name="F:Xceder.Client._sentRequests">
-            <summary>
-            store the sent request and will be retrieved to trigger the received message event 
-            </summary>
-        </member>
-        <member name="M:Xceder.Client.#ctor">
-            <summary>
-            Client constructor
-            </summary>
-        </member>
-        <member name="P:Xceder.Client.Connected">
-            <summary>
-            indicate whether the server is connected 
-            </summary>
-        </member>
-        <member name="M:Xceder.Client.convertUTC(System.UInt64)">
-            <summary>
-            convert the UTC milliseconds into DateTime object
-            </summary>
-            <param name="UTCMillis">target UTC milliseconds</param>
-            <returns>return a DateTime object</returns>
-        </member>
-        <member name="M:Xceder.Client.convertEpochDays(System.UInt32)">
-            <summary>
-            convert the epoch days into DateTime object
-            </summary>
-            <param name="epochDays">target epoch days</param>
-            <returns>return a DateTime object</returns>
-        </member>
-        <member name="M:Xceder.Client.toEpochMilliseconds(System.DateTime)">
-            <summary>
-            convert the local DateTime object into the UTC milliseconds
-            </summary>
-            <param name="localTime">target local datetime object</param>
-            <returns>UTC milliseconds</returns>
-        </member>
-        <member name="M:Xceder.Client.toEpochDays(System.DateTime)">
-            <summary>
-            convert the local DateTime object into the epoch days
-            </summary>
-            <param name="localTime">target local datetime object</param>
-            <returns>epoch days</returns>
-        </member>
-        <member name="P:Xceder.Client.LastSentRequestID">
-            <summary>
-            last sent request ID
-            </summary>
-        </member>
-        <member name="P:Xceder.Client.AccountInfo">
-            <summary>
-            current account info. if it is not login yet, it is the default Account instance
-            </summary>
-        </member>
-        <member name="M:Xceder.Client.extractMessages``1(System.IO.Stream)">
-            <exception cref="T:System.Exception"></exception>
-        </member>
-        <member name="M:Xceder.Client.isRequestSent(System.UInt64)">
-            <summary>
-            check whether the specified request by the ID is sent successfully
-            </summary>
-            <param name="reqID">requet ID</param>
-            <returns>true: sent out successfully, false: not sent</returns>
-        </member>
-        <member name="M:Xceder.Client.connect(System.String,System.Int32)">
-            <summary>
-            start to connect to the server
-            </summary>
-            <param name="server">server IP or domain</param>
-            <param name="port">port number</param>
-            <returns>Task to wait on the async result, true means connected, false means fail</returns>
-        </member>
-        <member name="M:Xceder.Client.close(System.String)">
-            <summary>
-            stop the current connection
-            </summary>
-            <param name="reason">sepcify the stop reason</param>
-        </member>
-        <member name="M:Xceder.Client.login(System.String,System.String)">
-            <summary>
-            send login request to the server. 
-            </summary>
-            <param name="userID"></param>
-            <param name="password"></param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.registerAccount(System.String,System.String,System.String)">
-            <summary>
-            request to register a new account
-            </summary>
-            <param name="userID"></param>
-            <param name="email"></param>
-            <param name="password"></param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.requestOTP(System.String)">
-            <summary>
-            request an one time password for the password change
-            </summary>
-            <param name="email"></param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.requestPWDReset(System.String,System.String,System.String)">
-            <summary>
-            request password reset
-            </summary>
-            <param name="email"></param>
-            <param name="OTP">one time password gotten by the requestOTP()</param>
-            <param name="newPassword"></param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.queryPosition(System.UInt32)">
-            <summary>
-            query the account position info
-            </summary>
-            <param name="account">target account's position</param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.queryInstrument(System.String,Com.Xceder.Messages.Instrument.Types.PRODUCT,Com.Xceder.Messages.Exchange.Types.EXCHANGE,System.String,Com.Xceder.Messages.BROKER)">
-            <summary>
-            query the instrument info
-            </summary>
-            <param name="symbol"></param>
-            <param name="product">limit the result to the specified product only, default value "UnknownType" means query all products</param>
-            <param name="exchange">limit the result to the specified exchange only, default value "NonExch" means query all exchanges</param>
-            <param name="maturityDate">limit the result to the specified maturity date YYYYMM only, default value "" means all maturity date</param>
-            <param name="broker">limit the result to the specified broker only, default value "Xceder" means all brokers</param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.subscribePrice(System.UInt64[],System.Boolean)">
-            <summary>
-            subscribe or unsubscribe the specified instrument IDs market data
-            </summary>
-            <param name="instrumentIDAry"></param>
-            <param name="isUnSubscribe"></param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.subscribePrice(System.UInt64,System.Boolean)">
-            <summary>
-            subscribe one instrument market data
-            </summary>
-            <param name="instrumentID"></param>
-            <param name="isUnSubscribe"></param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.pingServer">
-            <summary>
-            send the ping request to the server to ensure the connection status
-            </summary>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.submitOrder(Com.Xceder.Messages.OrderParams)">
-            <summary>
-            submit the order
-            </summary>
-            <param name="orderParams"></param>
-            <returns>ansyc task result for this request</returns>
-        </member>
-        <member name="M:Xceder.Client.replaceOrWithdrawOrder(System.UInt64,System.UInt32,System.UInt64,System.UInt64)">
-            <summary>
-            replace/withdraw the target order
-            </summary>
-            <param name="targetClOrdID">target order clOrdID</param>
-            <param name="newQty">new order qty, 0 means withdraw the target order</param>
-            <param name="newLimitPrice"></param>
-            <param name="newStopPrice"></param>
-            <returns>ansyc task result for this request</returns>
-        </member>
         <member name="T:Com.Xceder.Messages.GatewayReflection">
             <summary>Holder for reflection information generated from gateway.proto</summary>
         </member>
@@ -3644,6 +3294,356 @@
             all user's positions. server will always publish the whole reports for any update
             key is the instrument ID
              </summary>
+        </member>
+        <member name="T:Xceder.PemKeyUtils">
+            <summary>
+            extract the key parameters from the pem key file
+            </summary>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.GetRSAProviderFromPemFile(System.String)">
+            <summary>
+            extract the key parameters from the file
+            </summary>
+            <param name="pemfile"></param>
+            <returns>return null if fail</returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPublicKey(System.String)">
+            <summary>
+            Get the binary RSA PUBLIC key
+            </summary>
+            <param name="keyVal"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeX509PublicKey(System.Byte[])">
+            <summary>
+            Parses binary asn.1 X509 SubjectPublicKeyInfo; returns RSACryptoServiceProvider
+            </summary>
+            <param name="x509key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeRSAPrivateKey(System.Byte[])">
+            <summary>
+            Parses binary ans.1 RSA private key; returns RSACryptoServiceProvider
+            </summary>
+            <param name="privkey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceder.PemKeyUtils.DecodeOpenSSLPrivateKey(System.String)">
+            <summary>
+            Get the binary RSA PRIVATE key, decrypting if necessary
+            </summary>
+            <param name="instr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Xceder.CircularBuffer`1">
+            <summary>
+            Circular buffer.
+            
+            When writting to a full buffer:
+            PushBack -> removes this[0] / Front()
+            PushFront -> removes this[Size-1] / Back()
+            
+            this implementation is inspired by
+            http://www.boost.org/doc/libs/1_53_0/libs/circular_buffer/doc/circular_buffer.html
+            because I liked their interface.
+            </summary>
+        </member>
+        <member name="F:Xceder.CircularBuffer`1._start">
+            <summary>
+            The _start. Index of the first element in buffer.
+            </summary>
+        </member>
+        <member name="F:Xceder.CircularBuffer`1._end">
+            <summary>
+            The _end. Index after the last element in the buffer.
+            </summary>
+        </member>
+        <member name="F:Xceder.CircularBuffer`1._size">
+            <summary>
+            The _size. Buffer size.
+            </summary>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.#ctor(System.Int32,`0[])">
+            <summary>
+            Initializes a new instance of the <see cref="!:CircularBuffer.CircularBuffer"/> class.
+            
+            </summary>
+            <param name='capacity'>
+            Buffer capacity. Must be positive.
+            </param>
+            <param name='items'>
+            Items to fill buffer with. Items length must be less than capacity.
+            Sugestion: use Skip(x).Take(y).ToArray() to build this argument from
+            any enumerable.
+            </param>
+        </member>
+        <member name="P:Xceder.CircularBuffer`1.Capacity">
+            <summary>
+            Maximum capacity of the buffer. Elements pushed into the buffer after
+            maximum capacity is reached (IsFull = true), will remove an element.
+            </summary>
+        </member>
+        <member name="P:Xceder.CircularBuffer`1.Size">
+            <summary>
+            Current buffer size (the number of elements that the buffer has).
+            </summary>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.Front">
+            <summary>
+            Element at the front of the buffer - this[0].
+            </summary>
+            <returns>The value of the element of type T at the front of the buffer.</returns>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.Back">
+            <summary>
+            Element at the back of the buffer - this[Size - 1].
+            </summary>
+            <returns>The value of the element of type T at the back of the buffer.</returns>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.PushBack(`0)">
+            <summary>
+            Pushes a new element to the back of the buffer. Back()/this[Size-1]
+            will now return this element.
+            
+            When the buffer is full, the element at Front()/this[0] will be 
+            popped to allow for this new element to fit.
+            </summary>
+            <param name="item">Item to push to the back of the buffer</param>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.PushFront(`0)">
+            <summary>
+            Pushes a new element to the front of the buffer. Front()/this[0]
+            will now return this element.
+            
+            When the buffer is full, the element at Back()/this[Size-1] will be 
+            popped to allow for this new element to fit.
+            </summary>
+            <param name="item">Item to push to the front of the buffer</param>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.PopBack(System.Int32)">
+            <summary>
+            Removes the element at the back of the buffer. Decreassing the 
+            Buffer size by 1.
+            </summary>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.PopFront(System.Int32)">
+            <summary>
+            Removes the element at the front of the buffer. Decreassing the 
+            Buffer size by 1.
+            </summary>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.ToArray">
+            <summary>
+            Copies the buffer contents to an array, acording to the logical
+            contents of the buffer (i.e. independent of the internal 
+            order/contents)
+            </summary>
+            <returns>A new array with a copy of the buffer contents.</returns>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.Increment(System.Int32@)">
+            <summary>
+            Increments the provided index variable by one, wrapping
+            around if necessary.
+            </summary>
+            <param name="index"></param>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.Decrement(System.Int32@)">
+            <summary>
+            Decrements the provided index variable by one, wrapping
+            around if necessary.
+            </summary>
+            <param name="index"></param>
+        </member>
+        <member name="M:Xceder.CircularBuffer`1.InternalIndex(System.Int32)">
+            <summary>
+            Converts the index in the argument to an index in <code>_buffer</code>
+            </summary>
+            <returns>
+            The transformed index.
+            </returns>
+            <param name='index'>
+            External index.
+            </param>
+        </member>
+        <member name="T:Xceder.Client">
+            <summary>handle the xceder server connection</summary>
+        </member>
+        <member name="E:Xceder.Client.ResponseEvent">
+            <summary>
+            provide the server broadcast event.For example, the real time market data update
+            </summary>
+        </member>
+        <member name="E:Xceder.Client.NetWorkErrorEvent">
+            <summary>
+            error event for the error encountered when try to receive the message from the socket
+            </summary>
+        </member>
+        <member name="F:Xceder.Client._sentRequests">
+            <summary>
+            store the sent request and will be retrieved to trigger the received message event 
+            </summary>
+        </member>
+        <member name="M:Xceder.Client.#ctor">
+            <summary>
+            Client constructor
+            </summary>
+        </member>
+        <member name="P:Xceder.Client.Connected">
+            <summary>
+            indicate whether the server is connected 
+            </summary>
+        </member>
+        <member name="M:Xceder.Client.convertUTC(System.UInt64)">
+            <summary>
+            convert the UTC milliseconds into DateTime object
+            </summary>
+            <param name="UTCMillis">target UTC milliseconds</param>
+            <returns>return a DateTime object</returns>
+        </member>
+        <member name="M:Xceder.Client.convertEpochDays(System.UInt32)">
+            <summary>
+            convert the epoch days into DateTime object
+            </summary>
+            <param name="epochDays">target epoch days</param>
+            <returns>return a DateTime object</returns>
+        </member>
+        <member name="M:Xceder.Client.toEpochMilliseconds(System.DateTime)">
+            <summary>
+            convert the local DateTime object into the UTC milliseconds
+            </summary>
+            <param name="localTime">target local datetime object</param>
+            <returns>UTC milliseconds</returns>
+        </member>
+        <member name="M:Xceder.Client.toEpochDays(System.DateTime)">
+            <summary>
+            convert the local DateTime object into the epoch days
+            </summary>
+            <param name="localTime">target local datetime object</param>
+            <returns>epoch days</returns>
+        </member>
+        <member name="P:Xceder.Client.LastSentRequestID">
+            <summary>
+            last sent request ID
+            </summary>
+        </member>
+        <member name="P:Xceder.Client.AccountInfo">
+            <summary>
+            current account info. if it is not login yet, it is the default Account instance
+            </summary>
+        </member>
+        <member name="M:Xceder.Client.extractMessages``1(System.IO.Stream)">
+            <exception cref="T:System.Exception"></exception>
+        </member>
+        <member name="M:Xceder.Client.isRequestSent(System.UInt64)">
+            <summary>
+            check whether the specified request by the ID is sent successfully
+            </summary>
+            <param name="reqID">requet ID</param>
+            <returns>true: sent out successfully, false: not sent</returns>
+        </member>
+        <member name="M:Xceder.Client.connect(System.String,System.Int32)">
+            <summary>
+            start to connect to the server
+            </summary>
+            <param name="server">server IP or domain</param>
+            <param name="port">port number</param>
+            <returns>Task to wait on the async result, true means connected, false means fail</returns>
+        </member>
+        <member name="M:Xceder.Client.close(System.String)">
+            <summary>
+            stop the current connection
+            </summary>
+            <param name="reason">sepcify the stop reason</param>
+        </member>
+        <member name="M:Xceder.Client.login(System.String,System.String)">
+            <summary>
+            send login request to the server. 
+            </summary>
+            <param name="userID"></param>
+            <param name="password"></param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.registerAccount(System.String,System.String,System.String)">
+            <summary>
+            request to register a new account
+            </summary>
+            <param name="userID"></param>
+            <param name="email"></param>
+            <param name="password"></param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.requestOTP(System.String)">
+            <summary>
+            request an one time password for the password change
+            </summary>
+            <param name="email"></param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.requestPWDReset(System.String,System.String,System.String)">
+            <summary>
+            request password reset
+            </summary>
+            <param name="email"></param>
+            <param name="OTP">one time password gotten by the requestOTP()</param>
+            <param name="newPassword"></param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.queryPosition(System.UInt32)">
+            <summary>
+            query the account position info
+            </summary>
+            <param name="account">target account's position</param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.queryInstrument(System.String,Com.Xceder.Messages.Instrument.Types.PRODUCT,Com.Xceder.Messages.Exchange.Types.EXCHANGE,System.String,Com.Xceder.Messages.BROKER)">
+            <summary>
+            query the instrument info
+            </summary>
+            <param name="symbol"></param>
+            <param name="product">limit the result to the specified product only, default value "UnknownType" means query all products</param>
+            <param name="exchange">limit the result to the specified exchange only, default value "NonExch" means query all exchanges</param>
+            <param name="maturityDate">limit the result to the specified maturity date YYYYMM only, default value "" means all maturity date</param>
+            <param name="broker">limit the result to the specified broker only, default value "Xceder" means all brokers</param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.subscribePrice(System.UInt64[],System.Boolean)">
+            <summary>
+            subscribe or unsubscribe the specified instrument IDs market data
+            </summary>
+            <param name="instrumentIDAry"></param>
+            <param name="isUnSubscribe"></param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.subscribePrice(System.UInt64,System.Boolean)">
+            <summary>
+            subscribe one instrument market data
+            </summary>
+            <param name="instrumentID"></param>
+            <param name="isUnSubscribe"></param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.pingServer">
+            <summary>
+            send the ping request to the server to ensure the connection status
+            </summary>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.submitOrder(Com.Xceder.Messages.OrderParams)">
+            <summary>
+            submit the order
+            </summary>
+            <param name="orderParams"></param>
+            <returns>ansyc task result for this request</returns>
+        </member>
+        <member name="M:Xceder.Client.replaceOrWithdrawOrder(System.UInt64,System.UInt32,System.UInt64,System.UInt64)">
+            <summary>
+            replace/withdraw the target order
+            </summary>
+            <param name="targetClOrdID">target order clOrdID</param>
+            <param name="newQty">new order qty, 0 means withdraw the target order</param>
+            <param name="newLimitPrice"></param>
+            <param name="newStopPrice"></param>
+            <returns>ansyc task result for this request</returns>
         </member>
     </members>
 </doc>
