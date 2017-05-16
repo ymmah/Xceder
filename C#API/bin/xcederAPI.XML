@@ -560,6 +560,9 @@
             to delete spreader, just specify the ID with the empty name
              </summary>
         </member>
+        <member name="F:Com.Xceder.Messages.Request.RequestTradingHourFieldNumber">
+            <summary>Field number for the "requestTradingHour" field.</summary>
+        </member>
         <member name="T:Com.Xceder.Messages.Request.RequestOneofCase">
             <summary>Enum of possible cases for the "request" oneof.</summary>
         </member>
@@ -667,6 +670,14 @@
             <summary>
             sent by the server when the position is changed, for example, the order is filled
             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Response.TradingDaysFieldNumber">
+            <summary>Field number for the "tradingDays" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Response.TradingDays">
+             <summary>
+            it can be reponse for the trading hour request of broadcasted by server
+             </summary>
         </member>
         <member name="T:Com.Xceder.Messages.Response.ResponseOneofCase">
             <summary>Enum of possible cases for the "response" oneof.</summary>
@@ -1454,9 +1465,6 @@
         <member name="F:Com.Xceder.Messages.QueryResult.SupportedExchangesFieldNumber">
             <summary>Field number for the "supportedExchanges" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.QueryResult.CalendarFieldNumber">
-            <summary>Field number for the "calendar" field.</summary>
-        </member>
         <member name="F:Com.Xceder.Messages.QueryResult.InstrumentsFieldNumber">
             <summary>Field number for the "instruments" field.</summary>
         </member>
@@ -1469,23 +1477,47 @@
         <member name="T:Com.Xceder.Messages.QueryResult.ResultOneofCase">
             <summary>Enum of possible cases for the "result" oneof.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ExchangeCalendar.ExchangeFieldNumber">
-            <summary>Field number for the "exchange" field.</summary>
+        <member name="F:Com.Xceder.Messages.ExchangeTradingDays.TradingDayMapFieldNumber">
+            <summary>Field number for the "tradingDayMap" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ExchangeCalendar.HolidayFieldNumber">
-            <summary>Field number for the "holiday" field.</summary>
+        <member name="P:Com.Xceder.Messages.ExchangeTradingDays.TradingDayMap">
+             <summary>
+            key is the Exchange.EXCHANGE
+             </summary>
         </member>
-        <member name="T:Com.Xceder.Messages.ExchangeCalendar.Types">
-            <summary>Container for nested types declared in the ExchangeCalendar message type.</summary>
+        <member name="F:Com.Xceder.Messages.TradingDays.TimeZoneFieldNumber">
+            <summary>Field number for the "timeZone" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ExchangeCalendar.Types.Holiday.EpochDayFieldNumber">
-            <summary>Field number for the "epochDay" field.</summary>
+        <member name="P:Com.Xceder.Messages.TradingDays.TimeZone">
+             <summary>
+            indicate the time zone info as GMT hour offset
+             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ExchangeCalendar.Types.Holiday.Holiday_FieldNumber">
-            <summary>Field number for the "holiday" field.</summary>
+        <member name="F:Com.Xceder.Messages.TradingDays.TradingDayFieldNumber">
+            <summary>Field number for the "tradingDay" field.</summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ExchangeCalendar.Types.Holiday.HoursFieldNumber">
-            <summary>Field number for the "hours" field.</summary>
+        <member name="F:Com.Xceder.Messages.TradingDay.DayOfYearFieldNumber">
+            <summary>Field number for the "dayOfYear" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.TradingDay.DayOfYear">
+             <summary>
+            if it is 0, means this is for normal trading days
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.TradingDay.RemarkFieldNumber">
+            <summary>Field number for the "remark" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.TradingDay.WorkingHourFieldNumber">
+            <summary>Field number for the "workingHour" field.</summary>
+        </member>
+        <member name="T:Com.Xceder.Messages.TradingDay.Types">
+            <summary>Container for nested types declared in the TradingDay message type.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.TradingDay.Types.WorkingHour.StartSecOfDayUTCFieldNumber">
+            <summary>Field number for the "startSecOfDayUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.TradingDay.Types.WorkingHour.EndSecOfDayUTCFieldNumber">
+            <summary>Field number for the "endSecOfDayUTC" field.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.BrokerExchanges.BrokerFieldNumber">
             <summary>Field number for the "broker" field.</summary>
@@ -1646,6 +1678,14 @@
         </member>
         <member name="F:Com.Xceder.Messages.Order.CompoundFieldNumber">
             <summary>Field number for the "compound" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Order.ClOrdIDFieldNumber">
+            <summary>Field number for the "clOrdID" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Order.ClOrdID">
+             <summary>
+            server side will store this value after the order is submitted. mainly used in later query result
+             </summary>
         </member>
         <member name="T:Com.Xceder.Messages.Order.DetailOneofCase">
             <summary>Enum of possible cases for the "detail" oneof.</summary>
