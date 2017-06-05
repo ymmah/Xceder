@@ -1122,7 +1122,7 @@ message CompoundOrder {
 }
 
 message Spreaders {
-    repeated Spreader speader = 1;
+    repeated Spreader spreader = 1;
 }
 
 message Spreader {
