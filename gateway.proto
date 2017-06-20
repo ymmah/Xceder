@@ -48,7 +48,6 @@ message Request {
         Order order = 13;
 
         //request to create/update spreader, the new spreader ID should be 0.
-        //only allow to change the spreader which status isn't RUN
         //to delete spreader, just specify the ID with the empty name
         Spreader spreader = 14;
 
@@ -89,7 +88,7 @@ message Response {
         InstrumentStatuses instrumentStatus = 10;
 
         // reply for the spreader creation request
-        uint64 spreaderID = 11;
+        SpreaderResult spreaderResult = 11;
 
         // execution report for the order submission request; broadcast message for the order execution report
         // if the submitted order is algo order, this is used to report the order triggered by server
@@ -101,6 +100,12 @@ message Response {
         //it can be reponse for the trading hour request of broadcasted by server
         ExchangeTradingDays tradingDays = 14;
     }
+}
+
+message SpreaderResult {
+    uint64 id = 1;
+    uint32 version = 2;
+    uint64 updateTimeUTC = 3;
 }
 
 enum ID_TYPE {
@@ -223,7 +228,7 @@ enum ERROR {
     ORDER_NOT_REPLACEABLE = 161;
 
     /* Spreader related errors */
-    SPREADER_DUPLICATE_NAME = 171;
+    //SPREADER_DUPLICATE_NAME = 171; now use version to allow the duplication of name
 
     SPREADER_NO_QUOTING = 172;
 
@@ -266,6 +271,9 @@ enum BROKER {
 
     //中国国际期货
     CIFCO = 8;
+
+    //直达通
+    DA = 9;
 }
 
 enum SIDE {
@@ -1389,6 +1397,7 @@ message Spreader {
     }
 
     //this will be created by server after it is registered successfully, client side spreader create request should be 0
+    //after the spreader is created, each modification will get a new id from server
     uint64 id = 1;
 
     uint32 ownerAcct = 2;
@@ -1426,6 +1435,12 @@ message Spreader {
     repeated Leg leg = 10;
 
     uint64 updateTimeUTC = 11;
+
+    //after the spreader modification is submitted successfully, the version will be changed by server.
+    //this is to make sure the spreader is unique forever to track all the submitted orders
+    uint32 version = 12;
+
+    Instrument.STATUS status = 13;
 }
 
 message OrderID {
