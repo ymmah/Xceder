@@ -3,10 +3,12 @@ message protocol and network communication. The client side only need call
 the provided functions to submit the request and receive the real time data
 through the events.
 
-#How to use
+# How to use
 
 All the functions are exported from the class Client. It is in the Client.cs file. There are 2 ways to 
-use it, 1. add this project into your solution; 2. add the xcederAPI.dll in bin folder as reference.  
+use it, 
+1. add this project into your solution 
+2. add the xcederAPI.dll in bin folder as reference.  
 
 
 # Project Setup
