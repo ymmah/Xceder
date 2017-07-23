@@ -71,11 +71,6 @@
             tag should be less than 255
              </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.ERROR.SpreaderDuplicateName">
-            <summary>
-            Spreader related errors 
-            </summary>
-        </member>
         <member name="F:Com.Xceder.Messages.ERROR.SpreaderInvalidLegRules">
              <summary>
             for example syntax error
@@ -99,6 +94,11 @@
         <member name="F:Com.Xceder.Messages.BROKER.Cifco">
              <summary>
             中国国际期货
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.BROKER.Da">
+             <summary>
+            直达通
              </summary>
         </member>
         <member name="F:Com.Xceder.Messages.SIDE.Buy">
@@ -206,7 +206,6 @@
         <member name="P:Com.Xceder.Messages.Request.Spreader">
              <summary>
             request to create/update spreader, the new spreader ID should be 0.
-            only allow to change the spreader which status isn't RUN
             to delete spreader, just specify the ID with the empty name
              </summary>
         </member>
@@ -296,10 +295,10 @@
             broadcast message for the instrument status change
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.Response.SpreaderIDFieldNumber">
-            <summary>Field number for the "spreaderID" field.</summary>
+        <member name="F:Com.Xceder.Messages.Response.SpreaderResultFieldNumber">
+            <summary>Field number for the "spreaderResult" field.</summary>
         </member>
-        <member name="P:Com.Xceder.Messages.Response.SpreaderID">
+        <member name="P:Com.Xceder.Messages.Response.SpreaderResult">
             <summary>
             reply for the spreader creation request
             </summary>
@@ -331,6 +330,15 @@
         </member>
         <member name="T:Com.Xceder.Messages.Response.ResponseOneofCase">
             <summary>Enum of possible cases for the "response" oneof.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.SpreaderResult.IdFieldNumber">
+            <summary>Field number for the "id" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.SpreaderResult.VersionFieldNumber">
+            <summary>Field number for the "version" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.SpreaderResult.UpdateTimeUTCFieldNumber">
+            <summary>Field number for the "updateTimeUTC" field.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.Exchange.CodeFieldNumber">
             <summary>Field number for the "code" field.</summary>
@@ -1647,8 +1655,8 @@
             [Partial] fill of any order triggers [partial] canceling of all other orders.
             </summary>
         </member>
-        <member name="F:Com.Xceder.Messages.Spreaders.SpeaderFieldNumber">
-            <summary>Field number for the "speader" field.</summary>
+        <member name="F:Com.Xceder.Messages.Spreaders.SpreaderFieldNumber">
+            <summary>Field number for the "spreader" field.</summary>
         </member>
         <member name="F:Com.Xceder.Messages.Spreader.IdFieldNumber">
             <summary>Field number for the "id" field.</summary>
@@ -1656,6 +1664,7 @@
         <member name="P:Com.Xceder.Messages.Spreader.Id">
              <summary>
             this will be created by server after it is registered successfully, client side spreader create request should be 0
+            after the spreader is created, each modification will get a new id from server
              </summary>
         </member>
         <member name="F:Com.Xceder.Messages.Spreader.OwnerAcctFieldNumber">
@@ -1715,6 +1724,18 @@
         </member>
         <member name="F:Com.Xceder.Messages.Spreader.UpdateTimeUTCFieldNumber">
             <summary>Field number for the "updateTimeUTC" field.</summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.VersionFieldNumber">
+            <summary>Field number for the "version" field.</summary>
+        </member>
+        <member name="P:Com.Xceder.Messages.Spreader.Version">
+             <summary>
+            after the spreader modification is submitted successfully, the version will be changed by server.
+            this is to make sure the spreader is unique forever to track all the submitted orders
+             </summary>
+        </member>
+        <member name="F:Com.Xceder.Messages.Spreader.StatusFieldNumber">
+            <summary>Field number for the "status" field.</summary>
         </member>
         <member name="T:Com.Xceder.Messages.Spreader.Types">
             <summary>Container for nested types declared in the Spreader message type.</summary>

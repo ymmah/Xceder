@@ -271,6 +271,9 @@ enum BROKER {
 
     //中国国际期货
     CIFCO = 8;
+
+    //直达通
+    DA = 9;
 }
 
 enum SIDE {
@@ -448,7 +451,7 @@ message Exchange {
         NYSE_Liffe = 50;
         Eris_GovEx = 51;
         eSpeed = 52;
-        Eurex = 53;
+        EUREX = 53;
         CME = 54;
         MEFF = 55;
         Montreal = 56;
@@ -468,13 +471,47 @@ message Exchange {
         NYSE_Liffe_US = 70;
         TTSIM = 71;
         NFX = 72;
-        HKEx = 73;
+        HKEX = 73;
         GMEX = 74;
         FIX = 75;
         TSE = 76;
 
         //Dubai Gold & Commodities Exchange Dmcc
         DGCX = 77;
+
+        BMD = 78;
+
+        NYMEX = 79;
+
+        COMEX = 80;
+
+        DME = 81;
+
+        LIFFE = 82;
+
+        CBOE = 83;
+
+        ICE = 84;
+
+        XEUREX = 85;
+
+        ICE_UK = 86;
+
+        ICE_NYBOT = 88;
+
+        EURONEXT = 89;
+
+        KRX = 90;
+
+        ASX = 91;
+
+        JPX = 92;
+
+        ICE_US = 93;
+
+        TAIFEX = 94;
+
+        GLOBEX = 95;
     }
 
     EXCHANGE code = 1;
