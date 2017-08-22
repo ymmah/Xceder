@@ -1,5 +1,5 @@
 ///////////////////////////////////////
-//version 20170511
+//version 20170817
 //the string size (not speicified) should be within 255 bytes
 
 syntax = "proto3";
@@ -52,6 +52,8 @@ message Request {
         Spreader spreader = 14;
 
         bool requestTradingHour = 15;
+
+        uint64 orderStatus = 16;
     }
 }
 
