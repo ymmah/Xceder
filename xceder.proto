@@ -1,0 +1,1517 @@
+syntax = "proto3";
+
+/**
+* Version: 20171205
+**/
+
+package com.xceder.protocol;
+
+option optimize_for = SPEED;
+
+/**
+Protocol version
+*/
+enum PROTOCOL {
+    BUILD = 0;
+    VERSION = 20171205;
+}
+
+message Request {
+
+    message OrderReplace {
+        uint64 orderID = 1;
+
+        OrderAction action = 2;
+    }
+
+    //request ID, should be unique enough to receive the request Result
+    uint32 requestID = 1;
+
+    oneof request {
+        Ping ping = 2;
+
+        //login system for registered user
+        Logon logon = 3;
+
+        //logoff message to logoff current session
+        string logoff = 4;
+
+        //register new account or update the account detail
+        Account account = 5;
+
+        Query queryRequest = 6;
+
+        // subscribe/unsubscribe market data
+        MarketDataSubscription marketData = 7;
+
+        //subscrbie/unsubscribe instrument change
+        InstrumentSubscription instrument = 8;
+
+        Order order = 9;
+
+        OrderReplace orderReplace = 10;
+
+        //to delete spreader, just specify the status as DELISTED
+        Spreader spreader = 11;
+
+        //upload the application layout info
+        WorkSpaces workSpaceList = 12;
+
+        //upload the watch list info
+        WatchLists watchList = 13;
+    }
+}
+
+// Server to Client message, server can include different fields in a single message
+message Response {
+
+    //server side initiated message will have value 0
+    uint32 requestID = 1;
+
+    //it is only valid for the request reply
+    ERROR resultCode = 2;
+
+    //only valid for request reply
+    uint64 requestRcvTime = 3;
+
+    //only valid for request reply
+    uint64 requestCompletedTime = 4;
+
+    //mainly used for the pagination, 0 means total records is decided by the result
+    uint32 totalRecords = 5;
+
+    oneof response {
+        // server reply for the Ping request
+        Ping ping = 6;
+
+        Instruments instruments = 7;
+
+        OrderTransactions orderTransactions = 8;
+
+        // broadcast message for the price updates
+        MarketDatas marketDatas = 9;
+
+        Logs logs = 10;
+
+        AccountPosition position = 11;
+
+        // reply for the logon request
+        Account account = 12;
+
+        // broadcast message for notice
+        NoticeMessages notice = 13;
+
+        // broadcadst message for the service status updates
+        Services service = 14;
+
+        Exchanges exchange = 15;
+
+        WatchLists watchList = 16;
+
+        WorkSpaces workSpaceList = 17;
+    }
+}
+
+//actual value = value * power(-scale)
+message Decimal {
+    sint64 value = 1;
+
+    //always be 0 for integer value
+    uint32 scale = 2;
+}
+
+// Result code.
+enum ERROR {
+    PROCESSING = 0;
+
+    // success codes
+    SUCCESS = 1;
+
+    // failure codes (>=100)
+    FAILURE = 100;
+
+    TIMEOUT = 101;
+
+    NETWORK_ERROR = 102;
+
+    CANCELLED = 103;
+
+    CONNECTION_DOWN = 104;
+
+    CONNECTION_NOT_CONFIGURE = 105;
+
+    // Requested data is outside of allowed range.
+    OUTSIDE_ALLOWED_RANGE = 106;
+
+    UNKNOWN_REQUEST = 107;
+
+    // The user is not allowed to access this instrument data.
+    ACCESS_DENIED = 108;
+
+    TIMEOUTOFSYNC = 109;
+
+    NOT_SUPPORT = 110;
+
+    NOT_FOUND = 111;
+
+
+    ACCOUNT_NO_ONETIME_PASSWORD = 130;
+
+    ACCOUNT_NO_TRADINGACCOUNT = 131;
+
+    ACCOUNT_OTP_EXPIRED = 132;
+
+    ACCOUNT_OTP_NOT_FOUND = 133;
+
+    ACCOUNT_PASSWORD_EXPIRED = 134;
+
+    ACCOUNT_WRONG_PASSWORD = 135;
+
+    ACCOUNT_SUSPENDED = 136;
+
+    ACCOUNT_KICKEDOUT = 137;
+
+    ACCOUNT_DUPLICATE_USER = 138;
+
+    ACCOUNT_NOT_LOGIN = 139;
+
+    ACCOUNT_INVALID_EMAIL = 140;
+
+    ACCOUNT_INVALID_USERID = 141;
+
+    ACCOUNT_NOT_EXIST = 142;
+
+
+    INSTRUMENT_EXPIRED = 160;
+
+    INSTRUMENT_NOT_TRADABLE = 161;
+
+    INSTRUMENT_NO_PRICE_ACCESS = 162;
+
+
+    ORDER_INVALID_PARAMS = 180;
+
+    ORDER_INVALID_INSTRUMENTID = 181;
+
+    ORDER_INVALID_CLORDID = 182;
+
+    ORDER_INVALID_BROKER = 183;
+
+    ORDER_INVALID_SUBMITUSER = 184;
+
+    ORDER_INVALID_QTY = 185;
+
+    ORDER_INVALID_LIMIT_PRICE = 186;
+
+    ORDER_INVALID_STOP_PRICE = 187;
+
+    ORDER_INVALID_ORDER_TYPE = 188;
+
+    ORDER_INVALID_SUBMIT_TIME = 189;
+
+    ORDER_INVALID_TIMEINFORCE = 190;
+
+    ORDER_INVALID_CHAINCLORDID = 191;
+
+    ORDER_INVALID_SYMBOL = 192;
+
+    ORDER_INVALID_SIDE = 193;
+
+    /* Order related errors */
+    //tag should be less than 255
+    ORDER_TAG_TOOLONG = 194;
+
+    ORDER_NOT_REPLACEABLE = 195;
+
+    //previous action is still in progress
+    ORDER_ACTION_IN_PROGRESS = 196;
+
+
+    SPREADER_NO_QUOTING = 220;
+
+    SPREADER_NO_LEGS = 221;
+
+    SPREADER_NO_INSTRUMENT_ACCESS = 222;
+
+    SPREADER_DUPLICATE_ORDER = 223;
+
+    SPREADER_INVALID_ID = 224;
+
+    SPREADER_INVALID_LEG_INSTRUMENT = 225;
+
+    SPREADER_INVALID_LEG_RATIO = 226;
+
+    SPREADER_INVALID_LEG_PRICEWEIGHT = 227;
+
+    //for example syntax error
+    SPREADER_INVALID_LEG_RULES = 228;
+
+    //leg order has failure, for example, fail to withdraw some leg orders
+    SPREADER_LEG_FAILURE = 229;
+
+    /* Algo related errors */
+    //can't modify the algo/spreader because of active orders
+    ALGO_ACTIVE_ORDER = 250;
+}
+
+enum BROKER {
+    //also means any/unspecified broker
+    ANY = 0;
+
+    XCEDER = 1;
+
+    SQUARE = 2;
+    KGI = 3;
+    PHILLIP = 4;
+    ORIENT = 5;
+    UOB = 6;
+
+    //直达通
+    DA = 7;
+
+    LMAX = 8;
+}
+
+message Logs {
+    repeated Log record = 1;
+}
+
+message Log {
+    Request request = 1;
+
+    Response result = 2;
+}
+
+// Ping request which can be initiated by any side to ensure connection is alive. Both client and
+// server sides must respond such request with Ping.
+message Ping {
+    // initiator time
+    uint64 pingSentUTC = 1;
+
+    uint64 pingRcvUTC = 2;
+
+    uint64 pongSentUTC = 3;
+
+    // responser time
+    uint64 pongRcvUTC = 4;
+}
+
+// Logon into the system and opening a new session.
+message Logon {
+    // User login ID.
+    string userID = 1;
+
+    // User's password.
+    string password = 2;
+
+    // User's one time password, might be required according to the user's settings.
+    uint32 OTP = 3;
+
+    string clientApp = 4;
+}
+
+message WorkSpaces {
+    repeated WorkSpace record = 1;
+}
+
+message WorkSpace {
+    uint32 acccountID = 1;
+
+    string layoutID = 2;
+
+    //max length is 10K bytes
+    string detail = 3;
+
+    uint64 updateTimeUTC = 4;
+}
+
+message Account {
+
+    enum LOGIN_MODE {
+        PASSWORD = 0;
+
+        OATH2 = 1;
+
+        OTP = 2;
+    }
+
+    enum STATUS {
+        NORMAL = 0;
+
+        SUSPEND = 1;
+    }
+
+    enum ROLE {
+        CLIENT = 0;
+        ADMIN = 1;
+    }
+
+    //it is server side created account ID, when register new user, it should be just 0
+    uint32 accountID = 1;
+
+    //client side specified user ID. it will be used as login user name
+    string userID = 2;
+
+    string password = 3;
+
+    Particular particular = 4;
+
+    uint64 updateTimeUTC = 5;
+
+    //for new client, it should be UNVERIFIED
+    STATUS status = 6;
+
+    ROLE role = 7;
+
+    repeated LoginRecord loginLogs = 8;
+}
+
+message Particular {
+    enum GENDER {
+        UNKNOWN = 0;
+
+        MALE = 1;
+
+        FEMALE = 2;
+    }
+
+    string firstName = 1;
+
+    string surName = 2;
+
+    string email = 3;
+
+    string phone = 4;
+
+    //ISO 3166 2-letter code
+    string country = 5;
+
+    //ISO 639 alpha-2 language code
+    string language = 6;
+
+    //in minutes, default, SG time zone
+    sint32 timezoneOffset = 7;
+
+    GENDER gender = 8;
+
+    uint64 signUpUTC = 9;
+
+    uint64 emailVerifiedUTC = 10;
+
+    uint64 phoneVerifiedUTC = 11;
+}
+
+message LoginRecord {
+    uint64 loginUTC = 1;
+
+    string loginFrom = 2;
+
+    string loginDevice = 3;
+
+    ERROR loginResult = 4;
+
+    uint64 logoutUTC = 5;
+
+    string logoutRemark = 6;
+
+    uint32 prevFailCount = 7;
+
+    string OTP = 8;
+
+    string clientApp = 9;
+}
+
+// Request for information.
+message Query {
+    oneof query {
+        QueryLog log = 1;
+
+        QueryProduct product = 2;
+
+        QueryInstrument instrument = 3;
+
+        QuerySpreader spreader = 4;
+
+        Exchange.EXCHANGE exchange = 5;
+
+        //target Account for position query
+        uint32 accountPosition = 6;
+
+        QueryOrder order = 7;
+
+        QueryOrderRange orderRange = 8;
+
+        QueryWatchList watchList = 9;
+
+        QueryWorkSpace workSpace = 10;
+
+        QueryMarketData marketData = 11;
+    }
+}
+
+message PeriodRange {
+    //yyyyMMdd
+    uint32 fromDate = 1;
+
+    //yyyyMMdd
+    uint32 toDate = 2;
+
+    //offset index (0 based)
+    uint32 offset = 3;
+}
+
+message QueryLog {
+    PeriodRange period = 1;
+
+    uint32 accountID = 2;
+}
+
+message QueryProduct {
+
+    ProductID productID = 1;
+
+    Product.TYPE type = 2;
+
+    //key words separated with comma ','
+    string keywords = 3;
+
+    uint32 offset = 4;
+}
+
+message QueryInstrument {
+
+    InstrumentID instrumentID = 1;
+
+    //key words separated with comma ','
+    string keywords = 2;
+
+    uint32 offset = 3;
+}
+
+message QuerySpreader {
+
+    uint32 accountID = 1;
+
+    string name = 2;
+
+    uint32 version = 3;
+
+    string keywords = 4;
+
+    uint32 offset = 5;
+}
+
+message QueryOrder {
+
+    uint64 orderID = 1;
+
+    //always from last action to the first, 0 means the latest action
+    uint32 actionOffset = 2;
+
+    //always from the last to the first, 0 means the latest report
+    uint32 reportOffset = 3;
+}
+
+message QueryOrderRange {
+    //0 means any
+    uint32 accountID = 1;
+
+    PeriodRange range = 2;
+}
+
+
+message QueryWatchList {
+    uint32 accountID = 1;
+
+    string title = 2;
+}
+
+message QueryWorkSpace {
+    uint32 accountID = 1;
+
+    string layoutID = 2;
+
+    uint32 offset = 3;
+}
+
+message QueryMarketData {
+
+    enum TYPE {
+        //day end only
+        DAY = 0;
+
+        //last done only
+        TRADE = 1;
+
+        //including last done, bid and ask quotes
+        QUOTES = 2;
+    }
+
+    TYPE type = 1;
+
+    PeriodRange period = 2;
+}
+
+enum ACTION {
+    SUBSCRIBE = 0;
+
+    UNSUBSCRIBE = 1;
+}
+
+message InstrumentSubscription {
+
+    BROKER broker = 1;
+
+    Exchange.EXCHANGE exchange = 2;
+
+    string symbol = 3;
+
+    Product.TYPE type = 4;
+
+    ACTION action = 5;
+}
+
+message MarketDataSubscription {
+
+    InstrumentID instrumentID = 1;
+
+    ACTION action = 2;
+}
+
+enum SIDE {
+    NO_SIDE = 0;
+
+    // Describes purchasing side of a trade.
+    BUY = 1;
+
+    // Describes selling side of a trade.
+    SELL = 2;
+}
+
+// Trade routing order. It is used as new order request and as a part of order status updates.
+message Order {
+    enum TYPE {
+        // Limit order, buy or sell by price that is the same or better then specified limit price.
+        LMT = 0;
+
+        // Stop order, Order becomes a Market when market reaches order's stop price
+        // (which is on opposite side of market).
+        STP = 1;
+
+        // Stop-limit order, Order becomes a Limit when market reaches order's stop price.
+        STL = 2;
+
+        // Market order, buy or sell by the best available opposite price.
+        MKT = 3;
+    }
+
+    enum TIMEINFORCE {
+        DAY = 0;
+
+        //Good Till Cancel
+        GTC = 1;
+
+        //At the Opening
+        OPG = 2;
+
+        //Immediate or Cancel
+        IOC = 3;
+
+        //Fill or Kill
+        FOK = 4;
+
+        //Good Till Crossing
+        GTX = 5;
+
+        //Good Till Date
+        GTD = 6;
+
+        //Good in Session
+        GIS = 7;
+    }
+
+    enum EXECINSTRUCTION {
+        // All or None (fill order only completely).
+        AON = 0;
+
+        // Iceberg (show only part of order size).
+        ICEBERG = 1;
+
+        // Quantity triggered (aka DOM Triggered, honor additional quantity threshold for triggering).
+        QT = 2;
+
+        // Trailing order (price of the order is following market one direction by specific offset).
+        TRAIL = 3;
+
+        // Funari (Limit order becomes a Market on Close).
+        FUNARI = 4;
+
+        // Market if Touched (Limit order becomes a Market when market reaches order's limit price).
+        MIT = 5;
+
+        // Market Limit Market is a limit order that is used to place a buy order above the best offer
+        // to fill by the best offer or a sell order below the best bid to fill by the best bid.
+        MLM = 6;
+    }
+
+    enum SUBMITMODE {
+        AUTOMATED = 0;
+        MANUAL = 1;
+    }
+
+    // this order owner user ID.
+    uint32 accountID = 1;
+
+    // who placed the order.
+    uint32 submitByAcct = 2;
+
+    //order source time when an order was submitted (UTC).
+    uint64 submitUTC = 3;
+
+    // remark for this order
+    string remark = 4;
+
+    //this is for the multipe leg orders. normally it should be 0 for non-leg orders
+    uint32 leg = 5;
+
+    SUBMITMODE indicator = 6;
+
+    //instrument/spreader ID
+    InstrumentID instrumentID = 7;
+
+    // Order side.
+    SIDE side = 8;
+
+    Order.TYPE orderType = 9;
+
+    repeated Order.EXECINSTRUCTION execInstruction = 10;
+
+    Order.TIMEINFORCE timeInForce = 11;
+
+    // Total positive size of the order, need be used with product lot scale
+    uint64 orderQty = 12;
+
+    //Limit price of the order (required for Limit and Stop-limit orders), need be used with product tick size scale
+    sint64 limitPrice = 13;
+
+    // Stop price of the order (required for Stop and Stop-limit orders).
+    sint64 stopPrice = 14;
+
+    // Visible size of the order for Icebergs, if it is 0 means all visible.
+    uint64 visibleQty = 15;
+
+    // Minimum visible positive size of the order
+    // used for iceberg orders with 'random visible size',
+    // must be < visible_qty.
+    uint64 minVisibleQty = 16;
+
+    //yyyyMMdd
+    uint32 validDate = 17;
+
+    // Trigger quantity (threshold) as additional stop order activation condition.
+    uint64 triggerQty = 18;
+
+    //ISO 3 charactor currency
+    string currency = 19;
+
+    // True if order is used for closing/ reducing a position, opening/ increasing otherwise
+    // default is false, means open position
+    bool close = 20;
+
+    //server will publish the value after the order submitted
+    uint64 orderID = 21;
+
+    //server will publish the value after the order submitted
+    uint64 chainID = 22;
+}
+
+// Status of a specific transaction.
+// All attributes are at the transaction moment.
+message OrderReport {
+    //keep the 0 for those unknown status
+    enum STATUS {
+        UNKNOWN = 0;
+
+        PENDING_NEW = 1;
+
+        PENDING_CANCEL = 2;
+
+        PENDING_REPLACE = 3; //(e.g. result of Order Cancel/Replace Request <G>)
+
+        NEW = 4;
+
+        REPLACED = 5;
+
+        //ExecType will always use FILL, this is for order status only
+        PARTIAL_FILL = 6;
+
+        //this is mainly for the FIX ExecType RESTATED, order status should has no this value
+        RESTATED = 7;
+
+        //CQG suspended has other meaning, market is closed and temporarily queued in their server
+        SUSPENDED = 8;
+
+        //non-working order status
+        FILL = 9;
+
+        CANCELED = 10;
+
+        REJECTED = 11;
+
+        EXPIRED = 12;
+    }
+
+    enum REJECTCODE {
+        NA = 0;
+
+        //FIX OrdRejReason
+        BROKER_OPTION = 1;
+
+        UNKNOWN_ORDER_SYMBOL = 2;
+
+        EXCHANGE_CLOSED = 3;
+
+        EXCEEDS_LIMIT = 4;
+
+        TOO_LATE = 5;
+
+        UNKNOWN_ORDER = 6; //Unknown order
+
+        DUPLICATE = 7; //(e.g. dupe ClOrdID <11> ())
+
+        DUPLICATE_COMMUNICATED = 8; //Duplicate of a verbally communicated order
+
+        STALE = 9;
+
+        TRADE_ALONG_REQUIRED = 10;
+
+        INVALID_INVESTOR = 11;
+
+        UNSUPPORTED = 12; //Unsupported order characteristic
+
+        SURVEILLENCE = 13; //Surveillence Option
+
+        QUANTITY = 14; //Incorrect quantity
+
+        ALLOCATED_QUANTITY = 15; //Incorrect allocated quantity
+
+        UNKNOWN_ORDER_ACCOUNT = 16;
+
+        INVALID_PRICE_INCREMENT = 19;
+    }
+
+    //1 based running number
+    uint32 reportNo = 1;
+
+    //unique report ID
+    string execID = 2;
+
+    uint64 orderID = 3;
+
+    //0 means not reply to any action
+    uint32 actionNo = 4;
+
+    //this transaction type
+    STATUS execType = 5;
+
+    //order status
+    STATUS ordStatus = 6;
+
+    //only valid when the status is rejected
+    REJECTCODE rejectCode = 7;
+
+    // Time of execution/order creation, if not provided, 0.
+    uint64 transactTimeUTC = 8;
+
+    // Time of report received time
+    uint64 reportTimeUTC = 9;
+
+    //need be sued with product lot size scale
+    uint64 fillQty = 10;
+
+    //need be sued with product tick size scale
+    sint64 fillPrice = 11;
+
+    uint64 totalFillQty = 12;
+
+    // Average fill price.
+    sint64 avgFillPrice = 13;
+
+    // Remaining (unfilled) order quantity. It is not always equal
+    // to order size minus filled size (for example, busted orders violate that).
+    uint64 remainingQty = 14;
+
+    // Additional transaction details.
+    string remark = 15;
+
+    // If present, identifies the counterpart of the order fill, as reported by the execution system.
+    string fillCounterParty = 16;
+}
+
+message OrderTransactions {
+    repeated OrderTransaction record = 1;
+}
+
+message OrderTransaction {
+
+    Order order = 1;
+
+    //this is the total number for current + past
+    uint32 totalActions = 2;
+
+    uint32 totalReports = 3;
+
+    //current effective action No
+    uint32 effectiveAction = 4;
+
+    //last action is the latest action, sorted by the actionNo
+    repeated OrderAction actionRecords = 5;
+
+    //last report is the latest report
+    repeated OrderReport reportRecords = 6;
+}
+
+message OrderAction {
+
+    //1 based running number, it is server to maintain this value
+    uint32 actionNo = 1;
+
+    uint64 submitTimeUTC = 2;
+
+    uint32 submitByAcct = 3;
+
+    //0 means cancel
+    uint64 orderQty = 4;
+
+    //below is for replacement only
+    sint64 limitPrice = 5;
+
+    sint64 stopPrice = 6;
+}
+
+message TradingHour {
+    //HHMM
+    uint32 preOpenTime = 1;
+
+    //HHMM
+    uint32 openTime = 2;
+
+    //HHMM
+    uint32 preCloseTime = 3;
+
+    //HHMM
+    uint32 closeTime = 4;
+}
+
+message TradingDay {
+
+    //if it is 0, means this is for normal trading days
+    uint32 dayOfYear = 1;
+
+    string remark = 2;
+
+    repeated TradingHour tradingHourList = 3;
+}
+
+message Exchanges {
+    repeated Exchange record = 1;
+}
+
+message Exchange {
+    enum EXCHANGE {
+        ANY = 0;
+
+        XCEDER = 1;
+
+        OTC = 2;
+
+        DGCX = 3;
+
+        LMAX = 4;
+
+        SGX = 5;
+
+        HKEX = 6;
+    }
+
+    EXCHANGE code = 1;
+    string name = 2;
+    sint32 timezone = 3;
+
+    //GMT yyyyMMDD
+    uint32 summerTimeFrom = 4;
+
+    //GMT yyyyMMDD
+    uint32 summerTimeEnd = 5;
+
+    repeated TradingDay tradingDayList = 6;
+}
+
+message ProductID {
+    Exchange.EXCHANGE exchange = 1;
+
+    //Spreader will be the formatted as ownerAcct:name string, others will be exchange symbol
+    string symbol = 2;
+}
+
+message Product {
+    enum TYPE {
+        ANY = 0;
+        FUTURES = 1;
+        FOREX = 2;
+        INDEX = 3;
+
+        SPREADER = 4;
+    }
+
+    enum STATUS {
+        NORMAL = 0;
+
+        EXPIRED = 1;
+
+        TRADING_HALT = 2;
+
+        DELISTED = 3;
+    }
+
+    ProductID productID = 1;
+
+    Product.TYPE type = 2;
+
+    string description = 3;
+
+    //3 ISO char
+    string currency = 4;
+
+    Decimal maxOrderVolume = 5;
+
+    Decimal minOrderVolume = 6;
+
+    Decimal lotSize = 7;
+
+    //Size of one base tick for this security
+    Decimal tickSize = 8;
+
+    //tick table for price tiers
+    repeated TickRange tickRange = 9;
+
+    uint64 updateTimeUTC = 10;
+
+    //can be traded through brokers
+    repeated BROKER broker = 11;
+
+    //for futures contracts, empty records means all year
+    //>12 means next year month, for example, 13 means next year Jan
+    repeated uint32 contractMonth = 12 [packed = true];
+
+    //product trading hour. if it is empty, follow exchange trading hour
+    repeated TradingHour tradingHourList = 13;
+
+    TradingHour lastDayTradingHour = 14;
+
+    Decimal dailyPriceLimit = 15;
+
+    Decimal positionLimit = 16;
+
+    //empty means the last day of the month
+    //3WEDNESDAY-2: 2 Business days before 3rd Wednesday
+    string lastTradingDay = 17;
+
+    //empty means business day immediately folloing the last trading day
+    string listDay = 18;
+}
+
+message Instruments {
+
+    repeated Instrument instrument = 1;
+
+    repeated Product product = 2;
+
+    repeated Spreader spreader = 3;
+}
+
+message InstrumentID {
+    ProductID productID = 1;
+
+    //Futures is the contract month YYYYMM
+    uint32 contract = 2;
+
+    BROKER broker = 3;
+}
+
+message Instrument {
+
+    InstrumentID id = 1;
+
+    //yyyyMMdd
+    uint32 listDay = 2;
+
+    //yyyyMMdd
+    uint32 lastTradingday = 3;
+
+    Product.STATUS status = 4;
+}
+
+message Spreader {
+    enum QUOTING_MODE {
+        //If the hedge market quantity drops below the minimum hedge quantity, the associated quoting order will be pulled
+        //from the market and will not be resubmitted even if sufficient hedge market volume reappears at some later time.
+        ALL_NONE = 0;
+
+        //Resubmits a quoting order when there is sufficient hedge volume.
+        //Note: that with this option, the spread order will persist and remain working even though no quoting orders are
+        //working in the market; quoting orders will automatically be resubmitted if sufficient hedge quantity returns.
+        ALL_NONE_RESUBMIT = 1;
+
+        //Leans on only the inside market of the hedge legs and, therefore, only considers the size of the hedge leg’s inside
+        //market. If that volume is less than the minimum hedge quantity, the quoting order will be reduced to the largest
+        //size that could be fully hedged at the inside market of the hedge leg(s).
+        DYNAMIC_INSIDELEAN = 2;
+    }
+
+    //how to represent the price for this spread
+    enum TYPE {
+        // Prices display as the implied price of the spread.
+        // Leg A Price (*) User-Defined Multiplier – Leg B Price (*) User-Defined Multiplier= Implied Price
+        IMPLIED = 0;
+
+        //Prices display based on the individual legs' net change from the previous day settlement.
+        //If you base spread prices on Net Change , you disable calculations in the Tick Information section.
+        //The Calculated Tick Size defaults to 25/100. You can still use the Override Tick Size to change it.
+        NETCHANGE = 1;
+
+        //Prices display as a percentage ratio (divides Leg A price by Leg B price).
+        //The Ratio setting is for two-legged spreads.
+        RATIO = 2;
+
+        //Prices display in yield. When enabled, an additional set of “Yield” parameters is displayed that can be configured
+        //for each leg
+        YIELD = 3;
+
+        //Prices display based on a custom formula for the implied spread price.
+        CUSTOM = 4;
+    }
+
+    message SpreadSlop {
+        //spread price range for this slop, need be used with price scale
+        sint64 range = 1;
+
+        //The worst spread price you will accept,need be used with price scale
+
+        //When buying, this property applies to prices above the current bid.
+        //When selling, this property applies to prices below the current offer.
+        sint64 insideSlop = 2;
+
+        //The best spread price you will accept,need be used with price scale
+
+        //When buying, this property applies to prices below the current bid.
+        //When selling, this property applies to prices above the current offer.
+        sint64 outsideSlop = 3;
+    }
+
+    message InsideQuote {
+        //0: means disable
+        //1: Quotes do not adjust toward the inside market unless the new quote price is the inside market
+        //n: quoting (n-1) ticks away from the inside market
+        uint32 insideTick = 1;
+
+        //limit in ticks a quoting order is allowed to work away from the price level that matches the spread differential
+        //0: the spread differential price level and the quoting order will always requote to the price that matches the
+        //spread differential.
+        uint32 distanceLimit = 2;
+    }
+
+    message EventRules {
+        string preQuoting = 1;
+        string preHedging = 2;
+        string postHedging = 3;
+    }
+
+    message Leg {
+        enum TYPE {
+            //send hedge and quoting orders at the same time
+            QUOTE = 0;
+
+            //send the hedge order only after receiving a full fill of the quoting order
+            HEDGE = 1;
+        }
+
+        InstrumentID instrumentID = 1;
+
+        TYPE type = 2;
+
+        //indicate whether this leg is a short leg
+        bool isShortLeg = 3;
+
+        //quantity of this leg in relation to the other spread legs
+        //The Spread Ratio field allows a value of zero for spreads that require a leg for spread calculation purposes only,
+        //and not for entering orders as a part of the spread. When a leg has a value of zero in the Spread Ratio field,
+        //no quoting orders or hedge orders will be submitted in that leg as a part of a spread, but a spread fill is
+        //generated. The current inside market price at the time of the quoting leg fill will be used for the leg fill price
+        //when creating the spread fill.
+        //Values entered in the Spread Ratio field do not affect the spread price.
+        Decimal qtyRatio = 4;
+
+        //the multipler in the spread price formula
+        Decimal priceWeight = 5;
+
+        //number of ticks spreader can adjust the price of the limit order to fill the spread order.
+        //Indicates the number of ticks Spreader can adjust the price of the limit order to fill the spread order.
+        //Payup Ticks values can be between -9999 and 9999. Enter a positive value to adjust the price into the market, or
+        //enter a negative value to adjust the price away from the market. Generally, a positive value is more aggressive and
+        //may prevent you from getting legged; whereas a negative value moves away from the market and submits an order that
+        //may not get filled, but may result in a better spread price.
+
+        //Example: You buy one ES Dec-Mar calendar spread at 6.00 and the quote leg fills at 2134.00. Payup Ticks are set to
+        //"-2" for the hedge leg and the contract ticks in ".25" increments. Instead of entering a sell order in the hedge leg
+        //for 2128.00 to achieve the spread price, Autospreader adjusts the price 2 ticks away from the market and enters an
+        //order at 2128.50. Using this same example but with Payup Ticks set to positive "2", Autospreader adjusts the spread
+        //price 2 ticks into the market and enters a hedge order at 2127.50.
+        sint32 hedgeTick = 6;
+
+        //minimum quantity required for quoting orders to lean against, need be used with lot size scale
+
+        //If you want to lean only against the inside market and not lean on multiple levels of depth you can set the
+        //qtyLeanDepth to 0 and the minQtyLean to 1.
+        uint64 minQtyLean = 7;
+
+        //Example: If the quantity on the second leg of the spread is 10 and the trader assigns an qtyLeanDepth of 2,
+        //Spreader determines the price level at which 20 contracts of cumulative market quantity exists on the second leg
+        //and uses this to determine the price at which it quotes the first leg of the spread.
+        uint32 qtyLeanDepth = 8;
+
+        QUOTING_MODE quotingMode = 9;
+
+        //number of outright leg orders placed at consecutive price levels away from the inside market in addition to the
+        //single quoted order for each leg.
+        //Note: Queue Holder is only available with two-legged spreads.
+        uint32 queueHolderDepth = 10;
+
+        //maximum number of ticks a leg price can move in a single price update before pulling the order
+        //this defines an order move threshold in the quoting leg.
+        //Setting these properties can help prevent legging risks in volatile markets.
+        //minimum setting is 1
+        uint32 maxQuotePriceMove = 11;
+
+        //maximum number of ticks a leg price can move in a single price update before pulling the order from the market
+        //this defines a price move threshold in the leaning (hedging) leg.
+        //Setting these properties can help prevent legging risks in volatile markets.
+        //minimum setting is 1
+        uint32 maxHedgePriceMove = 12;
+
+        //whether should send a hedge order when the quoted order is more than specified qty filled
+        //This setting is intended to be used for spreads with quoting orders more than Decimal the quantity of the hedge order
+        //Once the entire hedge order fills and there is a quoting order working in the market, the quoting order is now the
+        //unhedged leg of the spread and will not reprice.
+        //Example: You are quoting 11 contracts and hedging 1. With Hedge trigger is set at 6, a hedge order is sent when 6
+        //of the 11 contracts fill. When not set (0), all 11 contracts need to fill before 1 lot hedge is sent.
+        uint64 hedgeTriggerFillQty = 13;
+
+        //reduces excessive quoting away from the inside market.
+        //legs only requote when they are a set number of ticks away from the inside market
+        InsideQuote insideQuote = 14;
+
+        EventRules rules = 15;
+
+        //Lets you configure multiple levels of slop to determine when to reprice the quoted outright legs based upon
+        //movement in the market
+        repeated SpreadSlop slopLevel = 16;
+    }
+
+    uint32 ownerAcct = 1;
+
+    //this must be unique for the owner account
+    string name = 2;
+
+    uint32 version = 3;
+
+    string remark = 4;
+
+    TYPE type = 5;
+
+    string formula = 6;
+
+    //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
+    //disclosed quantities.
+    //When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire spread
+    //order quantity fills.
+    //You can use the this property tick enter the market at the same price or a set number of ticks from the previously
+    //disclosed spread order.
+    //0 will submit the new spread order at the same price as the previous spread order.
+    //1 will submit the spread order at a price 1 tick from the previous spread order away from the market.
+    //-1 will submit the spread order 1 tick from the previous spread order toward the market.
+    sint32 reloadOffset = 7;
+
+    //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
+    //disclosed quantities.
+    //When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire
+    //spread order quantity fills.
+    //This property specifies the quantity for each child disclosed order.
+    uint64 reloadQty = 8;
+
+    Decimal tickSize = 9;
+
+    repeated Leg leg = 10;
+
+    uint64 updateTimeUTC = 11;
+
+    Product.STATUS status = 12;
+}
+
+
+message TickRange {
+    //need be used with tick size scale
+    sint64 priceRange = 1;
+
+    uint32 numTicks = 2;
+}
+
+message MarketDatas {
+    repeated MarketData record = 1;
+}
+
+message MarketData {
+    //unique sequence for this update within the current trading day
+    uint32 updateNo = 1;
+
+    //instrument ID
+    InstrumentID instrumentID = 2;
+
+    PriceBar priceBar = 3;
+
+    //last trade message
+    Quote tradeQuote = 4;
+
+    //always sorted by the price from best to worst, (bid: highest -> lowest, ask: lowest -> highest)
+    //bid market depth
+    repeated Quote bidQuotes = 5;
+
+    //always sorted by the price from best to worst, (bid: highest -> lowest, ask: lowest -> highest)
+    //ask market depth
+    repeated Quote askQuotes = 6;
+}
+
+message PriceBar {
+    uint64 updateTimeUTC = 1;
+
+    //need use with tick size scale
+    sint64 open = 2;
+
+    //need use with tick size scale
+    sint64 high = 3;
+
+    //need use with tick size scale
+    sint64 low = 4;
+
+    //need use with tick size scale
+    sint64 close = 5;
+
+    //need use with tick size scale
+    sint64 settlement = 6;
+
+    //traded volume, need use with lot size scale
+    uint64 volume = 7;
+}
+
+message Quote {
+    string entryID = 1;
+
+    // Time of the quote (UTC).
+    uint64 quoteUTC = 2;
+
+    //need use with tick size scale
+    sint64 price = 3;
+
+    //traded volume, need use with lot size scale
+    uint64 volume = 4;
+
+    //In an Aggregated Book, used to show how many individual orders make up this entry
+    uint32 numberOfOrders = 5;
+}
+
+message Position {
+    InstrumentID instrumentID = 1;
+
+    uint64 updateTimeUTC = 2;
+
+    //建仓开始日期 yyyyMMdd
+    uint64 startPosDay = 3;
+
+    //完全平仓日期   yyyyMMdd
+    uint64 closePosDay = 4;
+
+    //昨持仓 负数表示空头
+    sint64 prevPosition = 5;
+
+    //昨持仓均价
+    sint64 prevPositionAvgPrice = 6;
+
+    //负数表示空头
+    sint64 position = 7;
+
+    sint64 positionAvgPrice = 8;
+
+    //多头成交均价, need be used with tick size scale
+    sint64 longAvgPrice = 9;
+
+    //多头成交量, need be used with lot size scale
+    uint64 longVolume = 10;
+
+    //空头成交均价,need be used with tick size scale
+    sint64 shortAvgPrice = 11;
+
+    //空头成交量, need be used with lot size scale
+    uint64 shortVolume = 12;
+
+    //逐笔对冲平仓盈亏, the scale is sum of tick/lot size scale
+    sint64 closeProfitByTrade = 13;
+
+    //占用的投资者保证金
+    Decimal margin = 14;
+
+    //需要的交易所保证金,
+    Decimal exchMargin = 15;
+
+    //保证金率
+    Decimal marginRateByMoney = 16;
+
+    //保证金率(按手数)
+    Decimal marginRateByVolume = 17;
+
+    //昨结算价
+    sint64 prevSettlementPrice = 18;
+
+    //结算价
+    sint64 settlementPrice = 19;
+
+    //资金差额
+    Decimal cashIn = 20;
+
+    //手续费
+    Decimal commission = 21;
+
+    //冻结的保证金
+    Decimal frozenMargin = 22;
+
+    //冻结的资金
+    Decimal frozenCash = 23;
+
+    //冻结的手续费
+    Decimal frozenCommission = 24;
+
+    //多头冻结
+    Decimal longFrozen = 25;
+
+    //空头冻结
+    Decimal shortFrozen = 26;
+
+    //多头冻结金额
+    Decimal longFrozenAmount = 27;
+
+    //空头冻结金额
+    Decimal shortFrozenAmount = 28;
+}
+
+//investor position report
+message AccountPosition {
+
+    uint32 accountID = 1;
+
+    //latest update time from the record
+    uint64 updateTimeUTC = 2;
+
+    //all user's positions. server will always publish the whole reports for any update
+    repeated Position positions = 3;
+}
+
+message NoticeMessages {
+    repeated NoticeMessage record = 1;
+}
+
+// Text message from server.
+message NoticeMessage {
+    // Type of the message.
+    enum TYPE {
+        // General information.
+        INFO = 0;
+
+        // Warning.
+        WARNING = 1;
+
+        // Critical error message.
+        ERROR = 2;
+    }
+
+    // This field is associated with MessageType enum type.
+    TYPE type = 1;
+
+    // Information about source of the message.
+    string source = 2;
+
+    // Message subject.
+    string subject = 3;
+
+    // Message text.
+    string text = 4;
+
+    // Optional time when this message is expired, it should be hidden from user after this time yyyyMMdd.
+    uint32 expirationDate = 5;
+}
+
+message Services {
+    repeated Service record = 1;
+}
+
+message Service {
+    enum SERVICE {
+        ALL = 0;
+
+        PRICE = 1;
+        ORDER = 2;
+
+        SPREADER = 3;
+    }
+
+    enum STATUS {
+        UNKNOWN = 0;
+
+        CONNECTING = 1;
+
+        //line is up and can take requests
+        READY = 2;
+
+        //network connection is broken
+        BROKEN = 3;
+
+        //session is over
+        CLOSE = 4;
+    }
+
+    BROKER broker = 1;
+    Exchange.EXCHANGE exchange = 2;
+    SERVICE svc = 3;
+
+    STATUS status = 4;
+
+    uint64 updateTimeUTC = 5;
+}
+
+message WatchLists {
+    repeated WatchList record = 1;
+}
+
+message WatchList {
+    uint32 accountID = 1;
+
+    string title = 2;
+
+    uint64 accessTimeUTC = 3;
+
+    //this is the server side UTC. when sync, we only take the server side time. when upload change to server, it should be 0
+    uint64 updateTimeUTC = 4;
+
+    //empty list means delete this watch list
+    repeated InstrumentID instrumentIDList = 5;
+}
+
+
