@@ -18,52 +18,183 @@ enum PROTOCOL {
 
 message Request {
 
-    message OrderReplace {
-        uint64 orderID = 1;
-
-        OrderAction action = 2;
-    }
-
     //request ID, should be unique enough to receive the request Result
     uint32 requestID = 1;
 
+    //this is the timestamp from client side when request is submitted
+    uint64 requestUTC = 2;
+
     oneof request {
-        Ping ping = 2;
+        Ping ping = 3;
 
         //login system for registered user
-        Logon logon = 3;
+        Logon logon = 4;
 
         //logoff message to logoff current session
-        string logoff = 4;
+        string logoff = 5;
 
         //register new account or update the account detail
-        Account account = 5;
+        Account account = 6;
 
-        Query queryRequest = 6;
+        Query queryRequest = 7;
 
         // subscribe/unsubscribe market data
-        MarketDataSubscription marketData = 7;
+        MarketDataSubscription marketData = 8;
 
         //subscrbie/unsubscribe instrument change
-        InstrumentSubscription instrument = 8;
+        InstrumentSubscription instrument = 9;
 
-        Order order = 9;
+        Order order = 10;
 
-        OrderReplace orderReplace = 10;
+        OrderReplace orderReplace = 11;
 
         //to delete spreader, just specify the status as DELISTED
-        Spreader spreader = 11;
+        Spreader spreader = 12;
 
         //upload the application layout info
-        WorkSpaces workSpaceList = 12;
+        WorkSpaces workSpaceList = 13;
 
         //upload the watch list info
-        WatchLists watchList = 13;
+        WatchLists watchList = 14;
     }
 }
 
 // Server to Client message, server can include different fields in a single message
 message Response {
+
+    // Result code.
+    enum ERROR {
+        PROCESSING = 0;
+
+        // success codes
+        SUCCESS = 1;
+
+        // failure codes (>=100)
+        FAILURE = 100;
+
+        TIMEOUT = 101;
+
+        NETWORK_ERROR = 102;
+
+        CANCELLED = 103;
+
+        CONNECTION_DOWN = 104;
+
+        CONNECTION_NOT_CONFIGURE = 105;
+
+        // Requested data is outside of allowed range.
+        OUTSIDE_ALLOWED_RANGE = 106;
+
+        UNKNOWN_REQUEST = 107;
+
+        // The user is not allowed to access this instrument data.
+        ACCESS_DENIED = 108;
+
+        TIMEOUTOFSYNC = 109;
+
+        NOT_SUPPORT = 110;
+
+        NOT_FOUND = 111;
+
+
+        ACCOUNT_NO_ONETIME_PASSWORD = 130;
+
+        ACCOUNT_NO_TRADINGACCOUNT = 131;
+
+        ACCOUNT_OTP_EXPIRED = 132;
+
+        ACCOUNT_OTP_NOT_FOUND = 133;
+
+        ACCOUNT_PASSWORD_EXPIRED = 134;
+
+        ACCOUNT_WRONG_PASSWORD = 135;
+
+        ACCOUNT_SUSPENDED = 136;
+
+        ACCOUNT_KICKEDOUT = 137;
+
+        ACCOUNT_DUPLICATE_USER = 138;
+
+        ACCOUNT_NOT_LOGIN = 139;
+
+        ACCOUNT_INVALID_EMAIL = 140;
+
+        ACCOUNT_INVALID_USERID = 141;
+
+        ACCOUNT_NOT_EXIST = 142;
+
+
+        INSTRUMENT_EXPIRED = 160;
+
+        INSTRUMENT_NOT_TRADABLE = 161;
+
+        INSTRUMENT_NO_PRICE_ACCESS = 162;
+
+
+        ORDER_INVALID_PARAMS = 180;
+
+        ORDER_INVALID_INSTRUMENTID = 181;
+
+        ORDER_INVALID_CLORDID = 182;
+
+        ORDER_INVALID_BROKER = 183;
+
+        ORDER_INVALID_SUBMITUSER = 184;
+
+        ORDER_INVALID_QTY = 185;
+
+        ORDER_INVALID_LIMIT_PRICE = 186;
+
+        ORDER_INVALID_STOP_PRICE = 187;
+
+        ORDER_INVALID_ORDER_TYPE = 188;
+
+        ORDER_INVALID_SUBMIT_TIME = 189;
+
+        ORDER_INVALID_TIMEINFORCE = 190;
+
+        ORDER_INVALID_CHAINCLORDID = 191;
+
+        ORDER_INVALID_SYMBOL = 192;
+
+        ORDER_INVALID_SIDE = 193;
+
+        /* Order related errors */
+        //tag should be less than 255
+        ORDER_TAG_TOOLONG = 194;
+
+        ORDER_NOT_REPLACEABLE = 195;
+
+        //previous action is still in progress
+        ORDER_ACTION_IN_PROGRESS = 196;
+
+
+        SPREADER_NO_QUOTING = 220;
+
+        SPREADER_NO_LEGS = 221;
+
+        SPREADER_NO_INSTRUMENT_ACCESS = 222;
+
+        SPREADER_DUPLICATE_ORDER = 223;
+
+        SPREADER_INVALID_ID = 224;
+
+        SPREADER_INVALID_LEG_INSTRUMENT = 225;
+
+        SPREADER_INVALID_LEG_RATIO = 226;
+
+        SPREADER_INVALID_LEG_PRICEWEIGHT = 227;
+
+        //for example syntax error
+        SPREADER_INVALID_LEG_RULES = 228;
+
+        //leg order has failure, for example, fail to withdraw some leg orders
+        SPREADER_LEG_FAILURE = 229;
+
+        /* Algo related errors */
+        //can't modify the algo/spreader because of active orders
+        ALGO_ACTIVE_ORDER = 250;
+    }
 
     //server side initiated message will have value 0
     uint32 requestID = 1;
@@ -71,45 +202,56 @@ message Response {
     //it is only valid for the request reply
     ERROR resultCode = 2;
 
-    //only valid for request reply
-    uint64 requestRcvTime = 3;
-
-    //only valid for request reply
-    uint64 requestCompletedTime = 4;
+    RequestMeta requestMeta = 3;
 
     //mainly used for the pagination, 0 means total records is decided by the result
-    uint32 totalRecords = 5;
+    uint32 totalRecords = 4;
 
     oneof response {
         // server reply for the Ping request
-        Ping ping = 6;
+        Ping ping = 5;
 
-        Instruments instruments = 7;
+        Instruments instruments = 6;
 
-        OrderTransactions orderTransactions = 8;
+        OrderTransactions orderTransactions = 7;
 
         // broadcast message for the price updates
-        MarketDatas marketDatas = 9;
+        MarketDatas marketDatas = 8;
 
-        Logs logs = 10;
+        Logs logs = 9;
 
-        AccountPosition position = 11;
+        AccountPosition position = 10;
 
         // reply for the logon request
-        Account account = 12;
+        Account account = 11;
 
         // broadcast message for notice
-        NoticeMessages notice = 13;
+        NoticeMessages notice = 12;
 
         // broadcadst message for the service status updates
-        Services service = 14;
+        Services service = 13;
 
-        Exchanges exchange = 15;
+        Exchanges exchange = 14;
 
-        WatchLists watchList = 16;
+        WatchLists watchList = 15;
 
-        WorkSpaces workSpaceList = 17;
+        WorkSpaces workSpaceList = 16;
+
+        //reply for the spreader request
+        Spreader.Status spreaderStatus = 17;
     }
+}
+
+message RequestMeta {
+    //only valid for request reply
+    uint64 requestRcvTime = 1;
+
+    //only valid for request reply
+    uint64 requestCompletedTime = 2;
+
+    string requestFromIP = 3;
+
+    uint32 requestFromPort = 4;
 }
 
 //actual value = value * power(-scale)
@@ -118,140 +260,6 @@ message Decimal {
 
     //always be 0 for integer value
     uint32 scale = 2;
-}
-
-// Result code.
-enum ERROR {
-    PROCESSING = 0;
-
-    // success codes
-    SUCCESS = 1;
-
-    // failure codes (>=100)
-    FAILURE = 100;
-
-    TIMEOUT = 101;
-
-    NETWORK_ERROR = 102;
-
-    CANCELLED = 103;
-
-    CONNECTION_DOWN = 104;
-
-    CONNECTION_NOT_CONFIGURE = 105;
-
-    // Requested data is outside of allowed range.
-    OUTSIDE_ALLOWED_RANGE = 106;
-
-    UNKNOWN_REQUEST = 107;
-
-    // The user is not allowed to access this instrument data.
-    ACCESS_DENIED = 108;
-
-    TIMEOUTOFSYNC = 109;
-
-    NOT_SUPPORT = 110;
-
-    NOT_FOUND = 111;
-
-
-    ACCOUNT_NO_ONETIME_PASSWORD = 130;
-
-    ACCOUNT_NO_TRADINGACCOUNT = 131;
-
-    ACCOUNT_OTP_EXPIRED = 132;
-
-    ACCOUNT_OTP_NOT_FOUND = 133;
-
-    ACCOUNT_PASSWORD_EXPIRED = 134;
-
-    ACCOUNT_WRONG_PASSWORD = 135;
-
-    ACCOUNT_SUSPENDED = 136;
-
-    ACCOUNT_KICKEDOUT = 137;
-
-    ACCOUNT_DUPLICATE_USER = 138;
-
-    ACCOUNT_NOT_LOGIN = 139;
-
-    ACCOUNT_INVALID_EMAIL = 140;
-
-    ACCOUNT_INVALID_USERID = 141;
-
-    ACCOUNT_NOT_EXIST = 142;
-
-
-    INSTRUMENT_EXPIRED = 160;
-
-    INSTRUMENT_NOT_TRADABLE = 161;
-
-    INSTRUMENT_NO_PRICE_ACCESS = 162;
-
-
-    ORDER_INVALID_PARAMS = 180;
-
-    ORDER_INVALID_INSTRUMENTID = 181;
-
-    ORDER_INVALID_CLORDID = 182;
-
-    ORDER_INVALID_BROKER = 183;
-
-    ORDER_INVALID_SUBMITUSER = 184;
-
-    ORDER_INVALID_QTY = 185;
-
-    ORDER_INVALID_LIMIT_PRICE = 186;
-
-    ORDER_INVALID_STOP_PRICE = 187;
-
-    ORDER_INVALID_ORDER_TYPE = 188;
-
-    ORDER_INVALID_SUBMIT_TIME = 189;
-
-    ORDER_INVALID_TIMEINFORCE = 190;
-
-    ORDER_INVALID_CHAINCLORDID = 191;
-
-    ORDER_INVALID_SYMBOL = 192;
-
-    ORDER_INVALID_SIDE = 193;
-
-    /* Order related errors */
-    //tag should be less than 255
-    ORDER_TAG_TOOLONG = 194;
-
-    ORDER_NOT_REPLACEABLE = 195;
-
-    //previous action is still in progress
-    ORDER_ACTION_IN_PROGRESS = 196;
-
-
-    SPREADER_NO_QUOTING = 220;
-
-    SPREADER_NO_LEGS = 221;
-
-    SPREADER_NO_INSTRUMENT_ACCESS = 222;
-
-    SPREADER_DUPLICATE_ORDER = 223;
-
-    SPREADER_INVALID_ID = 224;
-
-    SPREADER_INVALID_LEG_INSTRUMENT = 225;
-
-    SPREADER_INVALID_LEG_RATIO = 226;
-
-    SPREADER_INVALID_LEG_PRICEWEIGHT = 227;
-
-    //for example syntax error
-    SPREADER_INVALID_LEG_RULES = 228;
-
-    //leg order has failure, for example, fail to withdraw some leg orders
-    SPREADER_LEG_FAILURE = 229;
-
-    /* Algo related errors */
-    //can't modify the algo/spreader because of active orders
-    ALGO_ACTIVE_ORDER = 250;
 }
 
 enum BROKER {
@@ -408,7 +416,7 @@ message LoginRecord {
 
     string loginDevice = 3;
 
-    ERROR loginResult = 4;
+    Response.ERROR loginResult = 4;
 
     uint64 logoutUTC = 5;
 
@@ -714,23 +722,28 @@ message Order {
     //ISO 3 charactor currency
     string currency = 19;
 
-    // True if order is used for closing/ reducing a position, opening/ increasing otherwise
-    // default is false, means open position
-    bool close = 20;
+    //server will publish the value after the order submitted
+    uint64 orderID = 20;
 
     //server will publish the value after the order submitted
-    uint64 orderID = 21;
+    uint64 chainID = 21;
 
-    //server will publish the value after the order submitted
-    uint64 chainID = 22;
+    //server will publish the value after the order is submitted
+    uint32 serverID = 22;
+}
+
+message OrderReplace {
+    uint64 orderID = 1;
+
+    OrderAction action = 2;
 }
 
 // Status of a specific transaction.
 // All attributes are at the transaction moment.
 message OrderReport {
-    //keep the 0 for those unknown status
     enum STATUS {
-        UNKNOWN = 0;
+        //not submitted to the market or execution side yet
+        INPROCESSING = 0;
 
         PENDING_NEW = 1;
 
@@ -803,49 +816,55 @@ message OrderReport {
     //1 based running number
     uint32 reportNo = 1;
 
-    //unique report ID
+    //unique report ID from the execution side
     string execID = 2;
 
     uint64 orderID = 3;
 
-    //0 means not reply to any action
-    uint32 actionNo = 4;
+    //if it is synthetic/algo order triggered orders, the value is the root orderID
+    uint64 chainID = 4;
+
+    //0 means it is for the order itself, not the reply of the action
+    uint32 actionNo = 5;
 
     //this transaction type
-    STATUS execType = 5;
+    STATUS execType = 6;
 
-    //order status
-    STATUS ordStatus = 6;
+    //latest order status
+    STATUS ordStatus = 7;
 
     //only valid when the status is rejected
-    REJECTCODE rejectCode = 7;
+    REJECTCODE rejectCode = 8;
 
     // Time of execution/order creation, if not provided, 0.
-    uint64 transactTimeUTC = 8;
+    uint64 transactTimeUTC = 9;
 
     // Time of report received time
-    uint64 reportTimeUTC = 9;
+    uint64 reportTimeUTC = 10;
 
     //need be sued with product lot size scale
-    uint64 fillQty = 10;
+    uint64 fillQty = 11;
 
     //need be sued with product tick size scale
-    sint64 fillPrice = 11;
+    sint64 fillPrice = 12;
 
-    uint64 totalFillQty = 12;
+    uint64 totalFillQty = 13;
 
     // Average fill price.
-    sint64 avgFillPrice = 13;
+    sint64 avgFillPrice = 14;
 
     // Remaining (unfilled) order quantity. It is not always equal
     // to order size minus filled size (for example, busted orders violate that).
-    uint64 remainingQty = 14;
+    uint64 remainingQty = 15;
 
-    // Additional transaction details.
-    string remark = 15;
+    // Additional transaction details from the execution side
+    string remark = 16;
 
     // If present, identifies the counterpart of the order fill, as reported by the execution system.
-    string fillCounterParty = 16;
+    string fillCounterParty = 17;
+
+    //server ID which create this report
+    uint32 serverID = 18;
 }
 
 message OrderTransactions {
@@ -854,6 +873,7 @@ message OrderTransactions {
 
 message OrderTransaction {
 
+    //if it is for the status update, this may be empty
     Order order = 1;
 
     //this is the total number for current + past
@@ -1053,6 +1073,12 @@ message Instrument {
 }
 
 message Spreader {
+    message Status {
+        uint32 version = 1;
+        uint64 updateTimeUTC = 2;
+        Product.STATUS status = 3;
+    }
+
     enum QUOTING_MODE {
         //If the hedge market quantity drops below the minimum hedge quantity, the associated quoting order will be pulled
         //from the market and will not be resubmitted even if sufficient hedge market volume reappears at some later time.
@@ -1223,7 +1249,7 @@ message Spreader {
     //this must be unique for the owner account
     string name = 2;
 
-    uint32 version = 3;
+    Status status = 3;
 
     string remark = 4;
 
@@ -1252,12 +1278,7 @@ message Spreader {
     Decimal tickSize = 9;
 
     repeated Leg leg = 10;
-
-    uint64 updateTimeUTC = 11;
-
-    Product.STATUS status = 12;
 }
-
 
 message TickRange {
     //need be used with tick size scale
@@ -1274,21 +1295,24 @@ message MarketData {
     //unique sequence for this update within the current trading day
     uint32 updateNo = 1;
 
-    //instrument ID
-    InstrumentID instrumentID = 2;
+    //it will be the latest update time from the price bar, trade quote, bid/ask quotes
+    uint64 updateTimeUTC = 2;
 
-    PriceBar priceBar = 3;
+    //instrument ID
+    InstrumentID instrumentID = 3;
+
+    PriceBar priceBar = 4;
 
     //last trade message
-    Quote tradeQuote = 4;
+    Quote tradeQuote = 5;
 
     //always sorted by the price from best to worst, (bid: highest -> lowest, ask: lowest -> highest)
     //bid market depth
-    repeated Quote bidQuotes = 5;
+    repeated Quote bidQuotes = 6;
 
     //always sorted by the price from best to worst, (bid: highest -> lowest, ask: lowest -> highest)
     //ask market depth
-    repeated Quote askQuotes = 6;
+    repeated Quote askQuotes = 7;
 }
 
 message PriceBar {
