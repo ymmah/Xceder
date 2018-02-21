@@ -1,7 +1,8 @@
 syntax = "proto3";
 
 /**
-* Version: 20171205
+* Version: 20171221
+* All double value should be accurate for 6 decimal position
 **/
 
 package com.xceder.protocol;
@@ -13,7 +14,7 @@ Protocol version
 */
 enum PROTOCOL {
     BUILD = 0;
-    VERSION = 20171205;
+    VERSION = 20171221;
 }
 
 message Request {
@@ -39,10 +40,10 @@ message Request {
         Query queryRequest = 7;
 
         // subscribe/unsubscribe market data
-        MarketDataSubscription marketData = 8;
+        InstrumentTopic marketData = 8;
 
         //subscrbie/unsubscribe instrument change
-        InstrumentSubscription instrument = 9;
+        InstrumentTopic instrument = 9;
 
         Order order = 10;
 
@@ -135,7 +136,7 @@ message Response {
 
         ORDER_INVALID_INSTRUMENTID = 181;
 
-        ORDER_INVALID_CLORDID = 182;
+        ORDER_INVALID_ID = 182;
 
         ORDER_INVALID_BROKER = 183;
 
@@ -252,14 +253,6 @@ message RequestMeta {
     string requestFromIP = 3;
 
     uint32 requestFromPort = 4;
-}
-
-//actual value = value * power(-scale)
-message Decimal {
-    sint64 value = 1;
-
-    //always be 0 for integer value
-    uint32 scale = 2;
 }
 
 enum BROKER {
@@ -447,7 +440,7 @@ message Query {
 
         QueryOrder order = 7;
 
-        QueryOrderRange orderRange = 8;
+        QueryPastOrder pastOrder = 8;
 
         QueryWatchList watchList = 9;
 
@@ -477,8 +470,6 @@ message QueryLog {
 message QueryProduct {
 
     ProductID productID = 1;
-
-    Product.TYPE type = 2;
 
     //key words separated with comma ','
     string keywords = 3;
@@ -520,7 +511,7 @@ message QueryOrder {
     uint32 reportOffset = 3;
 }
 
-message QueryOrderRange {
+message QueryPastOrder {
     //0 means any
     uint32 accountID = 1;
 
@@ -566,20 +557,7 @@ enum ACTION {
     UNSUBSCRIBE = 1;
 }
 
-message InstrumentSubscription {
-
-    BROKER broker = 1;
-
-    Exchange.EXCHANGE exchange = 2;
-
-    string symbol = 3;
-
-    Product.TYPE type = 4;
-
-    ACTION action = 5;
-}
-
-message MarketDataSubscription {
+message InstrumentTopic {
 
     InstrumentID instrumentID = 1;
 
@@ -696,22 +674,21 @@ message Order {
 
     Order.TIMEINFORCE timeInForce = 11;
 
-    // Total positive size of the order, need be used with product lot scale
-    uint64 orderQty = 12;
+    double orderQty = 12;
 
-    //Limit price of the order (required for Limit and Stop-limit orders), need be used with product tick size scale
-    sint64 limitPrice = 13;
+    //Limit price of the order (required for Limit and Stop-limit orders)
+    double limitPrice = 13;
 
     // Stop price of the order (required for Stop and Stop-limit orders).
-    sint64 stopPrice = 14;
+    double stopPrice = 14;
 
     // Visible size of the order for Icebergs, if it is 0 means all visible.
-    uint64 visibleQty = 15;
+    double visibleQty = 15;
 
     // Minimum visible positive size of the order
     // used for iceberg orders with 'random visible size',
     // must be < visible_qty.
-    uint64 minVisibleQty = 16;
+    double minVisibleQty = 16;
 
     //yyyyMMdd
     uint32 validDate = 17;
@@ -758,7 +735,7 @@ message OrderReport {
         //ExecType will always use FILL, this is for order status only
         PARTIAL_FILL = 6;
 
-        //this is mainly for the FIX ExecType RESTATED, order status should has no this value
+        //this is mainly for the FIX ExecType RESTATED, order status should not be this value
         RESTATED = 7;
 
         //CQG suspended has other meaning, market is closed and temporarily queued in their server
@@ -772,51 +749,14 @@ message OrderReport {
         REJECTED = 11;
 
         EXPIRED = 12;
+
+        NOT_EXIST = 13;
     }
 
-    enum REJECTCODE {
-        NA = 0;
-
-        //FIX OrdRejReason
-        BROKER_OPTION = 1;
-
-        UNKNOWN_ORDER_SYMBOL = 2;
-
-        EXCHANGE_CLOSED = 3;
-
-        EXCEEDS_LIMIT = 4;
-
-        TOO_LATE = 5;
-
-        UNKNOWN_ORDER = 6; //Unknown order
-
-        DUPLICATE = 7; //(e.g. dupe ClOrdID <11> ())
-
-        DUPLICATE_COMMUNICATED = 8; //Duplicate of a verbally communicated order
-
-        STALE = 9;
-
-        TRADE_ALONG_REQUIRED = 10;
-
-        INVALID_INVESTOR = 11;
-
-        UNSUPPORTED = 12; //Unsupported order characteristic
-
-        SURVEILLENCE = 13; //Surveillence Option
-
-        QUANTITY = 14; //Incorrect quantity
-
-        ALLOCATED_QUANTITY = 15; //Incorrect allocated quantity
-
-        UNKNOWN_ORDER_ACCOUNT = 16;
-
-        INVALID_PRICE_INCREMENT = 19;
-    }
-
-    //1 based running number
+    //1 based running number to indicate the report sequence
     uint32 reportNo = 1;
 
-    //unique report ID from the execution side
+    //unique report ID 
     string execID = 2;
 
     uint64 orderID = 3;
@@ -833,38 +773,33 @@ message OrderReport {
     //latest order status
     STATUS ordStatus = 7;
 
-    //only valid when the status is rejected
-    REJECTCODE rejectCode = 8;
-
     // Time of execution/order creation, if not provided, 0.
-    uint64 transactTimeUTC = 9;
+    uint64 transactTimeUTC = 8;
 
     // Time of report received time
-    uint64 reportTimeUTC = 10;
+    uint64 reportTimeUTC = 9;
 
-    //need be sued with product lot size scale
-    uint64 fillQty = 11;
+    double fillQty = 10;
 
-    //need be sued with product tick size scale
-    sint64 fillPrice = 12;
+    double fillPrice = 11;
 
-    uint64 totalFillQty = 13;
+    double totalFillQty = 12;
 
     // Average fill price.
-    sint64 avgFillPrice = 14;
+    double avgFillPrice = 13;
 
     // Remaining (unfilled) order quantity. It is not always equal
     // to order size minus filled size (for example, busted orders violate that).
-    uint64 remainingQty = 15;
+    double remainingQty = 14;
 
     // Additional transaction details from the execution side
-    string remark = 16;
+    string remark = 15;
 
     // If present, identifies the counterpart of the order fill, as reported by the execution system.
-    string fillCounterParty = 17;
+    string fillCounterParty = 16;
 
     //server ID which create this report
-    uint32 serverID = 18;
+    uint32 serverID = 17;
 }
 
 message OrderTransactions {
@@ -873,7 +808,7 @@ message OrderTransactions {
 
 message OrderTransaction {
 
-    //if it is for the status update, this may be empty
+    //if it is for the order status update, this may be empty
     Order order = 1;
 
     //this is the total number for current + past
@@ -884,6 +819,7 @@ message OrderTransaction {
     //current effective action No
     uint32 effectiveAction = 4;
 
+    //if it is for the order status update, this may be empty
     //last action is the latest action, sorted by the actionNo
     repeated OrderAction actionRecords = 5;
 
@@ -901,12 +837,12 @@ message OrderAction {
     uint32 submitByAcct = 3;
 
     //0 means cancel
-    uint64 orderQty = 4;
+    double orderQty = 4;
 
-    //below is for replacement only
-    sint64 limitPrice = 5;
+    //below is for replacement (orderQty != 0) only
+    double limitPrice = 5;
 
-    sint64 stopPrice = 6;
+    double stopPrice = 6;
 }
 
 message TradingHour {
@@ -972,6 +908,8 @@ message ProductID {
 
     //Spreader will be the formatted as ownerAcct:name string, others will be exchange symbol
     string symbol = 2;
+
+    Product.TYPE type = 3;
 }
 
 message Product {
@@ -996,49 +934,47 @@ message Product {
 
     ProductID productID = 1;
 
-    Product.TYPE type = 2;
-
-    string description = 3;
+    string description = 2;
 
     //3 ISO char
-    string currency = 4;
+    string currency = 3;
 
-    Decimal maxOrderVolume = 5;
+    double maxOrderVolume = 4;
 
-    Decimal minOrderVolume = 6;
+    double minOrderVolume = 5;
 
-    Decimal lotSize = 7;
+    double lotSize = 6;
 
     //Size of one base tick for this security
-    Decimal tickSize = 8;
+    double tickSize = 7;
 
     //tick table for price tiers
-    repeated TickRange tickRange = 9;
+    repeated TickRange tickRange = 8;
 
-    uint64 updateTimeUTC = 10;
+    uint64 updateTimeUTC = 9;
 
     //can be traded through brokers
-    repeated BROKER broker = 11;
+    repeated BROKER broker = 10;
 
     //for futures contracts, empty records means all year
     //>12 means next year month, for example, 13 means next year Jan
-    repeated uint32 contractMonth = 12 [packed = true];
+    repeated uint32 contractMonth = 11 [packed = true];
 
     //product trading hour. if it is empty, follow exchange trading hour
-    repeated TradingHour tradingHourList = 13;
+    repeated TradingHour tradingHourList = 12;
 
-    TradingHour lastDayTradingHour = 14;
+    TradingHour lastDayTradingHour = 13;
 
-    Decimal dailyPriceLimit = 15;
+    double dailyPriceLimit = 14;
 
-    Decimal positionLimit = 16;
+    double positionLimit = 15;
 
     //empty means the last day of the month
     //3WEDNESDAY-2: 2 Business days before 3rd Wednesday
-    string lastTradingDay = 17;
+    string lastTradingDay = 16;
 
     //empty means business day immediately folloing the last trading day
-    string listDay = 18;
+    string listDay = 17;
 }
 
 message Instruments {
@@ -1176,10 +1112,10 @@ message Spreader {
         //generated. The current inside market price at the time of the quoting leg fill will be used for the leg fill price
         //when creating the spread fill.
         //Values entered in the Spread Ratio field do not affect the spread price.
-        Decimal qtyRatio = 4;
+        double qtyRatio = 4;
 
         //the multipler in the spread price formula
-        Decimal priceWeight = 5;
+        double priceWeight = 5;
 
         //number of ticks spreader can adjust the price of the limit order to fill the spread order.
         //Indicates the number of ticks Spreader can adjust the price of the limit order to fill the spread order.
@@ -1199,7 +1135,7 @@ message Spreader {
 
         //If you want to lean only against the inside market and not lean on multiple levels of depth you can set the
         //qtyLeanDepth to 0 and the minQtyLean to 1.
-        uint64 minQtyLean = 7;
+        double minQtyLean = 7;
 
         //Example: If the quantity on the second leg of the spread is 10 and the trader assigns an qtyLeanDepth of 2,
         //Spreader determines the price level at which 20 contracts of cumulative market quantity exists on the second leg
@@ -1231,7 +1167,7 @@ message Spreader {
         //unhedged leg of the spread and will not reprice.
         //Example: You are quoting 11 contracts and hedging 1. With Hedge trigger is set at 6, a hedge order is sent when 6
         //of the 11 contracts fill. When not set (0), all 11 contracts need to fill before 1 lot hedge is sent.
-        uint64 hedgeTriggerFillQty = 13;
+        double hedgeTriggerFillQty = 13;
 
         //reduces excessive quoting away from the inside market.
         //legs only requote when they are a set number of ticks away from the inside market
@@ -1275,14 +1211,13 @@ message Spreader {
     //This property specifies the quantity for each child disclosed order.
     uint64 reloadQty = 8;
 
-    Decimal tickSize = 9;
+    double tickSize = 9;
 
     repeated Leg leg = 10;
 }
 
 message TickRange {
-    //need be used with tick size scale
-    sint64 priceRange = 1;
+    double priceRange = 1;
 
     uint32 numTicks = 2;
 }
@@ -1319,22 +1254,22 @@ message PriceBar {
     uint64 updateTimeUTC = 1;
 
     //need use with tick size scale
-    sint64 open = 2;
+    double open = 2;
 
     //need use with tick size scale
-    sint64 high = 3;
+    double high = 3;
 
     //need use with tick size scale
-    sint64 low = 4;
+    double low = 4;
 
     //need use with tick size scale
-    sint64 close = 5;
+    double close = 5;
 
     //need use with tick size scale
-    sint64 settlement = 6;
+    double settlement = 6;
 
-    //traded volume, need use with lot size scale
-    uint64 volume = 7;
+    //traded volume
+    double volume = 7;
 }
 
 message Quote {
@@ -1344,10 +1279,10 @@ message Quote {
     uint64 quoteUTC = 2;
 
     //need use with tick size scale
-    sint64 price = 3;
+    double price = 3;
 
     //traded volume, need use with lot size scale
-    uint64 volume = 4;
+    double volume = 4;
 
     //In an Aggregated Book, used to show how many individual orders make up this entry
     uint32 numberOfOrders = 5;
@@ -1365,75 +1300,75 @@ message Position {
     uint64 closePosDay = 4;
 
     //昨持仓 负数表示空头
-    sint64 prevPosition = 5;
+    double prevPosition = 5;
 
     //昨持仓均价
-    sint64 prevPositionAvgPrice = 6;
+    double prevPositionAvgPrice = 6;
 
     //负数表示空头
-    sint64 position = 7;
+    double position = 7;
 
-    sint64 positionAvgPrice = 8;
+    double positionAvgPrice = 8;
 
     //多头成交均价, need be used with tick size scale
-    sint64 longAvgPrice = 9;
+    double longAvgPrice = 9;
 
     //多头成交量, need be used with lot size scale
-    uint64 longVolume = 10;
+    double longVolume = 10;
 
     //空头成交均价,need be used with tick size scale
-    sint64 shortAvgPrice = 11;
+    double shortAvgPrice = 11;
 
     //空头成交量, need be used with lot size scale
-    uint64 shortVolume = 12;
+    double shortVolume = 12;
 
     //逐笔对冲平仓盈亏, the scale is sum of tick/lot size scale
-    sint64 closeProfitByTrade = 13;
+    double closeProfitByTrade = 13;
 
     //占用的投资者保证金
-    Decimal margin = 14;
+    double margin = 14;
 
     //需要的交易所保证金,
-    Decimal exchMargin = 15;
+    double exchMargin = 15;
 
     //保证金率
-    Decimal marginRateByMoney = 16;
+    double marginRateByMoney = 16;
 
     //保证金率(按手数)
-    Decimal marginRateByVolume = 17;
+    double marginRateByVolume = 17;
 
     //昨结算价
-    sint64 prevSettlementPrice = 18;
+    double prevSettlementPrice = 18;
 
     //结算价
-    sint64 settlementPrice = 19;
+    double settlementPrice = 19;
 
     //资金差额
-    Decimal cashIn = 20;
+    double cashIn = 20;
 
     //手续费
-    Decimal commission = 21;
+    double commission = 21;
 
     //冻结的保证金
-    Decimal frozenMargin = 22;
+    double frozenMargin = 22;
 
     //冻结的资金
-    Decimal frozenCash = 23;
+    double frozenCash = 23;
 
     //冻结的手续费
-    Decimal frozenCommission = 24;
+    double frozenCommission = 24;
 
     //多头冻结
-    Decimal longFrozen = 25;
+    double longFrozen = 25;
 
     //空头冻结
-    Decimal shortFrozen = 26;
+    double shortFrozen = 26;
 
     //多头冻结金额
-    Decimal longFrozenAmount = 27;
+    double longFrozenAmount = 27;
 
     //空头冻结金额
-    Decimal shortFrozenAmount = 28;
+    double shortFrozenAmount = 28;
 }
 
 //investor position report
