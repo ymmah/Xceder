@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 /**
-* Version: 20171221
+* Version: 20180222
 * All double value should be accurate for 6 decimal position
 **/
 
@@ -14,7 +14,7 @@ Protocol version
 */
 enum PROTOCOL {
     BUILD = 0;
-    VERSION = 20171221;
+    VERSION = 20180222;
 }
 
 message Request {
@@ -57,151 +57,19 @@ message Request {
 
         //upload the watch list info
         WatchLists watchList = 14;
+
+        PasswordChange changePassword = 15;
     }
 }
 
 // Server to Client message, server can include different fields in a single message
 message Response {
 
-    // Result code.
-    enum ERROR {
-        PROCESSING = 0;
-
-        // success codes
-        SUCCESS = 1;
-
-        // failure codes (>=100)
-        FAILURE = 100;
-
-        TIMEOUT = 101;
-
-        NETWORK_ERROR = 102;
-
-        CANCELLED = 103;
-
-        CONNECTION_DOWN = 104;
-
-        CONNECTION_NOT_CONFIGURE = 105;
-
-        // Requested data is outside of allowed range.
-        OUTSIDE_ALLOWED_RANGE = 106;
-
-        UNKNOWN_REQUEST = 107;
-
-        // The user is not allowed to access this instrument data.
-        ACCESS_DENIED = 108;
-
-        TIMEOUTOFSYNC = 109;
-
-        NOT_SUPPORT = 110;
-
-        NOT_FOUND = 111;
-
-
-        ACCOUNT_NO_ONETIME_PASSWORD = 130;
-
-        ACCOUNT_NO_TRADINGACCOUNT = 131;
-
-        ACCOUNT_OTP_EXPIRED = 132;
-
-        ACCOUNT_OTP_NOT_FOUND = 133;
-
-        ACCOUNT_PASSWORD_EXPIRED = 134;
-
-        ACCOUNT_WRONG_PASSWORD = 135;
-
-        ACCOUNT_SUSPENDED = 136;
-
-        ACCOUNT_KICKEDOUT = 137;
-
-        ACCOUNT_DUPLICATE_USER = 138;
-
-        ACCOUNT_NOT_LOGIN = 139;
-
-        ACCOUNT_INVALID_EMAIL = 140;
-
-        ACCOUNT_INVALID_USERID = 141;
-
-        ACCOUNT_NOT_EXIST = 142;
-
-
-        INSTRUMENT_EXPIRED = 160;
-
-        INSTRUMENT_NOT_TRADABLE = 161;
-
-        INSTRUMENT_NO_PRICE_ACCESS = 162;
-
-
-        ORDER_INVALID_PARAMS = 180;
-
-        ORDER_INVALID_INSTRUMENTID = 181;
-
-        ORDER_INVALID_ID = 182;
-
-        ORDER_INVALID_BROKER = 183;
-
-        ORDER_INVALID_SUBMITUSER = 184;
-
-        ORDER_INVALID_QTY = 185;
-
-        ORDER_INVALID_LIMIT_PRICE = 186;
-
-        ORDER_INVALID_STOP_PRICE = 187;
-
-        ORDER_INVALID_ORDER_TYPE = 188;
-
-        ORDER_INVALID_SUBMIT_TIME = 189;
-
-        ORDER_INVALID_TIMEINFORCE = 190;
-
-        ORDER_INVALID_CHAINCLORDID = 191;
-
-        ORDER_INVALID_SYMBOL = 192;
-
-        ORDER_INVALID_SIDE = 193;
-
-        /* Order related errors */
-        //tag should be less than 255
-        ORDER_TAG_TOOLONG = 194;
-
-        ORDER_NOT_REPLACEABLE = 195;
-
-        //previous action is still in progress
-        ORDER_ACTION_IN_PROGRESS = 196;
-
-
-        SPREADER_NO_QUOTING = 220;
-
-        SPREADER_NO_LEGS = 221;
-
-        SPREADER_NO_INSTRUMENT_ACCESS = 222;
-
-        SPREADER_DUPLICATE_ORDER = 223;
-
-        SPREADER_INVALID_ID = 224;
-
-        SPREADER_INVALID_LEG_INSTRUMENT = 225;
-
-        SPREADER_INVALID_LEG_RATIO = 226;
-
-        SPREADER_INVALID_LEG_PRICEWEIGHT = 227;
-
-        //for example syntax error
-        SPREADER_INVALID_LEG_RULES = 228;
-
-        //leg order has failure, for example, fail to withdraw some leg orders
-        SPREADER_LEG_FAILURE = 229;
-
-        /* Algo related errors */
-        //can't modify the algo/spreader because of active orders
-        ALGO_ACTIVE_ORDER = 250;
-    }
-
     //server side initiated message will have value 0
     uint32 requestID = 1;
 
     //it is only valid for the request reply
-    ERROR resultCode = 2;
+    ERROR_CODE resultCode = 2;
 
     RequestMeta requestMeta = 3;
 
@@ -230,7 +98,7 @@ message Response {
         NoticeMessages notice = 12;
 
         // broadcadst message for the service status updates
-        Services service = 13;
+        ServiceStatuses serviceStatus = 13;
 
         Exchanges exchange = 14;
 
@@ -243,6 +111,140 @@ message Response {
     }
 }
 
+// Result code.
+enum ERROR_CODE {
+    PROCESSING = 0;
+
+    // success codes
+    SUCCESS = 1;
+
+    // failure codes (>=100)
+    FAILURE = 100;
+
+    TIMEOUT = 101;
+
+    NETWORK_ERROR = 102;
+
+    CANCELLED = 103;
+
+    CONNECTION_DOWN = 104;
+
+    CONNECTION_NOT_CONFIGURE = 105;
+
+    // Requested data is outside of allowed range.
+    OUTSIDE_ALLOWED_RANGE = 106;
+
+    UNKNOWN_REQUEST = 107;
+
+    // The user is not allowed to access this instrument data.
+    ACCESS_DENIED = 108;
+
+    TIMEOUTOFSYNC = 109;
+
+    NOT_SUPPORT = 110;
+
+    NOT_FOUND = 111;
+
+
+    ACCOUNT_NO_ONETIME_PASSWORD = 130;
+
+    ACCOUNT_NO_TRADINGACCOUNT = 131;
+
+    ACCOUNT_OTP_EXPIRED = 132;
+
+    ACCOUNT_OTP_NOT_FOUND = 133;
+
+    ACCOUNT_PASSWORD_EXPIRED = 134;
+
+    ACCOUNT_WRONG_PASSWORD = 135;
+
+    ACCOUNT_SUSPENDED = 136;
+
+    ACCOUNT_KICKEDOUT = 137;
+
+    ACCOUNT_DUPLICATE_USER = 138;
+
+    ACCOUNT_NOT_LOGIN = 139;
+
+    ACCOUNT_INVALID_EMAIL = 140;
+
+    ACCOUNT_INVALID_USERID = 141;
+
+    ACCOUNT_NOT_EXIST = 142;
+
+
+    INSTRUMENT_EXPIRED = 160;
+
+    INSTRUMENT_NOT_TRADABLE = 161;
+
+    INSTRUMENT_NO_PRICE_ACCESS = 162;
+
+
+    ORDER_INVALID_PARAMS = 180;
+
+    ORDER_INVALID_INSTRUMENTID = 181;
+
+    ORDER_INVALID_ID = 182;
+
+    ORDER_INVALID_BROKER = 183;
+
+    ORDER_INVALID_SUBMITUSER = 184;
+
+    ORDER_INVALID_QTY = 185;
+
+    ORDER_INVALID_LIMIT_PRICE = 186;
+
+    ORDER_INVALID_STOP_PRICE = 187;
+
+    ORDER_INVALID_ORDER_TYPE = 188;
+
+    ORDER_INVALID_SUBMIT_TIME = 189;
+
+    ORDER_INVALID_TIMEINFORCE = 190;
+
+    ORDER_INVALID_CHAINCLORDID = 191;
+
+    ORDER_INVALID_SYMBOL = 192;
+
+    ORDER_INVALID_SIDE = 193;
+
+    /* Order related errors */
+    //tag should be less than 255
+    ORDER_TAG_TOOLONG = 194;
+
+    ORDER_NOT_REPLACEABLE = 195;
+
+    //previous action is still in progress
+    ORDER_ACTION_IN_PROGRESS = 196;
+
+
+    SPREADER_NO_QUOTING = 220;
+
+    SPREADER_NO_LEGS = 221;
+
+    SPREADER_NO_INSTRUMENT_ACCESS = 222;
+
+    SPREADER_DUPLICATE_ORDER = 223;
+
+    SPREADER_INVALID_ID = 224;
+
+    SPREADER_INVALID_LEG_INSTRUMENT = 225;
+
+    SPREADER_INVALID_LEG_RATIO = 226;
+
+    SPREADER_INVALID_LEG_PRICEWEIGHT = 227;
+
+    //for example syntax error
+    SPREADER_INVALID_LEG_RULES = 228;
+
+    //leg order has failure, for example, fail to withdraw some leg orders
+    SPREADER_LEG_FAILURE = 229;
+
+    /* Algo related errors */
+    //can't modify the algo/spreader because of active orders
+    ALGO_ACTIVE_ORDER = 250;
+}
+
 message RequestMeta {
     //only valid for request reply
     uint64 requestRcvTime = 1;
@@ -253,6 +255,18 @@ message RequestMeta {
     string requestFromIP = 3;
 
     uint32 requestFromPort = 4;
+}
+
+
+message PasswordChange {
+
+    // Currently used password.
+    string currentPassword = 1;
+
+    // New password that user wants to use. put blank means request the reset token
+    string newPassword = 2;
+
+    string email = 3;
 }
 
 enum BROKER {
@@ -1417,19 +1431,12 @@ message NoticeMessage {
     uint32 expirationDate = 5;
 }
 
-message Services {
-    repeated Service record = 1;
+message ServiceStatuses
+{
+    repeated ServiceStatus status = 1;
 }
 
-message Service {
-    enum SERVICE {
-        ALL = 0;
-
-        PRICE = 1;
-        ORDER = 2;
-
-        SPREADER = 3;
-    }
+message ServiceStatus {
 
     enum STATUS {
         UNKNOWN = 0;
@@ -1446,13 +1453,26 @@ message Service {
         CLOSE = 4;
     }
 
+    Service service = 1;
+
+    STATUS status = 2;
+
+    uint64 updateTimeUTC = 3;
+}
+
+message Service {
+    enum SERVICE {
+        ALL = 0;
+
+        PRICE = 1;
+        ORDER = 2;
+
+        SPREADER = 3;
+    }
+
     BROKER broker = 1;
     Exchange.EXCHANGE exchange = 2;
     SERVICE svc = 3;
-
-    STATUS status = 4;
-
-    uint64 updateTimeUTC = 5;
 }
 
 message WatchLists {
