@@ -909,9 +909,10 @@
         </member>
         <member name="P:Com.Xceder.Messages.Logon.PushingDelay">
              <summary>
-            specify the minimum pushing message gap (in seconds) from the server, such as price, order status updates. this excludes those reponse of
-            requests. if it is 0, means no delay on the pushing message.
-            this is to avoid sending too many messages. server will merge the messages properly
+                 specify the minimum pushing message gap (in seconds) from the server, such as price, order status updates.
+                 this excludes those reponse of
+                 requests. if it is 0, means no delay on the pushing message.
+                 this is to avoid sending too many com.xceder.connector.CTP.messages. server will merge the messages properly
              </summary>
         </member>
         <member name="T:Com.Xceder.Messages.LogonResult">
