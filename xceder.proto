@@ -145,6 +145,8 @@ enum ERROR_CODE {
 
     NOT_FOUND = 111;
 
+    COUNTERPARTY_REJECTED = 112;
+
 
     ACCOUNT_NO_ONETIME_PASSWORD = 130;
 
@@ -178,6 +180,8 @@ enum ERROR_CODE {
     INSTRUMENT_NOT_TRADABLE = 161;
 
     INSTRUMENT_NO_PRICE_ACCESS = 162;
+
+    INSTRUMENT_UNKNOWN = 163;
 
 
     ORDER_INVALID_PARAMS = 180;
@@ -330,7 +334,7 @@ message WorkSpaces {
 }
 
 message WorkSpace {
-    uint32 acccountID = 1;
+    string userID = 1;
 
     string layoutID = 2;
 
@@ -361,24 +365,21 @@ message Account {
         ADMIN = 1;
     }
 
-    //it is server side created account ID, when register new user, it should be just 0
-    uint32 accountID = 1;
+    //it will be used as login user name
+    string userID = 1;
 
-    //client side specified user ID. it will be used as login user name
-    string userID = 2;
+    string password = 2;
 
-    string password = 3;
+    Particular particular = 3;
 
-    Particular particular = 4;
-
-    uint64 updateTimeUTC = 5;
+    uint64 updateTimeUTC = 4;
 
     //for new client, it should be UNVERIFIED
-    STATUS status = 6;
+    STATUS status = 5;
 
-    ROLE role = 7;
+    ROLE role = 6;
 
-    repeated LoginRecord loginLogs = 8;
+    repeated LoginRecord loginLogs = 7;
 }
 
 message Particular {
@@ -423,7 +424,7 @@ message LoginRecord {
 
     string loginDevice = 3;
 
-    Response.ERROR loginResult = 4;
+    ERROR_CODE loginResult = 4;
 
     uint64 logoutUTC = 5;
 
@@ -503,7 +504,7 @@ message QueryInstrument {
 
 message QuerySpreader {
 
-    uint32 accountID = 1;
+    string owner = 1;
 
     string name = 2;
 
@@ -526,21 +527,22 @@ message QueryOrder {
 }
 
 message QueryPastOrder {
-    //0 means any
-    uint32 accountID = 1;
+    //blank means any
+    string owner = 1;
 
     PeriodRange range = 2;
 }
 
 
 message QueryWatchList {
-    uint32 accountID = 1;
+
+    string userID = 1;
 
     string title = 2;
 }
 
 message QueryWorkSpace {
-    uint32 accountID = 1;
+    string userID = 1;
 
     string layoutID = 2;
 
@@ -660,10 +662,10 @@ message Order {
     }
 
     // this order owner user ID.
-    uint32 accountID = 1;
+    string owner = 1;
 
     // who placed the order.
-    uint32 submitByAcct = 2;
+    string submitBy = 2;
 
     //order source time when an order was submitted (UTC).
     uint64 submitUTC = 3;
@@ -770,7 +772,7 @@ message OrderReport {
     //1 based running number to indicate the report sequence
     uint32 reportNo = 1;
 
-    //unique report ID 
+    //unique report ID
     string execID = 2;
 
     uint64 orderID = 3;
@@ -787,7 +789,7 @@ message OrderReport {
     //latest order status
     STATUS ordStatus = 7;
 
-    // Time of execution/order creation, if not provided, 0.
+    // Time of execution of order, if not provided, 0.
     uint64 transactTimeUTC = 8;
 
     // Time of report received time
@@ -1194,7 +1196,7 @@ message Spreader {
         repeated SpreadSlop slopLevel = 16;
     }
 
-    uint32 ownerAcct = 1;
+    string owner = 1;
 
     //this must be unique for the owner account
     string name = 2;
@@ -1431,8 +1433,7 @@ message NoticeMessage {
     uint32 expirationDate = 5;
 }
 
-message ServiceStatuses
-{
+message ServiceStatuses {
     repeated ServiceStatus status = 1;
 }
 
@@ -1441,16 +1442,14 @@ message ServiceStatus {
     enum STATUS {
         UNKNOWN = 0;
 
-        CONNECTING = 1;
-
         //line is up and can take requests
-        READY = 2;
+        READY = 1;
+
+        //session is over
+        CLOSE = 2;
 
         //network connection is broken
         BROKEN = 3;
-
-        //session is over
-        CLOSE = 4;
     }
 
     Service service = 1;
@@ -1480,7 +1479,7 @@ message WatchLists {
 }
 
 message WatchList {
-    uint32 accountID = 1;
+    string userID = 1;
 
     string title = 2;
 
