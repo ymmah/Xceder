@@ -42,23 +42,20 @@ message Request {
         // subscribe/unsubscribe market data
         InstrumentTopic marketData = 8;
 
-        //subscrbie/unsubscribe instrument change
-        InstrumentTopic instrument = 9;
+        Order order = 9;
 
-        Order order = 10;
-
-        OrderReplace orderReplace = 11;
+        OrderReplace orderReplace = 10;
 
         //to delete spreader, just specify the status as DELISTED
-        Spreader spreader = 12;
+        Spreader spreader = 11;
 
         //upload the application layout info
-        WorkSpaces workSpaceList = 13;
+        WorkSpaces workSpaceList = 12;
 
         //upload the watch list info
-        WatchLists watchList = 14;
+        WatchLists watchList = 13;
 
-        PasswordChange changePassword = 15;
+        PasswordChange changePassword = 14;
     }
 }
 
@@ -379,6 +376,7 @@ message Account {
 
     ROLE role = 6;
 
+    //sorted by the login time in descending sequence. the first record is the latest 
     repeated LoginRecord loginLogs = 7;
 }
 
@@ -426,15 +424,17 @@ message LoginRecord {
 
     ERROR_CODE loginResult = 4;
 
-    uint64 logoutUTC = 5;
+    string authBy = 5;
 
-    string logoutRemark = 6;
+    uint64 logoutUTC = 6;
 
-    uint32 prevFailCount = 7;
+    string logoutRemark = 7;
 
-    string OTP = 8;
+    uint32 prevFailCount = 8;
 
-    string clientApp = 9;
+    uint32 OTP = 9;
+
+    string clientApp = 10;
 }
 
 // Request for information.
@@ -720,9 +720,6 @@ message Order {
 
     //server will publish the value after the order submitted
     uint64 chainID = 21;
-
-    //server will publish the value after the order is submitted
-    uint32 serverID = 22;
 }
 
 message OrderReplace {
@@ -813,9 +810,6 @@ message OrderReport {
 
     // If present, identifies the counterpart of the order fill, as reported by the execution system.
     string fillCounterParty = 16;
-
-    //server ID which create this report
-    uint32 serverID = 17;
 }
 
 message OrderTransactions {
@@ -850,7 +844,8 @@ message OrderAction {
 
     uint64 submitTimeUTC = 2;
 
-    uint32 submitByAcct = 3;
+    //server will fill this value based on the actual user ID
+    string submitBy = 3;
 
     //0 means cancel
     double orderQty = 4;
