@@ -183,40 +183,38 @@ enum ERROR_CODE {
 
     ORDER_INVALID_PARAMS = 180;
 
-    ORDER_INVALID_INSTRUMENTID = 181;
+    ORDER_INVALID_ID = 181;
 
-    ORDER_INVALID_ID = 182;
+    ORDER_INVALID_BROKER = 182;
 
-    ORDER_INVALID_BROKER = 183;
+    ORDER_INVALID_SUBMITUSER = 183;
 
-    ORDER_INVALID_SUBMITUSER = 184;
+    ORDER_INVALID_QTY = 184;
 
-    ORDER_INVALID_QTY = 185;
+    ORDER_INVALID_LIMIT_PRICE = 185;
 
-    ORDER_INVALID_LIMIT_PRICE = 186;
+    ORDER_INVALID_STOP_PRICE = 186;
 
-    ORDER_INVALID_STOP_PRICE = 187;
+    ORDER_INVALID_ORDER_TYPE = 187;
 
-    ORDER_INVALID_ORDER_TYPE = 188;
+    ORDER_INVALID_SUBMIT_TIME = 188;
 
-    ORDER_INVALID_SUBMIT_TIME = 189;
+    ORDER_INVALID_TIMEINFORCE = 189;
 
-    ORDER_INVALID_TIMEINFORCE = 190;
+    ORDER_INVALID_CHAINCLORDID = 190;
 
-    ORDER_INVALID_CHAINCLORDID = 191;
+    ORDER_INVALID_SYMBOL = 191;
 
-    ORDER_INVALID_SYMBOL = 192;
-
-    ORDER_INVALID_SIDE = 193;
+    ORDER_INVALID_SIDE = 192;
 
     /* Order related errors */
     //tag should be less than 255
-    ORDER_TAG_TOOLONG = 194;
+    ORDER_TAG_TOOLONG = 193;
 
-    ORDER_NOT_REPLACEABLE = 195;
+    ORDER_NOT_REPLACEABLE = 194;
 
     //previous action is still in progress
-    ORDER_ACTION_IN_PROGRESS = 196;
+    ORDER_ACTION_IN_PROGRESS = 195;
 
 
     SPREADER_NO_QUOTING = 220;
@@ -376,7 +374,7 @@ message Account {
 
     ROLE role = 6;
 
-    //sorted by the login time in descending sequence. the first record is the latest 
+    //sorted by the login time in descending sequence. the first record is the latest
     repeated LoginRecord loginLogs = 7;
 }
 
@@ -917,7 +915,7 @@ message Exchange {
 message ProductID {
     Exchange.EXCHANGE exchange = 1;
 
-    //Spreader will be the formatted as ownerAcct:name string, others will be exchange symbol
+    //Spreader will be the formatted as ownerAcct:name:version string, others will be exchange symbol
     string symbol = 2;
 
     Product.TYPE type = 3;
