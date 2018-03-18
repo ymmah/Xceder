@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 /**
-* Version: 20180308
+* Version: 20180318
 * All double value should be accurate for 6 decimal position
 **/
 
@@ -251,9 +251,8 @@ message RequestMeta {
     //only valid for request reply
     uint64 requestCompletedTime = 2;
 
-    string requestFromIP = 3;
-
-    uint32 requestFromPort = 4;
+    //address for the request
+    string requestFrom = 3;
 }
 
 
@@ -387,7 +386,7 @@ message Particular {
         FEMALE = 2;
     }
 
-    string firstName = 1;
+    string givenName = 1;
 
     string surName = 2;
 
@@ -401,16 +400,13 @@ message Particular {
     //ISO 639 alpha-2 language code
     string language = 6;
 
-    //in minutes, default, SG time zone
-    sint32 timezoneOffset = 7;
+    GENDER gender = 7;
 
-    GENDER gender = 8;
+    uint64 signUpUTC = 8;
 
-    uint64 signUpUTC = 9;
+    uint64 emailVerifiedUTC = 9;
 
-    uint64 emailVerifiedUTC = 10;
-
-    uint64 phoneVerifiedUTC = 11;
+    uint64 phoneVerifiedUTC = 10;
 }
 
 message LoginRecord {
@@ -485,9 +481,9 @@ message QueryProduct {
     ProductID productID = 1;
 
     //key words separated with comma ','
-    string keywords = 3;
+    string keywords = 2;
 
-    uint32 offset = 4;
+    uint32 offset = 3;
 }
 
 message QueryInstrument {
@@ -708,7 +704,7 @@ message Order {
     uint32 validDate = 17;
 
     // Trigger quantity (threshold) as additional stop order activation condition.
-    uint64 triggerQty = 18;
+    double triggerQty = 18;
 
     //ISO 3 charactor currency
     string currency = 19;
@@ -824,8 +820,8 @@ message OrderTransaction {
 
     uint32 totalReports = 3;
 
-    //current effective action No
-    uint32 effectiveAction = 4;
+    //current effective action No, success replace action
+    uint32 effectiveReplaceAction = 4;
 
     //if it is for the order status update, this may be empty
     //last action is the latest action, sorted by the actionNo
@@ -855,16 +851,16 @@ message OrderAction {
 }
 
 message TradingHour {
-    //HHMM
+    //HHMM in specified timezone
     uint32 preOpenTime = 1;
 
-    //HHMM
+    //HHMM in specified timezone
     uint32 openTime = 2;
 
-    //HHMM
+    //HHMM in specified timezone
     uint32 preCloseTime = 3;
 
-    //HHMM
+    //HHMM in specified timezone
     uint32 closeTime = 4;
 }
 
@@ -901,15 +897,11 @@ message Exchange {
 
     EXCHANGE code = 1;
     string name = 2;
-    sint32 timezone = 3;
 
-    //GMT yyyyMMDD
-    uint32 summerTimeFrom = 4;
+    //used by the trading day
+    string timezone = 3;
 
-    //GMT yyyyMMDD
-    uint32 summerTimeEnd = 5;
-
-    repeated TradingDay tradingDayList = 6;
+    repeated TradingDay tradingDayList = 4;
 }
 
 message ProductID {
@@ -984,6 +976,9 @@ message Product {
 
     //empty means business day immediately folloing the last trading day
     string listDay = 17;
+
+    //used by the trading hour
+    string timeZone = 18;
 }
 
 message Instruments {
@@ -1008,10 +1003,10 @@ message Instrument {
 
     InstrumentID id = 1;
 
-    //yyyyMMdd
+    //yyyyMMdd in product timezone
     uint32 listDay = 2;
 
-    //yyyyMMdd
+    //yyyyMMdd in product timezone
     uint32 lastTradingday = 3;
 
     Product.STATUS status = 4;
@@ -1302,11 +1297,11 @@ message Position {
 
     uint64 updateTimeUTC = 2;
 
-    //建仓开始日期 yyyyMMdd
-    uint64 startPosDay = 3;
+    //建仓开始
+    uint64 startPosUTC = 3;
 
-    //完全平仓日期   yyyyMMdd
-    uint64 closePosDay = 4;
+    //完全平仓日期
+    uint64 closePosUTC = 4;
 
     //昨持仓 负数表示空头
     double prevPosition = 5;
