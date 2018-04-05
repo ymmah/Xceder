@@ -183,38 +183,40 @@ enum ERROR_CODE {
 
     ORDER_INVALID_PARAMS = 180;
 
-    ORDER_INVALID_ID = 181;
+    ORDER_INVALID_INSTRUMENTID = 181;
 
-    ORDER_INVALID_BROKER = 182;
+    ORDER_INVALID_ID = 182;
 
-    ORDER_INVALID_SUBMITUSER = 183;
+    ORDER_INVALID_BROKER = 183;
 
-    ORDER_INVALID_QTY = 184;
+    ORDER_INVALID_OWNER = 184;
 
-    ORDER_INVALID_LIMIT_PRICE = 185;
+    ORDER_INVALID_QTY = 185;
 
-    ORDER_INVALID_STOP_PRICE = 186;
+    ORDER_INVALID_LIMIT_PRICE = 186;
 
-    ORDER_INVALID_ORDER_TYPE = 187;
+    ORDER_INVALID_STOP_PRICE = 187;
 
-    ORDER_INVALID_SUBMIT_TIME = 188;
+    ORDER_INVALID_ORDER_TYPE = 188;
 
-    ORDER_INVALID_TIMEINFORCE = 189;
+    //ORDER_INVALID_SUBMIT_TIME = 189;
 
-    ORDER_INVALID_CHAINCLORDID = 190;
+    ORDER_INVALID_TIMEINFORCE = 190;
 
-    ORDER_INVALID_SYMBOL = 191;
+    ORDER_INVALID_CHAINCLORDID = 191;
 
-    ORDER_INVALID_SIDE = 192;
+    ORDER_INVALID_SYMBOL = 192;
+
+    ORDER_INVALID_SIDE = 193;
 
     /* Order related errors */
     //tag should be less than 255
-    ORDER_TAG_TOOLONG = 193;
+    ORDER_TAG_TOOLONG = 194;
 
-    ORDER_NOT_REPLACEABLE = 194;
+    ORDER_NOT_REPLACEABLE = 195;
 
     //previous action is still in progress
-    ORDER_ACTION_IN_PROGRESS = 195;
+    ORDER_ACTION_IN_PROGRESS = 196;
 
 
     SPREADER_NO_QUOTING = 220;
@@ -655,65 +657,67 @@ message Order {
         MANUAL = 1;
     }
 
-    // this order owner user ID.
-    string owner = 1;
+    //server will auto fill the value after the order submitted
+    message Record {
+        uint64 orderID = 1;
 
-    // who placed the order.
-    string submitBy = 2;
+        uint64 chainID = 2;
 
-    //order source time when an order was submitted (UTC).
-    uint64 submitUTC = 3;
+        //will be the first report's transaction time
+        uint64 submitUTC = 3;
+
+        string submitBy = 4;
+    }
+
+    Record record = 1;
+
+    // this order owner user ID. if it is blank, means it same as the submitBy 
+    string owner = 2;
 
     // remark for this order
-    string remark = 4;
+    string remark = 3;
 
     //this is for the multipe leg orders. normally it should be 0 for non-leg orders
-    uint32 leg = 5;
+    uint32 leg = 4;
 
-    SUBMITMODE indicator = 6;
+    SUBMITMODE indicator = 5;
 
     //instrument/spreader ID
-    InstrumentID instrumentID = 7;
+    InstrumentID instrumentID = 6;
 
     // Order side.
-    SIDE side = 8;
+    SIDE side = 7;
 
-    Order.TYPE orderType = 9;
+    Order.TYPE orderType = 8;
 
-    repeated Order.EXECINSTRUCTION execInstruction = 10;
+    repeated Order.EXECINSTRUCTION execInstruction = 9;
 
-    Order.TIMEINFORCE timeInForce = 11;
+    Order.TIMEINFORCE timeInForce = 10;
 
-    double orderQty = 12;
+    double orderQty = 11;
 
     //Limit price of the order (required for Limit and Stop-limit orders)
-    double limitPrice = 13;
+    double limitPrice = 12;
 
     // Stop price of the order (required for Stop and Stop-limit orders).
-    double stopPrice = 14;
+    double stopPrice = 13;
 
     // Visible size of the order for Icebergs, if it is 0 means all visible.
-    double visibleQty = 15;
+    double visibleQty = 14;
 
     // Minimum visible positive size of the order
     // used for iceberg orders with 'random visible size',
     // must be < visible_qty.
-    double minVisibleQty = 16;
+    double minVisibleQty = 15;
 
     //yyyyMMdd
-    uint32 validDate = 17;
+    uint32 validDate = 16;
 
     // Trigger quantity (threshold) as additional stop order activation condition.
-    double triggerQty = 18;
+    double triggerQty = 17;
 
     //ISO 3 charactor currency
-    string currency = 19;
-
-    //server will publish the value after the order submitted
-    uint64 orderID = 20;
-
-    //server will publish the value after the order submitted
-    uint64 chainID = 21;
+    string currency = 18;
 }
 
 message OrderReplace {
@@ -804,6 +808,9 @@ message OrderReport {
 
     // If present, identifies the counterpart of the order fill, as reported by the execution system.
     string fillCounterParty = 16;
+
+    //broker string to indicate which system create this report. Xceder means this server is from xceder system
+    string reportSource = 17;
 }
 
 message OrderTransactions {
