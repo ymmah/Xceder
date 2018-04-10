@@ -822,9 +822,10 @@ message OrderTransaction {
     //if it is for the order status update, this may be empty
     Order order = 1;
 
-    //this is the total number for current + past
+    //this is the total number for current + past, 0 should be ignored
     uint32 totalActions = 2;
 
+    //0 should be ignored
     uint32 totalReports = 3;
 
     //current effective action No, success replace action
@@ -1456,7 +1457,7 @@ message ServiceStatus {
 
 message Service {
     enum SERVICE {
-        ALL = 0;
+        UNKNOWN = 0;
 
         PRICE = 1;
         ORDER = 2;
