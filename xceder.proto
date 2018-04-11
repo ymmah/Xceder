@@ -841,9 +841,10 @@ message OrderTransaction {
 
 message OrderAction {
 
-    //1 based running number, it is server to maintain this value
+    //1 based running number, it is server to maintain this value, client no need fill it when submit the request
     uint32 actionNo = 1;
 
+    //server will fill this info 
     uint64 submitTimeUTC = 2;
 
     //server will fill this value based on the actual user ID
