@@ -767,50 +767,53 @@ message OrderReport {
     //1 based running number to indicate the report sequence
     uint32 reportNo = 1;
 
-    //unique report ID
-    string execID = 2;
+    //unique report ID for this report
+    string reportID = 2;
 
     uint64 orderID = 3;
 
     //if it is synthetic/algo order triggered orders, the value is the root orderID
     uint64 chainID = 4;
 
+    //orderID assigned by the execution side
+    string execOrderID = 5;
+
     //0 means it is for the order itself, not the reply of the action
-    uint32 actionNo = 5;
+    uint32 actionNo = 6;
 
     //this transaction type
-    STATUS execType = 6;
+    STATUS execType = 7;
 
     //latest order status
-    STATUS ordStatus = 7;
+    STATUS ordStatus = 8;
 
     // Time of execution of order, if not provided, 0.
-    uint64 transactTimeUTC = 8;
+    uint64 transactTimeUTC = 9;
 
     // Time of report received time
-    uint64 reportTimeUTC = 9;
+    uint64 reportTimeUTC = 10;
 
-    double fillQty = 10;
+    double fillQty = 11;
 
-    double fillPrice = 11;
+    double fillPrice = 12;
 
-    double totalFillQty = 12;
+    double totalFillQty = 13;
 
     // Average fill price.
-    double avgFillPrice = 13;
+    double avgFillPrice = 14;
 
     // Remaining (unfilled) order quantity. It is not always equal
     // to order size minus filled size (for example, busted orders violate that).
-    double remainingQty = 14;
+    double remainingQty = 15;
 
     // Additional transaction details from the execution side
-    string remark = 15;
+    string remark = 16;
 
     // If present, identifies the counterpart of the order fill, as reported by the execution system.
-    string fillCounterParty = 16;
+    string fillCounterParty = 17;
 
     //broker string to indicate which system create this report. Xceder means this server is from xceder system
-    string reportSource = 17;
+    string reportSource = 18;
 }
 
 message OrderTransactions {
@@ -844,7 +847,7 @@ message OrderAction {
     //1 based running number, it is server to maintain this value, client no need fill it when submit the request
     uint32 actionNo = 1;
 
-    //server will fill this info 
+    //server will fill this info
     uint64 submitTimeUTC = 2;
 
     //server will fill this value based on the actual user ID
@@ -979,14 +982,14 @@ message Product {
 
     double positionLimit = 15;
 
-    //empty means the last day of the month
+    //futures empty means the last day of the month
     //3WEDNESDAY-2: 2 Business days before 3rd Wednesday
     string lastTradingDay = 16;
 
     //empty means business day immediately folloing the last trading day
     string listDay = 17;
 
-    //used by the trading hour
+    //used by the trading hour, empty means follow exchange
     string timeZone = 18;
 }
 
