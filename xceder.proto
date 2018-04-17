@@ -658,66 +658,64 @@ message Order {
     }
 
     //server will auto fill the value after the order submitted
-    message Record {
-        uint64 orderID = 1;
+    uint64 orderID = 1;
 
-        uint64 chainID = 2;
+    //this is mainly for the strategy order
+    uint64 chainID = 2;
 
-        //will be the first report's transaction time
-        uint64 submitUTC = 3;
+    //will be the first report's transaction time
+    uint64 submitUTC = 3;
 
-        string submitBy = 4;
-    }
-
-    Record record = 1;
+    //server will fill this with the actual account who submit this order
+    string submitBy = 4;
 
     // this order owner user ID. if it is blank, means it same as the submitBy 
-    string owner = 2;
+    string owner = 5;
 
     // remark for this order
-    string remark = 3;
+    string remark = 6;
 
     //this is for the multipe leg orders. normally it should be 0 for non-leg orders
-    uint32 leg = 4;
+    uint32 leg = 7;
 
-    SUBMITMODE indicator = 5;
+    SUBMITMODE indicator = 8;
 
     //instrument/spreader ID
-    InstrumentID instrumentID = 6;
+    InstrumentID instrumentID = 9;
 
     // Order side.
-    SIDE side = 7;
+    SIDE side = 10;
 
-    Order.TYPE orderType = 8;
+    Order.TYPE orderType = 11;
 
-    repeated Order.EXECINSTRUCTION execInstruction = 9;
+    repeated Order.EXECINSTRUCTION execInstruction = 12;
 
-    Order.TIMEINFORCE timeInForce = 10;
+    Order.TIMEINFORCE timeInForce = 13;
 
-    double orderQty = 11;
+    double orderQty = 14;
 
     //Limit price of the order (required for Limit and Stop-limit orders)
-    double limitPrice = 12;
+    double limitPrice = 15;
 
     // Stop price of the order (required for Stop and Stop-limit orders).
-    double stopPrice = 13;
+    double stopPrice = 16;
 
     // Visible size of the order for Icebergs, if it is 0 means all visible.
-    double visibleQty = 14;
+    double visibleQty = 17;
 
     // Minimum visible positive size of the order
     // used for iceberg orders with 'random visible size',
     // must be < visible_qty.
-    double minVisibleQty = 15;
+    double minVisibleQty = 18;
 
     //yyyyMMdd
-    uint32 validDate = 16;
+    uint32 validDate = 19;
 
     // Trigger quantity (threshold) as additional stop order activation condition.
-    double triggerQty = 17;
+    double triggerQty = 20;
 
     //ISO 3 charactor currency
-    string currency = 18;
+    string currency = 21;
 }
 
 message OrderReplace {
@@ -772,48 +770,45 @@ message OrderReport {
 
     uint64 orderID = 3;
 
-    //if it is synthetic/algo order triggered orders, the value is the root orderID
-    uint64 chainID = 4;
-
     //orderID assigned by the execution side
-    string execOrderID = 5;
+    string execOrderID = 4;
 
     //0 means it is for the order itself, not the reply of the action
-    uint32 actionNo = 6;
+    uint32 actionNo = 5;
 
     //this transaction type
-    STATUS execType = 7;
+    STATUS execType = 6;
 
     //latest order status
-    STATUS ordStatus = 8;
+    STATUS ordStatus = 7;
 
     // Time of execution of order, if not provided, 0.
-    uint64 transactTimeUTC = 9;
+    uint64 transactTimeUTC = 8;
 
     // Time of report received time
-    uint64 reportTimeUTC = 10;
+    uint64 reportTimeUTC = 9;
 
-    double fillQty = 11;
+    double fillQty = 10;
 
-    double fillPrice = 12;
+    double fillPrice = 11;
 
-    double totalFillQty = 13;
+    double totalFillQty = 12;
 
     // Average fill price.
-    double avgFillPrice = 14;
+    double avgFillPrice = 13;
 
     // Remaining (unfilled) order quantity. It is not always equal
     // to order size minus filled size (for example, busted orders violate that).
-    double remainingQty = 15;
+    double remainingQty = 14;
 
     // Additional transaction details from the execution side
-    string remark = 16;
+    string remark = 15;
 
     // If present, identifies the counterpart of the order fill, as reported by the execution system.
-    string fillCounterParty = 17;
+    string fillCounterParty = 16;
 
     //broker string to indicate which system create this report. Xceder means this server is from xceder system
-    string reportSource = 18;
+    string reportSource = 17;
 }
 
 message OrderTransactions {
@@ -989,7 +984,7 @@ message Product {
     //empty means business day immediately folloing the last trading day
     string listDay = 17;
 
-    //used by the trading hour, empty means follow exchange
+    //used by the trading hour, empty means follow exchange 
     string timeZone = 18;
 }
 
