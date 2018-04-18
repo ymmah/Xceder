@@ -47,6 +47,7 @@ message Request {
         OrderReplace orderReplace = 10;
 
         //to delete spreader, just specify the status as DELISTED
+        //result will be in the instruments of response
         Spreader spreader = 11;
 
         //upload the application layout info
@@ -102,9 +103,6 @@ message Response {
         WatchLists watchList = 15;
 
         WorkSpaces workSpaceList = 16;
-
-        //reply for the spreader request
-        Spreader.Status spreaderStatus = 17;
     }
 }
 
@@ -995,6 +993,9 @@ message Instruments {
     repeated Product product = 2;
 
     repeated Spreader spreader = 3;
+
+    //reply for the spreader request
+    Spreader.Meta spreaderMeta = 4;
 }
 
 message InstrumentID {
@@ -1020,10 +1021,11 @@ message Instrument {
 }
 
 message Spreader {
-    message Status {
+    message Meta {
         uint32 version = 1;
         uint64 updateTimeUTC = 2;
         Product.STATUS status = 3;
+        string submitBy = 4;
     }
 
     enum QUOTING_MODE {
@@ -1191,18 +1193,16 @@ message Spreader {
         repeated SpreadSlop slopLevel = 16;
     }
 
-    string owner = 1;
-
     //this must be unique for the owner account
-    string name = 2;
+    string name = 1;
 
-    Status status = 3;
+    Meta meta = 2;
 
-    string remark = 4;
+    string remark = 3;
 
-    TYPE type = 5;
+    TYPE type = 4;
 
-    string formula = 6;
+    string formula = 5;
 
     //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
     //disclosed quantities.
@@ -1213,18 +1213,18 @@ message Spreader {
     //0 will submit the new spread order at the same price as the previous spread order.
     //1 will submit the spread order at a price 1 tick from the previous spread order away from the market.
     //-1 will submit the spread order 1 tick from the previous spread order toward the market.
-    sint32 reloadOffset = 7;
+    sint32 reloadOffset = 6;
 
     //Reload is an order that lets you execute a total spread order quantity by splitting the spread order into smaller
     //disclosed quantities.
     //When a disclosed spread order quantity is filled, the next disclosed quantity order is submitted until the entire
     //spread order quantity fills.
     //This property specifies the quantity for each child disclosed order.
-    uint64 reloadQty = 8;
+    uint64 reloadQty = 7;
 
-    double tickSize = 9;
+    double tickSize = 8;
 
-    repeated Leg leg = 10;
+    repeated Leg leg = 9;
 }
 
 message TickRange {
