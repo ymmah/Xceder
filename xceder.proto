@@ -498,7 +498,7 @@ message QueryInstrument {
 
 message QuerySpreader {
 
-    string owner = 1;
+    string submitBy = 1;
 
     string name = 2;
 
@@ -1196,7 +1196,7 @@ message Spreader {
     //this must be unique for the owner account
     string name = 1;
 
-    Meta meta = 2;
+    Meta metaInfo = 2;
 
     string remark = 3;
 
