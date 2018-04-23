@@ -521,8 +521,9 @@ message QueryOrder {
 }
 
 message QueryPastOrder {
+
     //blank means any
-    string owner = 1;
+    string userID = 1;
 
     PeriodRange range = 2;
 }
