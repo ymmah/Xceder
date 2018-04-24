@@ -328,6 +328,7 @@ message WorkSpaces {
 }
 
 message WorkSpace {
+    //when update workspace, server will fill in this field
     string userID = 1;
 
     string layoutID = 2;
@@ -335,6 +336,7 @@ message WorkSpace {
     //max length is 10K bytes
     string detail = 3;
 
+    //when update workspace, server will fill in this field
     uint64 updateTimeUTC = 4;
 }
 
@@ -1486,6 +1488,9 @@ message WatchList {
 
     //empty list means delete this watch list
     repeated InstrumentID instrumentIDList = 5;
+
+    //each instrument added time
+    repeated uint64 addedTimeList = 6 [packed = true];
 }
 
 
