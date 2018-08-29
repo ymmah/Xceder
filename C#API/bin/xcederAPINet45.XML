@@ -149,7 +149,7 @@
         </member>
         <member name="F:Xceder.Client._sentRequests">
             <summary>
-            store the sent request and will be retrieved to trigger the received message event 
+            instrumentStore the sent request and will be retrieved to trigger the received message event
             </summary>
         </member>
         <member name="M:Xceder.Client.#ctor">
@@ -1693,7 +1693,7 @@
         </member>
         <member name="P:Com.Xceder.Messages.Order.ClOrdID">
              <summary>
-            server side will store this value after the order is submitted. mainly used in later query result
+            server side will instrumentStore this value after the order is submitted. mainly used in later query result
              </summary>
         </member>
         <member name="T:Com.Xceder.Messages.Order.DetailOneofCase">

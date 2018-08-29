@@ -27,7 +27,7 @@ in the VS IDE can just simply restore the NuGet packages in the solution popup m
 
 * CircularBuffer.cs
 
-  used by the Client.cs to store the bytes
+  used by the Client.cs to instrumentStore the bytes
 
 * Client.cs
 	

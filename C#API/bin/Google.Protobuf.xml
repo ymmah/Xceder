@@ -280,7 +280,7 @@
         </member>
         <member name="F:Google.Protobuf.CodedInputStream.nextTag">
             <summary>
-            The next tag, used to store the value read by PeekTag.
+            The next tag, used to instrumentStore the value read by PeekTag.
             </summary>
         </member>
         <member name="F:Google.Protobuf.CodedInputStream.totalBytesRetired">
