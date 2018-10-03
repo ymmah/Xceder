@@ -748,8 +748,8 @@ message OrderReport {
         //this is mainly for the FIX ExecType RESTATED, order status should not be this value
         RESTATED = 7;
 
-        //CQG suspended has other meaning, market is closed and temporarily queued in their server
-        SUSPENDED = 8;
+        //market is closed and temporarily queued in broker server (CQG) or xceder server
+        PARKED = 8;
 
         //non-working order status
         FILL = 9;
